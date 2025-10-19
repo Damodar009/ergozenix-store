@@ -2,10 +2,9 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { Button } from "@/components/ui/button"
-import { Menu, ShoppingCart } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { LogoIcon } from "@/components/logo-icon"
+import CartButtons from "./cart-button"
 
 export function Header() {
   const pathname = usePathname()
@@ -29,24 +28,7 @@ export function Header() {
         <Link className={navLinkClass("/about")} href="/about">About</Link>
         <Link className={navLinkClass("/contact")} href="/contact">Contact</Link>
       </nav>
-      <div className="flex items-center gap-4">
-        <Button
-          variant="ghost"
-          size="icon"
-          className="rounded-full h-10 w-10 bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-white hover:bg-gray-200 dark:hover:bg-gray-700"
-          aria-label="Cart"
-        >
-          <ShoppingCart className="h-5 w-5" />
-        </Button>
-        <Button
-          variant="ghost"
-          size="icon"
-          className="md:hidden rounded-full h-10 w-10 bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-white hover:bg-gray-200 dark:hover:bg-gray-700"
-          aria-label="Open menu"
-        >
-          <Menu className="h-5 w-5" />
-        </Button>
-      </div>
+      <CartButtons />
     </header>
   )
 }

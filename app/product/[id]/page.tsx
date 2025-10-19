@@ -95,7 +95,6 @@ export default function product({ params }: { params: { id: string } }) {
 
   return (
     <div className="bg-background-light dark:bg-background-dark font-display min-h-screen">
-      <Header />
       <div className="relative flex h-auto min-h-screen w-full flex-col group/design-root overflow-x-hidden">
         <div className="layout-container flex h-full grow flex-col">
           <main className="flex-1 px-4 sm:px-6 lg:px-8 py-8">

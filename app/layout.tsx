@@ -4,6 +4,7 @@ import { Geist, Geist_Mono } from "next/font/google"
 import { Footer } from "@/components/footer"
 import { ThemeProvider } from "@/providers/theme-provider"
 import "./globals.css"
+import { Header } from "@/components/header"
 
 const _geist = Geist({ subsets: ["latin"] })
 const _geistMono = Geist_Mono({ subsets: ["latin"] })
@@ -23,6 +24,7 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body className={`font-sans antialiased`}>
         <ThemeProvider>
+          <Header/>
           {children}
           <Footer />
         </ThemeProvider>

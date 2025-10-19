@@ -8,7 +8,6 @@ import { ContactDetails } from "@/components/contact/ContactDetails"
 export default function contact() {
   return (
     <div className="bg-background-light dark:bg-background-dark font-display text-[#111718] dark:text-white min-h-screen">
-      <Header />
       <div className="relative flex h-auto min-h-screen w-full flex-col group/design-root overflow-x-hidden">
         <div className="layout-container flex h-full grow flex-col">
           <main className="flex-1">

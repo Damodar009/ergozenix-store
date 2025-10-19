@@ -78,7 +78,6 @@ export default function shop() {
 
   return (
     <div className="bg-background-light dark:bg-background-dark font-display text-gray-800 dark:text-gray-200 min-h-screen">
-      <Header />
       <main className="flex flex-1 justify-center py-8 px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col w-full max-w-7xl">
           <div className="flex flex-wrap justify-between gap-4 items-center mb-8">
