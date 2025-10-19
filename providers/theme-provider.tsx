@@ -54,10 +54,6 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     localStorage.setItem("theme", newTheme)
   }
 
-  if (!mounted) {
-    return <>{children}</>
-  }
-
   return <ThemeContext.Provider value={{ theme, setTheme, resolvedTheme }}>{children}</ThemeContext.Provider>
 }
 
