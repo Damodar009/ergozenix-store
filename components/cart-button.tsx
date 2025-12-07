@@ -20,7 +20,7 @@ export default function CartButtons() {
       <Button
         variant="ghost"
         size="icon"
-        className="rounded-full h-10 w-10 bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-white hover:bg-gray-200 dark:hover:bg-gray-700"
+        className="rounded-full h-10 w-10 bg-secondary text-foreground hover:bg-secondary/80"
         aria-label="Cart"
         onClick={goToCart}
       >
@@ -30,7 +30,7 @@ export default function CartButtons() {
       <Button
         variant="ghost"
         size="icon"
-        className="md:hidden rounded-full h-10 w-10 bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-white hover:bg-gray-200 dark:hover:bg-gray-700"
+        className="md:hidden rounded-full h-10 w-10 bg-secondary text-foreground hover:bg-secondary/80"
         aria-label="Open menu"
         onClick={openMenu}
       >

@@ -1,10 +1,10 @@
 import { FC } from "react";
 
 const HistorySection: FC = () => (
-  <div className="px-4 md:px-10 py-12 bg-white dark:bg-background-dark">
+  <div className="px-4 md:px-10 py-12 bg-card">
     <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
       <div>
-        <h2 className="text-gray-800 dark:text-white text-3xl font-bold leading-tight tracking-[-0.015em] mb-4">
+        <h2 className="text-foreground text-3xl font-bold leading-tight tracking-[-0.015em] mb-4">
           From a Simple Idea to a Movement
         </h2>
         <p className="text-base font-normal leading-relaxed mb-4">

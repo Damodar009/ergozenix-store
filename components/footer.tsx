@@ -10,25 +10,25 @@ import { socialLinks } from "@/lib/social-links"
 
 export function Footer() {
   return (
-    <footer className="bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800">
+    <footer className="bg-card border-t border-border">
       <div className="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
           <div className="col-span-2 md:col-span-1">
-            <div className="flex items-center gap-2 text-gray-900 dark:text-white">
+            <div className="flex items-center gap-2 text-card-foreground">
               <LogoIcon className="size-6 text-primary" />
               <h2 className="text-xl font-bold">ErgoFlex Store</h2>
             </div>
-            <p className="mt-4 text-sm text-gray-500 dark:text-gray-400">Comfort for a better life.</p>
+            <p className="mt-4 text-sm text-muted-foreground">Comfort for a better life.</p>
           </div>
 
           <div>
-            <h3 className="text-sm font-semibold text-gray-900 dark:text-white tracking-wider uppercase">Quick Links</h3>
+            <h3 className="text-sm font-semibold text-card-foreground tracking-wider uppercase">Quick Links</h3>
             <ul className="mt-4 space-y-4">
               {["Home", "Products", "About Us", "Contact"].map((label) => {
                 const href = `/${label.toLowerCase().replace(" ", "-")}`
                 return (
                   <li key={`footer-${label}`}>
-                    <UiLink className="text-base text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white" href={href}>
+                    <UiLink className="text-base text-muted-foreground hover:text-card-foreground" href={href}>
                       {label}
                     </UiLink>
                   </li>
@@ -38,8 +38,8 @@ export function Footer() {
           </div>
 
           <div>
-            <h3 className="text-sm font-semibold text-gray-900 dark:text-white tracking-wider uppercase">Contact Info</h3>
-            <ul className="mt-4 space-y-4 text-base text-gray-500 dark:text-gray-400">
+            <h3 className="text-sm font-semibold text-card-foreground tracking-wider uppercase">Contact Info</h3>
+            <ul className="mt-4 space-y-4 text-base text-muted-foreground">
               <li>support@ergoflex.com</li>
               <li>(123) 456-7890</li>
               <li>123 Ergonomic Ave, Comfort City</li>
@@ -47,7 +47,7 @@ export function Footer() {
           </div>
 
           <div>
-            <h3 className="text-sm font-semibold text-gray-900 dark:text-white tracking-wider uppercase">Follow Us</h3>
+            <h3 className="text-sm font-semibold text-card-foreground tracking-wider uppercase">Follow Us</h3>
             <div className="flex mt-4 gap-3">
               {socialLinks.map(({ name, href, Icon }) => (
                 <Button key={name} variant="outline" size="icon" className="rounded-full" asChild>
@@ -61,7 +61,7 @@ export function Footer() {
         </div>
 
         <Separator className="mt-8" />
-        <div className="pt-8 text-center text-sm text-gray-500 dark:text-gray-400">
+        <div className="pt-8 text-center text-sm text-muted-foreground">
           <p>© 2024 ErgoFlex Store. All rights reserved.</p>
         </div>
       </div>

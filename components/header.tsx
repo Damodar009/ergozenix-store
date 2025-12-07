@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { useTheme } from "next-themes"
+import { useTheme } from "@/providers/theme-provider"
 import { useEffect, useState } from "react"
 import { cn } from "@/lib/utils"
 import { LogoIcon } from "@/components/logo-icon"
@@ -30,15 +30,15 @@ export function Header() {
     )
 
   return (
-    <header className="flex items-center justify-between whitespace-nowrap border-b border-solid border-gray-200 dark:border-gray-800 px-6 md:px-10 py-4 bg-white dark:bg-background sticky top-0 z-10">
-      <div className="flex items-center gap-4 text-[#111718] dark:text-white">
+    <header className="flex items-center justify-between whitespace-nowrap border-b border-border px-6 md:px-10 py-4 bg-background sticky top-0 z-10">
+      <div className="flex items-center gap-4 text-foreground">
         <LogoIcon />
         <h2 className="text-xl font-bold leading-tight tracking-[-0.015em]">
-          ErgoFlex Store
+          ErgoZenix
         </h2>
       </div>
 
-      <nav className="hidden md:flex items-center gap-9 text-gray-800 dark:text-gray-200">
+      <nav className="hidden md:flex items-center gap-9 text-foreground">
         <Link className={navLinkClass("/")} href="/">
           Home
         </Link>
@@ -59,8 +59,11 @@ export function Header() {
           <Button
             variant="ghost"
             size="icon"
-            className="rounded-full h-10 w-10 bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-white hover:bg-gray-200 dark:hover:bg-gray-700"
-            onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+            className="rounded-full h-10 w-10 bg-secondary text-foreground hover:bg-secondary/80"
+            onClick={() => {
+              console.log("/////////////////",theme)
+              setTheme(theme === "dark" ? "light" : "dark")
+            }}
             aria-label="Toggle theme"
           >
             {theme === "dark" ? (

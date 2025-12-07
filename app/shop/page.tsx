@@ -77,11 +77,11 @@ export default function shop() {
   const [sortBy, setSortBy] = React.useState("newest")
 
   return (
-    <div className="bg-background-light dark:bg-background-dark font-display text-gray-800 dark:text-gray-200 min-h-screen">
+    <div className="bg-background text-foreground min-h-screen">
       <main className="flex flex-1 justify-center py-8 px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col w-full max-w-7xl">
           <div className="flex flex-wrap justify-between gap-4 items-center mb-8">
-            <p className="text-3xl lg:text-4xl font-black leading-tight tracking-[-0.033em] text-[#111718] dark:text-white">
+            <p className="text-3xl lg:text-4xl font-black leading-tight tracking-[-0.033em] text-foreground">
               Shop Our Ergonomic Products
             </p>
           </div>
@@ -91,7 +91,7 @@ export default function shop() {
 
             <div className="w-full lg:w-3/4">
               <div className="flex items-center justify-between mb-6 flex-wrap gap-4">
-                <p className="text-sm text-gray-600 dark:text-gray-400">Showing 1-9 of 27 results</p>
+                <p className="text-sm text-muted-foreground">Showing 1-9 of 27 results</p>
                 <div className="flex gap-3 flex-wrap">
                   <SortSelect value={sortBy} onChange={setSortBy} />
                 </div>

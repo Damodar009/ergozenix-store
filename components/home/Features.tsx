@@ -15,9 +15,9 @@ export function Features() {
   ]
 
   return (
-    <section className="py-16 sm:py-24 bg-white dark:bg-gray-900 rounded-xl">
+    <section className="py-16 sm:py-24 bg-card rounded-xl">
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h2 className="text-gray-900 dark:text-white text-3xl font-bold text-center mb-12">Feel the Difference</h2>
+        <h2 className="text-foreground text-3xl font-bold text-center mb-12">Feel the Difference</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-12 text-center">
           {items.map(({ icon: Icon, title, description }) => (
             <div key={title} className="flex flex-col items-center">
@@ -27,8 +27,8 @@ export function Features() {
               >
                 <Icon className="h-8 w-8" />
               </div>
-              <h3 className="text-xl font-semibold text-gray-900 dark:text-white">{title}</h3>
-              <p className="mt-2 text-gray-600 dark:text-gray-400">{description}</p>
+              <h3 className="text-xl font-semibold text-card-foreground">{title}</h3>
+              <p className="mt-2 text-muted-foreground">{description}</p>
             </div>
           ))}
         </div>

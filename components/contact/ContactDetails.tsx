@@ -6,12 +6,12 @@ export function ContactDetails() {
   return (
     <div className="flex flex-col gap-8">
       <div>
-        <h3 className="text-xl font-bold mb-4 text-[#111718] dark:text-white">Contact Information</h3>
+        <h3 className="text-xl font-bold mb-4 text-foreground">Contact Information</h3>
         <div className="flex flex-col gap-4">
           <div className="flex items-center gap-3">
             <Mail className="h-6 w-6 text-primary" />
             <a 
-              className="text-base text-[#111718] dark:text-white hover:text-primary dark:hover:text-primary transition-colors" 
+              className="text-base text-foreground hover:text-primary transition-colors" 
               href="mailto:contact@ergoflex.com"
             >
               contact@ergoflex.com

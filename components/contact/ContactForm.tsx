@@ -10,13 +10,13 @@ export function ContactForm() {
     <form className="flex flex-col gap-6">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="space-y-2">
-          <Label htmlFor="name" className="text-[#111718] dark:text-white text-base font-medium leading-normal">
+          <Label htmlFor="name" className="text-foreground text-base font-medium leading-normal">
             Your Name
           </Label>
           <Input
             id="name"
             placeholder="Enter your name"
-            className="h-14 text-base font-normal leading-normal border-[#dbe4e6] dark:border-gray-700 bg-white dark:bg-gray-800 focus:border-primary placeholder:text-[#618389] dark:placeholder:text-gray-400"
+            className="h-14 text-base font-normal leading-normal border-border bg-background focus:border-primary placeholder:text-muted-foreground"
           />
         </div>
         <div className="space-y-2">

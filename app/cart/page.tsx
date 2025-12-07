@@ -49,7 +49,7 @@ const MOCK_CART_SUMMARY: CartSummary = {
 
 export default function CartPage() {
   return (
-    <div className="bg-background-light dark:bg-background-dark font-display text-[#111718] dark:text-white min-h-screen">
+    <div className="bg-background text-foreground min-h-screen">
       <main className="max-w-6xl mx-auto px-4 py-10 grid grid-cols-1 lg:grid-cols-3 gap-12">
         {/* Cart Details Column */}
         <div className="lg:col-span-2">

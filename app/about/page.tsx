@@ -8,12 +8,12 @@ import CTASection from "@/components/about/CTASection";
 
 export default function AboutPage() {
   return (
-    <div className="bg-background-light dark:bg-background-dark font-display text-[#333333] dark:text-gray-200 min-h-screen">
+    <div className="bg-background text-foreground min-h-screen">
       <main className="flex flex-col max-w-5xl mx-auto">
         <HeroSection />
 
         <div className="px-4 md:px-10 py-12 text-center">
-          <h2 className="text-gray-800 dark:text-white text-3xl font-bold leading-tight tracking-[-0.015em] mb-4">
+          <h2 className="text-foreground text-3xl font-bold leading-tight tracking-[-0.015em] mb-4">
             Our Mission
           </h2>
           <p className="text-base font-normal leading-relaxed max-w-3xl mx-auto">
