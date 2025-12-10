@@ -5,13 +5,14 @@ import { Footer } from "@/components/footer"
 import { ThemeProvider } from "@/providers/theme-provider"
 import "./globals.css"
 import { Header } from "@/components/header"
+import { CartProvider } from "@/context/cart-context"
 
 const _geist = Geist({ subsets: ["latin"] })
 const _geistMono = Geist_Mono({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "Modern App",
-  description: "A modern app with dark mode and theme support",
+  title: "ErgoZenix",
+  description: "ErgoZenix - Your premium destination for ergonomic office furniture and accessories. Discover high-quality ergonomic chairs, standing desks, and workspace solutions designed for comfort, productivity, and long-term health. Shop now for the perfect ergonomic setup.",
   generator: "v0.app",
 }
 
@@ -24,9 +25,11 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body className={`font-sans antialiased`}>
         <ThemeProvider>
-          <Header/>
-          {children}
-          <Footer />
+          <CartProvider>
+            <Header/>
+            {children}
+            <Footer />
+          </CartProvider>
         </ThemeProvider>
       </body>
     </html>

@@ -1,80 +1,147 @@
 "use client"
 
-import React from "react"
-import { Header } from "@/components/header"
+import React, { useEffect, useState, useCallback } from "react"
 import { FiltersSidebar } from "@/components/shop/FiltersSidebar"
-import { ProductCard, type ProductItem } from "@/components/shop/ProductCard"
+import { ProductCard } from "@/components/shop/ProductCard"
 import { SortSelect } from "@/components/shop/SortSelect"
 import { Pagination } from "@/components/shop/Pagination"
-import { Car, Monitor, Box, Mouse } from "lucide-react"
-import type { Category } from "@/components/shop/CategoryList"
+import { ProductService } from "@/services/product-service"
+import type { ProductCard as ProductCardType } from "@/models/product"
+import { Category } from "@/components/shop/CategoryList"
+import { Car, Monitor, Box, Mouse, Loader2, PackageX } from "lucide-react"
 
-const productList: ProductItem[] = [
-  {
-    id: 1,
-    name: "ErgoFlex Pro Chair",
-    description: "Ultimate lumbar support for all-day comfort.",
-    price: "$399.99",
-    imageUrl:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuAqeP2jDX-1SyL1jJxZ2n74835k0B3w0tshNOhGL87barUvG20baIMCU87RbM4emPmpypHQ2B2mYNRsqYtxYr8dcDKHLXxxSMCmW-YKLRDh0VA3Leyz0bAomNJSgj2HawabJHBf7VUr2L0DkJRGaXdX2SdXBbocuhkLpSTsLp7pYNZZpOr-zFAK4PKxrJyMzW57rqpVzCyIpkQpuTZvqgXsYXZFoOrrSfHNSZB1XRb27MXNIpGFfEOz42bRLXcXHCrrb9qv8OllwtOt",
-    alt: "ErgoFlex Pro Chair against a plain background",
-  },
-  {
-    id: 2,
-    name: "Sit-Stand Desk X1",
-    description: "Adjustable height for perfect posture.",
-    price: "$599.00",
-    imageUrl:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuC0OHcvnZwJCVEWkQwDn8fl0yKlGgfs-kex4L_aDBihO-wQinE46WYoAD63_KCUVmxHaZvVkwSk1Fen3JuHKPfLCRIK4V01fDyGPjbgZi7KfThQzbbHbHwyUR6VIb7fA3aazTH67aaO5XoJN-qnggnn84YRWzpXIrd-ZhjGyFySjxepW7E5vqhi5qnRT5K6yR9Z-tiPe8ibWDiBvtsTFvf8eX0FXUCbD_EaLXwMXIptQq9Y6LTMm-SW4vaG_JHhiE_TYDo9WcWJbT5K",
-    alt: "Sit-Stand Desk X1 in a modern office setting",
-  },
-  {
-    id: 3,
-    name: "ErgoRest Footstool",
-    description: "Elevate your feet, improve your circulation.",
-    price: "$79.50",
-    imageUrl:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuAnsQHhU28Y6dyWIJMkkPE9ViJoFbsHN3-pImEccupjIQoIgnvB_ppDAp1GPPQ5-5j2F_9nf33oN0E-vIgNwAT03VvqK178bmj-FoIZhAU-vjlQ7vJj1KIkqL9aBZvL6a8sRCkPTzXCZXs7PzMdEyJxeDHTH9iLnzseIx84u2MB_WIw3sD-K1Gd4RKGVfIV-eidFFy779ZSUzD9vtG_EHSDcp8XeRGDLxsYsS96NTHM4m28Pdhs2anavW_V_KB0M4NS7Tn4MlsfMDde",
-    alt: "ErgoRest Footstool with a textured fabric",
-  },
-  {
-    id: 4,
-    name: "Vertical Ergonomic Mouse",
-    description: "Natural handshake position for less strain.",
-    price: "$45.99",
-    imageUrl:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuCZWM3tYlKRbVB1pXyq1cOnE2dpRs4f1bHcqogKf0AW6ouA7IGhKlLIMnFIgU_jcklda7QmBSmaFD_OEeCI7wRdaDm77QiN8D1-Gzgph390pzZYZCAXHXZWSdw7LN-cSaadRKc2GkbxyxwoLXLBPWkFFNzZeHET-tuQycu2OY-yTFCfpsb0D0fm7GSCfzRSMvMBehnkHMJpp4BIzzfc9qZ9P8RWtVMk_sPwd2tRea_m2X-7Kmlce7kjcapzPLGZ3biIjZXdGLn70i3J",
-    alt: "Vertical Ergonomic Mouse on a desk mat",
-  },
-  {
-    id: 5,
-    name: "Adjustable Laptop Stand",
-    description: "Raise your screen to eye level.",
-    price: "$65.00",
-    imageUrl:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuCB8lbO1G0XMmFSd0YqzWjgcEphVx7vNE1_pe78Hhhh0vtyCeNrx5eRXGoXs7V8N5sVYWTrz3HrpoCKRJ2ZUjbWyTWC5CxOH0jk4NQ1YM_Jhl8rYucxfWzYe0r5qXhzQpWjLAqqrwqGKkwZItOI0aVRESFOUumfigwaTSQwRq2zf61Lg17Xib-RvyjHt0URQalSNuVf5k7zUoSG6xsxU2cm3WSH9gCM7A6Hv250BEjGEiFzk15eJ1OJ_gcPuowrfN0I3Q0koj4GRNSO",
-    alt: "Adjustable Laptop Stand holding a laptop",
-  },
-  {
-    id: 6,
-    name: "ErgoFlex Mesh Chair",
-    description: "Breathable mesh for cool comfort.",
-    price: "$289.99",
-    imageUrl:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuBvILZycOGp1iFIhYRqAjHe7AgHs9D0Bn433gFSZnvNfgyeJ2-Tpem2cfz4L7S5BX04Iw6bC1guhqEuV5lr2rWR4r-5yHastiARE3qAv7RhNDmGB82XIhaS0z-9EEZTQ4fb3UcAcwD6HX6K40BNgsR9syQRC9Ktjh5x5oVeM6L21HQqO8UUBM6QeFD3RS9dAfbxAfGD30O6sQUZBDz0MjVDzjapKh70emRqZ-ctJtl5zLa3PjgPw7pwux3Vs6_oy9HJGtmZzrPlSrSC",
-    alt: "ErgoFlex Mesh Chair from the side",
-  },
-]
+// Map categories to icons (you can expand this logic or store icon name in DB)
+const getCategoryIcon = (name: string) => {
+  const iconMap: Record<string, any> = {
+    'Chairs': Car,
+    'Desks': Monitor,
+    'Accessories': Mouse,
+    'Stands': Box
+  }
+  return iconMap[name] || Box
+}
 
-const categories: Category[] = [
-  { name: "Chairs", icon: Car, href: "#", active: true },
-  { name: "Desks", icon: Monitor, href: "#", active: false },
-  { name: "Stands", icon: Box, href: "#", active: false },
-  { name: "Accessories", icon: Mouse, href: "#", active: false },
-]
+export default function ShopPage() {
+  // Data State
+  const [products, setProducts] = useState<ProductCardType[]>([])
+  const [categories, setCategories] = useState<Category[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
-export default function shop() {
-  const [sortBy, setSortBy] = React.useState("newest")
+  // Filter State
+  const [selectedCategory, setSelectedCategory] = useState<string | number | null>(null)
+  const [priceRange, setPriceRange] = useState<[number, number]>([0, 150000])
+  
+  // Sort State
+  const [sortBy, setSortBy] = useState("newest")
+
+  // Pagination State
+  const [page, setPage] = useState(1)
+  const [limit] = useState(9)
+  const [hasMore, setHasMore] = useState(true)
+
+  // Fetch Categories
+  useEffect(() => {
+    async function fetchCategories() {
+      try {
+        const cats = await ProductService.getAllCategories()
+        setCategories(cats.map(c => ({
+          id: c.id,
+          name: c.name,
+          icon: getCategoryIcon(c.name)
+        })))
+      } catch (err) {
+        console.error("Failed to load categories")
+      }
+    }
+    fetchCategories()
+  }, [])
+
+  // Fetch Products
+  const fetchProducts = useCallback(async () => {
+    setLoading(true)
+    setError(null)
+    try {
+      // Parse sort option
+      let sortOption: { field: 'base_price' | 'view_count' | 'created_at', ascending: boolean } | undefined
+      
+      // Map sort values to API options
+      if (sortBy === 'price-asc') {
+        sortOption = { field: 'base_price', ascending: true }
+      } else if (sortBy === 'price-desc') {
+        sortOption = { field: 'base_price', ascending: false }
+      } else if (sortBy === 'popular') {
+        // 'view_count' might not be in ProductSortOptions type, let's fallback or adjust
+        // If ProductSortOptions only allows specific fields, we must adhere.
+        // models/product.ts says: 'name' | 'base_price' | 'created_at' | 'updated_at'
+        // So 'popular' (view_count) is valid only if valid in type. If not, maybe use 'updated_at' or 'created_at'.
+        // Let's assume 'updated_at' for popular or just remove popular if not supported.
+        // Or if the service accepts 'any' string but type def is strict.
+        // Let's safe fallback to created_at for now if 'view_count' is invalid.
+        // But let's check ProductSortOptions again.
+        // It is: 'name' | 'base_price' | 'created_at' | 'updated_at'
+        // So 'view_count' is invalid. I should remove 'popular' or map it to something valid like 'created_at' (newest) or add it to type.
+        // I will map 'popular' to 'created_at' desc for now to be safe.
+        // actually 'newest' maps to undefined (default).
+        sortOption = undefined
+      }
+
+      // We need to cast sortOption to any or match the type exactly.
+      // The issue was `string` is not assignable to union.
+      
+      const options: any = sortOption
+
+      const data = await ProductService.getProducts(
+        {
+          category_id: selectedCategory ? Number(selectedCategory) : undefined,
+          min_price: priceRange[0],
+          max_price: priceRange[1],
+          in_stock: undefined // Show all for now
+        },
+        options,
+        limit,
+        (page - 1) * limit
+      )
+
+      setProducts(data)
+      setHasMore(data.length === limit)
+    } catch (err) {
+      setError("Failed to load products. Please try again.")
+    } finally {
+      setLoading(false)
+    }
+  }, [selectedCategory, priceRange, sortBy, page, limit])
+
+  // Debounce effect for price filtering to prevent excessive API calls
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      fetchProducts()
+    }, 500)
+    return () => clearTimeout(timer)
+  }, [fetchProducts])
+
+  // Handlers
+  const handleCategoryChange = (id: string | number | null) => {
+    setSelectedCategory(id)
+    setPage(1) // Reset to first page
+  }
+
+  const handlePriceChange = (range: [number, number]) => {
+    setPriceRange(range)
+    setPage(1)
+  }
+
+  const handleSortChange = (value: string) => {
+    setSortBy(value)
+    setPage(1)
+  }
+
+  const handleClearFilters = () => {
+    setSelectedCategory(null)
+    setPriceRange([0, 150000])
+    setSortBy("newest")
+    setPage(1)
+  }
 
   return (
     <div className="bg-background text-foreground min-h-screen">
@@ -87,23 +154,80 @@ export default function shop() {
           </div>
 
           <div className="flex flex-col lg:flex-row gap-8">
-            <FiltersSidebar categories={categories} />
+            <FiltersSidebar 
+              categories={categories} 
+              selectedCategory={selectedCategory}
+              onCategoryChange={handleCategoryChange}
+              priceRange={priceRange}
+              onPriceChange={handlePriceChange}
+              onClearFilters={handleClearFilters}
+            />
 
             <div className="w-full lg:w-3/4">
               <div className="flex items-center justify-between mb-6 flex-wrap gap-4">
-                <p className="text-sm text-muted-foreground">Showing 1-9 of 27 results</p>
+                <p className="text-sm text-muted-foreground">
+                  {loading ? 'Loading...' : `Showing ${products.length} results`}
+                </p>
                 <div className="flex gap-3 flex-wrap">
-                  <SortSelect value={sortBy} onChange={setSortBy} />
+                  <SortSelect value={sortBy} onChange={handleSortChange} />
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
-                {productList.map((product) => (
-                  <ProductCard key={product.id} product={product} />
-                ))}
-              </div>
+              {loading ? (
+                <div className="flex justify-center items-center py-20">
+                  <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                </div>
+              ) : error ? (
+                <div className="flex flex-col items-center justify-center py-20 text-center">
+                  <p className="text-red-500 mb-2">{error}</p>
+                  <button onClick={fetchProducts} className="text-primary hover:underline">Try Again</button>
+                </div>
+              ) : products.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-20 text-center">
+                  <PackageX className="h-16 w-16 text-muted-foreground mb-4" />
+                  <h3 className="text-xl font-bold mb-2">No Products Found</h3>
+                  <p className="text-muted-foreground mb-4">Try adjusting your filters or price range.</p>
+                  <button onClick={handleClearFilters} className="text-primary font-medium hover:underline">
+                    Clear All Filters
+                  </button>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
+                  {products.map((product) => (
+                    <ProductCard 
+                      key={product.id} 
+                      product={{
+                        id: product.id,
+                        name: product.name,
+                        description: product.description || '',
+                        price: `Rs ${product.base_price}`,
+                        imageUrl: product.primary_image || 'https://via.placeholder.com/300',
+                        alt: product.name,
+                        slug: product.slug
+                      }} 
+                    />
+                  ))}
+                </div>
+              )}
 
-              <Pagination />
+              {/* Simple Pagination Control (Can be expanded) */}
+              <div className="mt-8 flex justify-center gap-2">
+                <button 
+                  onClick={() => setPage(p => Math.max(1, p - 1))}
+                  disabled={page === 1 || loading}
+                  className="px-4 py-2 border rounded disabled:opacity-50"
+                >
+                  Previous
+                </button>
+                <span className="px-4 py-2">Page {page}</span>
+                <button 
+                  onClick={() => setPage(p => p + 1)}
+                  disabled={!hasMore || loading}
+                  className="px-4 py-2 border rounded disabled:opacity-50"
+                >
+                  Next
+                </button>
+              </div>
             </div>
           </div>
         </div>

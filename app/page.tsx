@@ -1,35 +1,8 @@
 import { Header } from "@/components/header"
 import { Hero } from "@/components/home/Hero"
-import { FeaturedProducts, type Product } from "@/components/home/FeaturedProducts"
+import { FeaturedProducts } from "@/components/home/FeaturedProducts"
 import { Features } from "@/components/home/Features"
 import { Testimonials, type Testimonial } from "@/components/home/Testimonials"
-
-const featuredProducts: Product[] = [
-  {
-    name: "ErgoChair Pro",
-    description: "The ultimate chair for all-day comfort and support.",
-    price: "$499.00",
-    imageUrl:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuBv1iTBvPDkvIGDZbxX0L3n2xOVj-gkOt9MpST5bUOKCbcXcgPOz7gbCD5Ej0l2Smd0HOf0AxCO_tQGDODo4ny4TP7UrPw1vkFC9Vu5mGbr5uNyIXYH8znvXFdZqJ2FWNQgBgp7uYEM1mSRAaRMyGX2V3zD6TYa2XQ3VCT2ZwQQ9AsqFNWNz6Ez425vS1INS2yq10ozuEOQbmMF-EELlDe1NWnZSrp7kYLOeo6qks92WwDNEbbeRFwdFwv9BcSApaJj2RpytyrJO9DN",
-    alt: "ErgoChair Pro",
-  },
-  {
-    name: "Adjustable Standing Desk",
-    description: "Switch between sitting and standing with ease.",
-    price: "$599.00",
-    imageUrl:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuBVTqTKga4GXBCQab4D01F2KxxI8BxytL-gyopydVxpgbG-7_okrjmrFru5Ddh6x0_NL9qJLlzTpCn4mKFQ2xc4qpp2MxK07WfRRLy6IW5YtxGwW9NlpC7Cp_udCxL-waaO0u6MSkh2lC5DBsZWMKnHuL3advIUNFGJayozybmdo8xwTETlA2QqTZ_wz13tL21ySaYJ58xkRzoW-winVbP_YmM0VScWFYbtu0QkU6uKdAxEdzkdThhTQEgI4ZlY0gcqMmVjr28q3NgE",
-    alt: "Adjustable Standing Desk",
-  },
-  {
-    name: "Vertical Mouse",
-    description: "Designed to reduce wrist strain and improve comfort.",
-    price: "$79.00",
-    imageUrl:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuD6nyQVozpL361XPiLZYsNzwWR-hGfAf9JbkTzAYX-WCNsy3h3_XWH2r4LJf2DF31XjEI6CA_jHTnKkK_1Mx33veRbo38Gb6X3PAcsL8Ku_S5A7snfcqIzUGYRxuLMDKfkm8PnOsIlKHrjLeJeJTowDEe6vTT1T0YT7kV1YValNjr1EXrz_HRvplrrsmm88QNZz-LKoqZNNFyz2iQa6_BI-JXf6Zlf7mDpnRIJCsqDJzDdVi7clDHVDhc9ImqeDVjVt-l7m8lZPempW",
-    alt: "Vertical Mouse",
-  },
-]
 
 const testimonials: Testimonial[] = [
   {
@@ -70,7 +43,7 @@ export default function home() {
               title="Upgrade Your Workspace, Elevate Your Well-being"
               subtitle="Discover our range of ergonomic products designed for comfort and productivity."
             />
-            <FeaturedProducts products={featuredProducts} />
+            <FeaturedProducts />
             <Features />
             <Testimonials testimonials={testimonials} />
           </div>
@@ -79,3 +52,4 @@ export default function home() {
     </div>
   )
 }
+

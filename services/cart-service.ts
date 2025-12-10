@@ -1,27 +1,85 @@
 import { supabase } from '@/lib/supabase/client'
 
+export interface CartAttribute {
+  id?: number
+  cart_item_id?: number
+  attribute_name: string
+  attribute_value: string
+}
+
 export interface CartItem {
-  id: string
-  user_id: string
-  product_id: string
+  id: number
+  cart_id: number
+  product_id: number
   quantity: number
+  price: number
   created_at: string
   updated_at: string
   product?: {
-    id: string
+    id: number
     name: string
     description: string | null
     price: number
     image_url: string | null
     stock_quantity: number
+    slug: string | null
   }
+  attributes?: CartAttribute[]
 }
 
 export class CartService {
   /**
-   * Get all cart items for the current user
+   * Get active cart for session or user
    */
-  static async getCartItems(userId: string): Promise<CartItem[]> {
+  static async getCart(sessionId: string, userId?: string) {
+    let query = supabase
+      .from('carts')
+      .select('*')
+      .eq('status', 'active')
+
+    if (userId) {
+      query = query.eq('user_id', userId)
+    } else {
+      query = query.eq('session_id', sessionId)
+    }
+
+    const { data, error } = await query.maybeSingle()
+
+    if (error) {
+      console.error('Error fetching cart:', error)
+      throw error
+    }
+
+    return data
+  }
+
+  /**
+   * Create a new cart
+   */
+  static async createCart(sessionId: string, userId?: string) {
+    const { data, error } = await supabase
+      .from('carts')
+      .insert({
+        session_id: sessionId,
+        user_id: userId || null,
+        status: 'active'
+      })
+      .select()
+      .single()
+
+    if (error) throw error
+    return data
+  }
+
+  /**
+   * Get all cart items
+   */
+  static async getCartItems(sessionId: string, userId?: string): Promise<CartItem[]> {
+    // 1. Get the cart first
+    const cart = await this.getCart(sessionId, userId)
+    if (!cart) return []
+
+    // 2. Get items with product details and attributes
     const { data, error } = await supabase
       .from('cart_items')
       .select(`
@@ -30,12 +88,21 @@ export class CartService {
           id,
           name,
           description,
-          price,
-          image_url,
-          stock_quantity
+          base_price,
+          stock_quantity,
+          slug,
+          images:product_images (
+            image_url,
+            is_primary
+          )
+        ),
+        attributes:cart_item_attributes (
+          id,
+          attribute_name,
+          attribute_value
         )
       `)
-      .eq('user_id', userId)
+      .eq('cart_id', cart.id)
       .order('created_at', { ascending: false })
 
     if (error) {
@@ -43,132 +110,132 @@ export class CartService {
       throw error
     }
 
-    return data || []
+    // Map DB product response to expected format
+    return (data || []).map((item: any) => {
+      // Find primary image or first image
+      const productImages = item.product?.images || []
+      const primaryImage = productImages.find((img: any) => img.is_primary) || productImages[0]
+
+      return {
+        ...item,
+        product: item.product ? {
+          ...item.product,
+          price: item.product.base_price,
+          image_url: primaryImage?.image_url || null
+        } : undefined
+      }
+    })
   }
 
   /**
-   * Add item to cart or update quantity if it already exists
+   * Add item to cart
    */
-  static async addToCart(userId: string, productId: string, quantity: number = 1): Promise<CartItem> {
-    // First check if item already exists in cart
-    const { data: existing } = await supabase
-      .from('cart_items')
-      .select('*')
-      .eq('user_id', userId)
-      .eq('product_id', productId)
+  static async addToCart(
+    sessionId: string,
+    userId: string | undefined,
+    productId: number,
+    quantity: number = 1,
+    attributes: { name: string; value: string }[] = []
+  ) {
+    // 1. Get or create cart
+
+    let cart = await this.getCart(sessionId, userId)
+    if (!cart) {
+      cart = await this.createCart(sessionId, userId)
+    }
+
+    // // 2. Fetch product price to ensure integrity
+    const { data: product } = await supabase
+      .from('products')
+      .select('base_price')
+      .eq('id', productId)
       .single()
 
-    if (existing) {
-      // Update existing item quantity
-      const { data, error } = await supabase
+
+    if (!product) throw new Error('Product not found')
+    const price = product.base_price
+
+    // // 3. Check for existing item
+    let existingItem
+    if (attributes.length === 0) {
+      const { data } = await supabase
         .from('cart_items')
-        .update({ 
-          quantity: existing.quantity + quantity,
+        .select('id, quantity')
+        .eq('cart_id', cart.id)
+        .eq('product_id', productId)
+        .maybeSingle()
+      existingItem = data
+    }
+    console.log("existingItem", existingItem)
+
+    if (existingItem) {
+      // Update
+      const { error } = await supabase
+        .from('cart_items')
+        .update({
+          quantity: existingItem.quantity + quantity,
           updated_at: new Date().toISOString()
         })
-        .eq('id', existing.id)
-        .select()
-        .single()
+        .eq('id', existingItem.id)
 
-      if (error) {
-        console.error('Error updating cart item:', error)
-        throw error
-      }
-
-      return data
+      if (error) throw error
     } else {
-      // Insert new item
-      const { data, error } = await supabase
+      // Insert
+      const { data: newItem, error } = await supabase
         .from('cart_items')
         .insert({
-          user_id: userId,
+          cart_id: cart.id,
           product_id: productId,
-          quantity
+          quantity,
+          price: price
         })
         .select()
         .single()
 
-      if (error) {
-        console.error('Error adding to cart:', error)
-        throw error
+      if (error) throw error
+
+      // 4. Insert Attributes
+      if (attributes.length > 0 && newItem) {
+        const attrInserts = attributes.map(a => ({
+          cart_item_id: newItem.id,
+          attribute_name: a.name,
+          attribute_value: a.value
+        }))
+
+        const { error: attrError } = await supabase
+          .from('cart_item_attributes')
+          .insert(attrInserts)
+
+        if (attrError) throw attrError
       }
-
-      return data
     }
   }
 
-  /**
-   * Update cart item quantity
-   */
-  static async updateCartItemQuantity(cartItemId: string, quantity: number): Promise<CartItem> {
-    if (quantity <= 0) {
-      throw new Error('Quantity must be greater than 0')
-    }
-
-    const { data, error } = await supabase
+  static async updateCartItemQuantity(itemId: number, quantity: number) {
+    if (quantity <= 0) throw new Error('Quantity must be > 0')
+    const { error } = await supabase
       .from('cart_items')
-      .update({ 
-        quantity,
-        updated_at: new Date().toISOString()
-      })
-      .eq('id', cartItemId)
-      .select()
-      .single()
-
-    if (error) {
-      console.error('Error updating cart item quantity:', error)
-      throw error
-    }
-
-    return data
+      .update({ quantity, updated_at: new Date().toISOString() })
+      .eq('id', itemId)
+    if (error) throw error
   }
 
-  /**
-   * Remove item from cart
-   */
-  static async removeFromCart(cartItemId: string): Promise<void> {
+  static async removeFromCart(itemId: number) {
     const { error } = await supabase
       .from('cart_items')
       .delete()
-      .eq('id', cartItemId)
+      .eq('id', itemId)
+    if (error) throw error
+  }
 
-    if (error) {
-      console.error('Error removing from cart:', error)
-      throw error
+  static async clearCart(sessionId: string, userId?: string) {
+    const cart = await this.getCart(sessionId, userId)
+    if (cart) {
+      const { error } = await supabase
+        .from('cart_items')
+        .delete()
+        .eq('cart_id', cart.id)
+      if (error) throw error
     }
-  }
-
-  /**
-   * Clear all items from cart
-   */
-  static async clearCart(userId: string): Promise<void> {
-    const { error } = await supabase
-      .from('cart_items')
-      .delete()
-      .eq('user_id', userId)
-
-    if (error) {
-      console.error('Error clearing cart:', error)
-      throw error
-    }
-  }
-
-  /**
-   * Get cart total
-   */
-  static async getCartTotal(userId: string): Promise<number> {
-    const items = await this.getCartItems(userId)
-    return items.reduce((total, item) => {
-      const price = item.product?.price || 0
-      return total + (price * item.quantity)
-    }, 0)
-  }
-
-  /**
-   * Get cart item count
-   */
-  static async getCartItemCount(userId: string): Promise<number> {
-    const items = await this.getCartItems(userId)
-    return items.reduce((count, item) => count + item.quantity, 0)
   }
 }

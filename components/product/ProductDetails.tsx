@@ -3,6 +3,9 @@
 import { Button } from "@/components/ui/button"
 import { ShoppingCart } from "lucide-react"
 import { StarRating } from "@/components/home/StarRating"
+import { QuantitySelector } from "./QuantitySelector"
+import { useState } from "react"
+import { useCart } from "@/context/cart-context"
 
 export type ProductSpec = {
   label: string
@@ -14,58 +17,79 @@ export function ProductDetails({
   rating, 
   reviewCount, 
   price, 
-  description, 
-  specifications 
+  description,
+  keySpecs,
+  productId
 }: {
   title: string
   rating: number
   reviewCount: number
   price: string
   description: string
-  specifications: ProductSpec[]
+  keySpecs?: ProductSpec[]
+  productId: number
 }) {
+  const [quantity, setQuantity] = useState(1)
+  const { addToCart } = useCart()
+
   return (
-    <div>
-      <h1 className="text-[#111718] dark:text-white tracking-tight text-3xl md:text-4xl font-bold leading-tight">
+    <div className="flex flex-col h-full">
+      <h1 className="text-[#111718] dark:text-white tracking-tight text-3xl md:text-4xl font-black leading-tight mb-2">
         {title}
       </h1>
       
-      <div className="flex items-center gap-2 mt-4">
+      <div className="flex items-center gap-2 mb-4">
         <StarRating rating={rating} />
         <p className="text-gray-600 dark:text-gray-400 text-sm font-normal leading-normal">
           ({reviewCount} Reviews)
         </p>
       </div>
       
-      <p className="text-3xl font-bold text-[#111718] dark:text-white mt-4">{price}</p>
+      <p className="text-4xl font-black text-[#111718] dark:text-white mb-6 tracking-tight">{price}</p>
       
-      <p className="text-gray-600 dark:text-gray-400 mt-4 text-base leading-relaxed">
+      <p className="text-gray-600 dark:text-gray-400 text-base leading-relaxed mb-8">
         {description}
       </p>
       
-      <div className="mt-8 flex flex-col sm:flex-row gap-4">
-        <Button className="w-full sm:w-auto flex-1 bg-primary text-primary-foreground hover:bg-primary/90">
-          <ShoppingCart className="mr-2 h-5 w-5" />
-          Add to Cart
-        </Button>
-        <Button variant="outline" className="w-full sm:w-auto flex-1">
+      <div className="flex flex-col gap-4 mb-10">
+        <div className="flex gap-4">
+          <QuantitySelector 
+            quantity={quantity}
+            onIncrease={() => setQuantity(q => q + 1)}
+            onDecrease={() => setQuantity(q => Math.max(1, q - 1))}
+            className="w-32 flex-shrink-0"
+          />
+          <Button 
+            className="flex-1 h-12 bg-[#00B5D8] hover:bg-[#00A3C4] text-white font-bold text-base rounded-md"
+            onClick={() => addToCart(productId, quantity, [])}
+          >
+            <ShoppingCart className="mr-2 h-5 w-5" />
+            Add to Cart
+          </Button>
+        </div>
+        <Button 
+          className="w-full h-12 bg-[#D0EDF5] hover:bg-[#C0E3ED] text-[#008CA3] font-bold text-base border-none rounded-md"
+        >
           Buy Now
         </Button>
       </div>
-      
-      <div className="mt-10 border-t border-gray-200 dark:border-gray-700 pt-8">
-        <h3 className="text-lg font-semibold text-[#111718] dark:text-white">Specifications</h3>
-        <ul className="mt-4 space-y-3 text-gray-600 dark:text-gray-400">
-          {specifications.map((spec, index) => (
-            <li key={index} className="flex justify-between">
-              <span>{spec.label}:</span>
-              <span className="font-medium text-right text-[#111718] dark:text-gray-300">
-                {spec.value}
-              </span>
-            </li>
-          ))}
-        </ul>
-      </div>
+
+      {keySpecs && keySpecs.length > 0 && (
+        <div className="mt-auto">
+          <h3 className="text-lg font-bold text-[#111718] dark:text-white mb-4">Specifications</h3>
+          <div className="space-y-3">
+            {keySpecs.map((spec, index) => (
+              <div key={index} className="flex justify-between items-end">
+                <span className="text-gray-600 dark:text-gray-400 text-base">{spec.label}:</span>
+                <span className="text-[#111718] dark:text-white font-bold text-base text-right">
+                  {spec.value}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   )
 }
+

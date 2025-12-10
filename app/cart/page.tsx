@@ -1,61 +1,61 @@
-
-
-// --- Mock Data ---
-
-import CartTable from "@/components/cart/CartTable";
+"use client"
+import CartTable, { CartTableItem } from "@/components/cart/CartTable";
 import CartTotals from "@/components/cart/CartTotals";
 import CheckoutForm from "@/components/cart/CheckoutForm";
-
-export interface CartItem {
-    id: number;
-    name: string;
-    price: number;
-    quantity: number;
-    imageUrl: string;
-    altText: string;
-  }
-  
-  export interface CartSummary {
-    subtotal: number;
-    shipping: number;
-    total: number;
-  }
-  
-
-const MOCK_CART_ITEMS: CartItem[] = [
-  {
-    id: 1,
-    name: "Ergonomic Chair",
-    price: 250.0,
-    quantity: 1,
-    imageUrl: "https://lh3.googleusercontent.com/aida-public/AB6AXuApoNas-1Q1qSHPMMr_lEUKB0prg0l5O0MLs8hOFHz4lQlNkbxJB_0aCVZCpZb0TkTG3PgTLZnD79iUtAcPtUMYtc8sC2TmiYBavJaLcQ1FInAt7tG801NMK9YUQlwORWwbGNir9tQl1E4RTUkhIN6EOTEJ-arjRRgsLuDt0hA5CYiM3tc1n3tLvtqCeTYSSJ8Zej0nmIYcXqcLvXRdxKM_-6hvqP8TqYN4gpDVpp2pJrMuZHO2q4ux2wUf5SvnCcy0b9JQadNG8lGX",
-    altText: "Ergonomic Chair",
-  },
-  {
-    id: 2,
-    name: "Standing Desk",
-    price: 400.0,
-    quantity: 1,
-    imageUrl: "https://lh3.googleusercontent.com/aida-public/AB6AXuBq0b4M5QUnsCA3kcFUr3gUCo4-LWgMi-qrBzd6FIqGQqWOnJV0wj7p1KRigqcHvddJo9I2SdjyKHyUwnpwxL82a9vByDA6bNXGOcEOL1HnLXp0zbLUiih8GRrj2qkLDpK-d9EUh6cf3uq7S5-d3g6z5sVWCfHRBvbTuIEOMM7Ew4R3qtkTw81qZ9USeeHwyx2XuntzIqY_4rUokpklI-8P2x2864I3pVhUIwRFMbCTgY8TyoNE6TINr7h2JaJ2b_bRGLASDMFxUt0T",
-    altText: "Standing Desk",
-  },
-];
-
-const MOCK_CART_SUMMARY: CartSummary = {
-  subtotal: 650.0,
-  shipping: 15.0,
-  total: 665.0,
-};
+import { useCart } from "@/context/cart-context";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+    
+export interface CartSummary {
+  subtotal: number;
+  shipping: number;
+  total: number;
+}
 
 export default function CartPage() {
+  const { items, cartTotal, isLoading } = useCart()
+
+  if (isLoading) {
+      return <div className="min-h-screen flex items-center justify-center">Loading cart...</div>
+  }
+
+  // Transform context items to view format
+  const viewItems = items.map(item => ({
+      id: item.product_id, // Product ID for display/link
+      name: item.product?.name || 'Unknown Product',
+      price: item.product?.price || 0,
+      quantity: item.quantity,
+      imageUrl: item.product?.image_url || 'https://via.placeholder.com/150',
+      altText: item.product?.name || 'Product Image',
+      cartItemId: item.id // The actual CartItem ID (number) for removal
+  }))
+
+  const summary = {
+      subtotal: cartTotal,
+      shipping: 15, // Fixed shipping for now
+      total: cartTotal + 15
+  }
+
+  if (items.length === 0) {
+      return (
+          <div className="bg-background text-foreground min-h-screen flex flex-col items-center justify-center">
+              <h1 className="text-3xl font-bold mb-4">Your Cart is Empty</h1>
+              <p className="text-muted-foreground mb-8">Looks like you haven't added anything yet.</p>
+              <Link href="/shop">
+                  <Button size="lg">Continue Shopping</Button>
+              </Link>
+          </div>
+      )
+  }
+
   return (
     <div className="bg-background text-foreground min-h-screen">
       <main className="max-w-6xl mx-auto px-4 py-10 grid grid-cols-1 lg:grid-cols-3 gap-12">
         {/* Cart Details Column */}
         <div className="lg:col-span-2">
           <p className="text-4xl font-black mb-6">Your Cart</p>
-          <CartTable items={MOCK_CART_ITEMS} />
-          <CartTotals summary={MOCK_CART_SUMMARY} />
+          <CartTable items={viewItems} />
+          <CartTotals summary={summary} />
         </div>
 
         {/* Checkout Column */}
