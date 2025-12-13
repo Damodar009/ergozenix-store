@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, use } from "react"
 import { ProductService } from "@/services/product-service"
 import type { ProductWithDetails, ProductAttributeValue, ProductAttribute } from "@/models/product"
 import { Breadcrumbs, type BreadcrumbItem } from "@/components/product/Breadcrumbs"
@@ -10,20 +10,14 @@ import { CategorizedSpecifications, getCategoryIcon, type SpecificationCategory,
 import { ReviewSummary, type RatingDistribution } from "@/components/product/ReviewSummary"
 import { RelatedProducts, type RelatedProduct } from "@/components/product/RelatedProducts"
 import { ProductTabs } from "@/components/product/ProductTabs"
+import { ReviewForm } from "@/components/product/ReviewForm"
+import { ReviewList } from "@/components/product/ReviewList"
 import { Button } from "@/components/ui/button"
 import { ArrowLeft } from "lucide-react"
 import Link from "next/link"
 
 // Mock data for features not yet fully implemented
 const mockRelatedProducts: RelatedProduct[] = []
-
-const mockRatingDistribution: RatingDistribution[] = [
-  { rating: 5, percent: 70 },
-  { rating: 4, percent: 15 },
-  { rating: 3, percent: 8 },
-  { rating: 2, percent: 4 },
-  { rating: 1, percent: 3 },
-]
 
 // Category mapping for attribute classification
 const CATEGORY_KEYWORDS = {
@@ -46,14 +40,15 @@ function categorizeAttribute(attributeName: string): string {
   return 'General Info'
 }
 
-export default function ProductPage({ params }: { params: { slug: string } }) {
+export default function ProductPage({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = use(params)
   const [product, setProduct] = useState<ProductWithDetails | null>(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     async function fetchProduct() {
       try {
-        const data = await ProductService.getProductBySlug(params.slug)
+        const data = await ProductService.getProductBySlug(slug)
         setProduct(data)
       } catch (error) {
         console.error('Error fetching product:', error)
@@ -62,10 +57,10 @@ export default function ProductPage({ params }: { params: { slug: string } }) {
       }
     }
 
-    if (params.slug) {
+    if (slug) {
       fetchProduct()
     }
-  }, [params.slug])
+  }, [slug])
 
   if (loading) {
     return (
@@ -225,6 +220,16 @@ export default function ProductPage({ params }: { params: { slug: string } }) {
     ? formatPriceNPR(product.sale_price)
     : formatPriceNPR(product.base_price)
 
+  // Calculate Rating Distribution
+  const ratingDistribution: RatingDistribution[] = [5, 4, 3, 2, 1].map(star => {
+    const count = product.reviews?.filter(r => r.rating === star).length || 0
+    const total = product.reviews?.length || 0
+    return {
+      rating: star,
+      percent: total > 0 ? Math.round((count / total) * 100) : 0
+    }
+  })
+
   return (
     <div className="bg-background min-h-screen">
       <div className="relative flex h-auto min-h-screen w-full flex-col group/design-root overflow-x-hidden">
@@ -243,6 +248,8 @@ export default function ProductPage({ params }: { params: { slug: string } }) {
                   rating={product.average_rating || 0}
                   reviewCount={product.review_count || 0}
                   price={displayPrice}
+                  basePrice={product.base_price}
+                  salePrice={product.sale_price}
                   description={product.description || 'No description available.'}
                   keySpecs={keySpecs}
                   productId={product.id}
@@ -252,11 +259,26 @@ export default function ProductPage({ params }: { params: { slug: string } }) {
               {/* Tabs Section for Reviews & Specifications */}
               <ProductTabs 
                 reviewsContent={
-                  <ReviewSummary
-                    averageRating={product.average_rating || 0}
-                    totalReviews={product.review_count || 0}
-                    ratingDistribution={mockRatingDistribution}
-                  />
+                  <div className="space-y-12">
+                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-24">
+                      {/* Left: Summary & Stats */}
+                      <div className="lg:col-span-5">
+                        <ReviewSummary
+                          averageRating={product.average_rating || 0}
+                          totalReviews={product.review_count || 0}
+                          ratingDistribution={ratingDistribution}
+                        />
+                      </div>
+                      
+                      {/* Right: Write Review Form */}
+                      <div className="lg:col-span-7">
+                        <ReviewForm productId={product.id} />
+                      </div>
+                    </div>
+                    
+                    {/* List of Reviews */}
+                    <ReviewList reviews={product.reviews} />
+                  </div>
                 }
                 detailsContent={
                   <CategorizedSpecifications categories={categories} />

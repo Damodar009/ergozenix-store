@@ -7,7 +7,7 @@ export type Testimonial = {
   name: string
   quote: string
   rating: number
-  imageUrl: string
+  imageUrl: string | null
 }
 
 export function Testimonials({ testimonials }: { testimonials: Testimonial[] }) {
@@ -18,7 +18,9 @@ export function Testimonials({ testimonials }: { testimonials: Testimonial[] }) 
         {testimonials.map((t) => (
           <Card key={t.name} className="bg-card p-8 rounded-xl shadow-sm border-none">
             <div className="flex items-center mb-4">
-              <img alt={`Photo of ${t.name}`} className="w-12 h-12 rounded-full mr-4 object-cover" src={t.imageUrl} />
+              <div className="w-12 h-12 rounded-full mr-4 bg-primary/10 flex items-center justify-center text-primary font-bold">
+                {t.name.charAt(0)}
+              </div>
               <div>
                 <p className="font-semibold text-card-foreground">{t.name}</p>
                 <StarRating rating={t.rating} />

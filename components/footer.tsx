@@ -16,7 +16,7 @@ export function Footer() {
           <div className="col-span-2 md:col-span-1">
             <div className="flex items-center gap-2 text-card-foreground">
               <LogoIcon className="size-6 text-primary" />
-              <h2 className="text-xl font-bold">ErgoFlex Store</h2>
+              <h2 className="text-xl font-bold">ErgoZenix Store</h2>
             </div>
             <p className="mt-4 text-sm text-muted-foreground">Comfort for a better life.</p>
           </div>
@@ -24,25 +24,29 @@ export function Footer() {
           <div>
             <h3 className="text-sm font-semibold text-card-foreground tracking-wider uppercase">Quick Links</h3>
             <ul className="mt-4 space-y-4">
-              {["Home", "Products", "About Us", "Contact"].map((label) => {
-                const href = `/${label.toLowerCase().replace(" ", "-")}`
-                return (
-                  <li key={`footer-${label}`}>
-                    <UiLink className="text-base text-muted-foreground hover:text-card-foreground" href={href}>
-                      {label}
-                    </UiLink>
-                  </li>
-                )
-              })}
+            <ul className="mt-4 space-y-4">
+              {[
+                { label: "Home", href: "/" },
+                { label: "Shop", href: "/shop" },
+                { label: "About Us", href: "/about" },
+                { label: "Contact", href: "/contact" },
+              ].map(({ label, href }) => (
+                <li key={`footer-${label}`}>
+                  <UiLink className="text-base text-muted-foreground hover:text-card-foreground" href={href}>
+                    {label}
+                  </UiLink>
+                </li>
+              ))}
+            </ul>
             </ul>
           </div>
 
           <div>
             <h3 className="text-sm font-semibold text-card-foreground tracking-wider uppercase">Contact Info</h3>
             <ul className="mt-4 space-y-4 text-base text-muted-foreground">
-              <li>support@ergoflex.com</li>
-              <li>(123) 456-7890</li>
-              <li>123 Ergonomic Ave, Comfort City</li>
+              <li>ergozenix.store@gmail.com</li>
+              <li>+977 9768602990</li>
+              <li>Basundhara, Kathmandu</li>
             </ul>
           </div>
 
@@ -62,7 +66,7 @@ export function Footer() {
 
         <Separator className="mt-8" />
         <div className="pt-8 text-center text-sm text-muted-foreground">
-          <p>© 2024 ErgoFlex Store. All rights reserved.</p>
+          <p>© 2024 ErgoZenix Store. All rights reserved.</p>
         </div>
       </div>
     </footer>

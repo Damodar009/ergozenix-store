@@ -12,18 +12,27 @@ export function ContactDetails() {
             <Mail className="h-6 w-6 text-primary" />
             <a 
               className="text-base text-foreground hover:text-primary transition-colors" 
-              href="mailto:contact@ergoflex.com"
+              href="mailto:ergozenix.store@gmail.com"
             >
-              contact@ergoflex.com
+              ergozenix.store@gmail.com
             </a>
           </div>
           <div className="flex items-center gap-3">
             <Phone className="h-6 w-6 text-primary" />
             <a 
               className="text-base text-[#111718] dark:text-white hover:text-primary dark:hover:text-primary transition-colors" 
-              href="tel:+1234567890"
+              href="tel:+9779768602990"
             >
-              +1 (234) 567-890
+              +977 9768602990
+            </a>
+          </div>
+          <div className="flex items-center gap-3">
+            <MapPin className="h-6 w-6 text-primary" />
+            <a 
+              className="text-base text-[#111718] dark:text-white hover:text-primary dark:hover:text-primary transition-colors" 
+              href="https://www.google.com/maps/place/Basundhara+Kathmandu"
+            >
+              Basundhara, Kathmandu
             </a>
           </div>
         </div>
@@ -33,10 +42,10 @@ export function ContactDetails() {
         <div className="aspect-w-16 aspect-h-9 rounded-lg overflow-hidden">
           <iframe 
             allowFullScreen 
-            data-location="New York, USA" 
+            data-location="Basundhara, Kathmandu" 
             height="100%" 
             loading="lazy" 
-            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3022.617418706341!2d-73.98784538459424!3d40.74844097932822!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x89c259a9b3117469%3A0xd134e199a405a163!2sEmpire%20State%20Building!5e0!3m2!1sen!2sus!4v1617307049487!5m2!1sen!2sus" 
+            src="https://maps.google.com/maps?q=27.7405123,85.3350013&t=&z=15&ie=UTF8&iwloc=&output=embed"
             style={{ border: 0 }} 
             width="100%"
             title="Map Location"

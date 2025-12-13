@@ -201,6 +201,8 @@ export default function ShopPage() {
                         name: product.name,
                         description: product.description || '',
                         price: `Rs ${product.base_price}`,
+                        basePrice: product.base_price,
+                        salePrice: product.sale_price,
                         imageUrl: product.primary_image || 'https://via.placeholder.com/300',
                         alt: product.name,
                         slug: product.slug

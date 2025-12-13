@@ -71,6 +71,8 @@ export interface ProductReview {
   id: number
   product_id: number
   user_id: number
+  full_name: string
+  phone_or_email: string
   rating: number
   review: string | null
   created_at: string

@@ -31,12 +31,12 @@ export function Header() {
 
   return (
     <header className="flex items-center justify-between whitespace-nowrap border-b border-border px-6 md:px-10 py-4 bg-background sticky top-0 z-10">
-      <div className="flex items-center gap-4 text-foreground">
+      <Link href="/" className="flex items-center gap-4 text-foreground">
         <LogoIcon />
         <h2 className="text-xl font-bold leading-tight tracking-[-0.015em]">
           ErgoZenix
         </h2>
-      </div>
+      </Link>
 
       <nav className="hidden md:flex items-center gap-9 text-foreground">
         <Link className={navLinkClass("/")} href="/">

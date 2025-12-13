@@ -29,7 +29,7 @@ export default function CartButtons() {
       >
         <ShoppingCart className="h-5 w-5" />
         {itemCount > 0 && (
-          <span className="absolute -top-2 -right-2 bg-[#00B5D8] text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center border-2 border-background">
+          <span className="absolute -top-2 -right-2 bg-primary text-primary-foreground text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center border-2 border-background">
             {itemCount}
           </span>
         )}

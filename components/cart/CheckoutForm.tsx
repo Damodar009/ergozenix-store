@@ -168,7 +168,7 @@ const CheckoutForm: FC = () => {
 
         <div className="pt-2">
           <Button 
-            className="w-full py-6 text-lg font-bold bg-[#00B5D8] hover:bg-[#00A3C4] text-white" 
+            className="w-full py-6 text-lg font-bold bg-primary hover:bg-primary/90 text-primary-foreground" 
             disabled={isSubmitting || items.length === 0}
           >
             {isSubmitting ? "Placing Order..." : "Place Order"}

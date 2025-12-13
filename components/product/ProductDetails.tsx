@@ -12,11 +12,15 @@ export type ProductSpec = {
   value: string
 }
 
+import { useRouter } from "next/navigation"
+
 export function ProductDetails({ 
   title, 
   rating, 
   reviewCount, 
   price, 
+  basePrice,
+  salePrice,
   description,
   keySpecs,
   productId
@@ -25,12 +29,23 @@ export function ProductDetails({
   rating: number
   reviewCount: number
   price: string
+  basePrice?: number
+  salePrice?: number | null
   description: string
   keySpecs?: ProductSpec[]
   productId: number
 }) {
   const [quantity, setQuantity] = useState(1)
   const { addToCart } = useCart()
+  const router = useRouter()
+
+  const handleBuyNow = async () => {
+    await addToCart(productId, quantity, [])
+    router.push("/cart")
+  }
+
+  const formatPrice = (p: number) => `Rs. ${p.toLocaleString()}`
+  const hasSale = salePrice && basePrice && salePrice < basePrice
 
   return (
     <div className="flex flex-col h-full">
@@ -45,7 +60,18 @@ export function ProductDetails({
         </p>
       </div>
       
-      <p className="text-4xl font-black text-[#111718] dark:text-white mb-6 tracking-tight">{price}</p>
+      {hasSale ? (
+        <div className="flex items-center gap-3 mb-6">
+           <p className="text-4xl font-black text-[#111718] dark:text-white tracking-tight">
+             {formatPrice(salePrice!)}
+           </p>
+           <p className="text-xl text-gray-500 line-through font-medium">
+             {formatPrice(basePrice!)}
+           </p>
+        </div>
+      ) : (
+        <p className="text-4xl font-black text-[#111718] dark:text-white mb-6 tracking-tight">{price}</p>
+      )}
       
       <p className="text-gray-600 dark:text-gray-400 text-base leading-relaxed mb-8">
         {description}
@@ -69,6 +95,7 @@ export function ProductDetails({
         </div>
         <Button 
           className="w-full h-12 bg-[#D0EDF5] hover:bg-[#C0E3ED] text-[#008CA3] font-bold text-base border-none rounded-md"
+          onClick={handleBuyNow}
         >
           Buy Now
         </Button>

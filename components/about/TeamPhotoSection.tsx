@@ -9,7 +9,7 @@ const TeamPhotoSection: FC = () => (
       }}
     />
     <p className="text-center mt-4 text-sm text-muted-foreground">
-      The ErgoFlex Team: Passionate about creating a healthier world, one workspace at a time.
+      The ErgoZenix Team: Passionate about creating a healthier world, one workspace at a time.
     </p>
   </div>
 );
