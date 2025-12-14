@@ -8,7 +8,15 @@ import { cn } from "@/lib/utils"
 import { LogoIcon } from "@/components/logo-icon"
 import CartButtons from "./cart-button"
 import { Button } from "@/components/ui/button"
-import { Moon, Sun } from "lucide-react"
+import { Moon, Sun, Menu } from "lucide-react"
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+  SheetClose,
+} from "@/components/ui/sheet"
 
 export function Header() {
   const pathname = usePathname()
@@ -54,12 +62,14 @@ export function Header() {
       </nav>
 
       <div className="flex items-center gap-3">
+        <CartButtons />
+
         {/* ✅ Only render theme toggle after mounted */}
         {mounted && (
           <Button
             variant="ghost"
             size="icon"
-            className="rounded-full h-10 w-10 bg-secondary text-foreground hover:bg-secondary/80"
+            className="rounded-full h-10 w-10 bg-secondary text-foreground hover:bg-secondary/80 hidden md:flex" 
             onClick={() => {
               console.log("/////////////////",theme)
               setTheme(theme === "dark" ? "light" : "dark")
@@ -74,7 +84,48 @@ export function Header() {
           </Button>
         )}
 
-        <CartButtons />
+        {/* Mobile Menu */}
+        <Sheet>
+          <SheetTrigger asChild>
+            <Button variant="ghost" size="icon" className="md:hidden">
+              <Menu className="h-6 w-6" />
+              <span className="sr-only">Toggle menu</span>
+            </Button>
+          </SheetTrigger>
+          <SheetContent side="right" className="w-[280px] sm:w-[320px] p-6 flex flex-col h-full">
+            <SheetHeader className="mb-6 text-left">
+              <SheetTitle>
+                <Link href="/" className="flex items-center gap-2">
+                  <LogoIcon className="h-6 w-6" />
+                  <span className="font-bold text-xl">ErgoZenix</span>
+                </Link>
+              </SheetTitle>
+            </SheetHeader>
+            
+            <nav className="flex flex-col gap-1 flex-1">
+              {[
+                { href: "/", label: "Home" },
+                { href: "/shop", label: "Shop" },
+                { href: "/about", label: "About" },
+                { href: "/contact", label: "Contact" },
+              ].map(({ href, label }) => (
+                <SheetClose key={href} asChild>
+                  <Link
+                    href={href}
+                    className={cn(
+                      "text-lg font-medium px-4 py-3 rounded-md transition-colors hover:bg-secondary/50",
+                      pathname === href ? "bg-secondary/80 text-primary" : "text-foreground"
+                    )}
+                  >
+                    {label}
+                  </Link>
+                </SheetClose>
+              ))}
+            </nav>
+
+
+          </SheetContent>
+        </Sheet>
       </div>
     </header>
   )

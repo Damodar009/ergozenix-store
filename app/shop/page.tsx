@@ -8,7 +8,9 @@ import { Pagination } from "@/components/shop/Pagination"
 import { ProductService } from "@/services/product-service"
 import type { ProductCard as ProductCardType } from "@/models/product"
 import { Category } from "@/components/shop/CategoryList"
-import { Car, Monitor, Box, Mouse, Loader2, PackageX } from "lucide-react"
+import { Car, Monitor, Box, Mouse, Loader2, PackageX, SlidersHorizontal } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { cn } from "@/lib/utils"
 
 // Map categories to icons (you can expand this logic or store icon name in DB)
 const getCategoryIcon = (name: string) => {
@@ -22,6 +24,9 @@ const getCategoryIcon = (name: string) => {
 }
 
 export default function ShopPage() {
+  // Mobile Filter State
+  const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false)
+
   // Data State
   const [products, setProducts] = useState<ProductCardType[]>([])
   const [categories, setCategories] = useState<Category[]>([])
@@ -154,14 +159,32 @@ export default function ShopPage() {
           </div>
 
           <div className="flex flex-col lg:flex-row gap-8">
-            <FiltersSidebar 
-              categories={categories} 
-              selectedCategory={selectedCategory}
-              onCategoryChange={handleCategoryChange}
-              priceRange={priceRange}
-              onPriceChange={handlePriceChange}
-              onClearFilters={handleClearFilters}
-            />
+            {/* Mobile Filter Toggle */}
+            <div className="lg:hidden mb-4">
+              <Button 
+                onClick={() => setMobileFiltersOpen(!mobileFiltersOpen)}
+                variant="outline" 
+                className="w-full justify-between"
+              >
+                <div className="flex items-center gap-2">
+                  <SlidersHorizontal className="h-4 w-4" />
+                  <span className="font-bold">Filters</span>
+                </div>
+                {mobileFiltersOpen ? "Hide" : "Show"}
+              </Button>
+            </div>
+
+            {/* Sidebar Wrapper */}
+            <div className={cn("w-full lg:w-1/4", mobileFiltersOpen ? "block" : "hidden lg:block")}>
+              <FiltersSidebar 
+                categories={categories} 
+                selectedCategory={selectedCategory}
+                onCategoryChange={handleCategoryChange}
+                priceRange={priceRange}
+                onPriceChange={handlePriceChange}
+                onClearFilters={handleClearFilters}
+              />
+            </div>
 
             <div className="w-full lg:w-3/4">
               <div className="flex items-center justify-between mb-6 flex-wrap gap-4">

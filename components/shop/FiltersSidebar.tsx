@@ -23,7 +23,7 @@ export function FiltersSidebar({
   onClearFilters
 }: FiltersSidebarProps) {
   return (
-    <aside className="w-full lg:w-1/4">
+    <aside className="w-full">
       <div className="sticky top-20">
         <Card className="flex flex-col gap-6 p-6 rounded-lg bg-white dark:bg-gray-900/50 border border-gray-200 dark:border-gray-800 shadow-sm">
           <div className="flex flex-col">

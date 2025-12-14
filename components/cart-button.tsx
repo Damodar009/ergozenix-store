@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button"; // your shadcn button
-import { ShoppingCart, Menu } from "lucide-react";
+import { ShoppingCart } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 import { useCart } from "@/context/cart-context";
@@ -14,9 +14,7 @@ export default function CartButtons() {
     router.push("/cart");
   };
 
-  const openMenu = () => {
-    // handle mobile menu open
-  };
+
 
   return (
     <div className="flex items-center gap-4">
@@ -35,15 +33,6 @@ export default function CartButtons() {
         )}
       </Button>
 
-      <Button
-        variant="ghost"
-        size="icon"
-        className="md:hidden rounded-full h-10 w-10 bg-secondary text-foreground hover:bg-secondary/80"
-        aria-label="Open menu"
-        onClick={openMenu}
-      >
-        <Menu className="h-5 w-5" />
-      </Button>
     </div>
   );
 }
