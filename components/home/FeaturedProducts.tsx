@@ -1,11 +1,10 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { ProductService } from "@/services/product-service"
 import type { ProductCard } from "@/models/product"
-import { Star } from "lucide-react"
+import { Star, ChevronRight } from "lucide-react"
 import Link from "next/link"
 
 export function FeaturedProducts() {
@@ -17,7 +16,7 @@ export function FeaturedProducts() {
     async function fetchFeaturedProducts() {
       try {
         setLoading(true)
-        const data = await ProductService.getFeaturedProducts(6)
+        const data = await ProductService.getFeaturedProducts(8)
         setProducts(data)
       } catch (err) {
         console.error('Failed to fetch featured products:', err)
@@ -40,21 +39,21 @@ export function FeaturedProducts() {
 
     if (salePrice && salePrice < price) {
       return (
-        <div className="flex items-center gap-2">
-          <span className="text-primary text-lg font-semibold">Rs {formatNumber(salePrice)}</span>
+        <div className="flex flex-col">
+          <span className="text-xl md:text-2xl font-semibold">Rs {formatNumber(salePrice)}</span>
           <span className="text-muted-foreground text-sm line-through">Rs {formatNumber(price)}</span>
         </div>
       )
     }
 
-    return <span className="text-primary text-lg font-semibold">Rs {formatNumber(price)}</span>
+    return <span className="text-xl md:text-2xl font-semibold">Rs {formatNumber(price)}</span>
   }
 
   const renderRating = (rating?: number, count?: number) => {
     if (!rating || !count) return null
 
     return (
-      <div className="flex items-center gap-1 mt-2">
+      <div className="flex items-center gap-1">
         <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
         <span className="text-sm font-medium">{rating.toFixed(1)}</span>
         <span className="text-sm text-muted-foreground">({count})</span>
@@ -64,21 +63,28 @@ export function FeaturedProducts() {
 
   if (loading) {
     return (
-      <section className="py-16 sm:py-24" id="products">
-        <h2 className="text-foreground text-3xl font-bold leading-tight tracking-[-0.015em] px-4 pb-8 text-center">
-          Featured Products
-        </h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 p-4">
-          {[1, 2, 3, 4, 5, 6].map((i) => (
-            <Card key={i} className="flex flex-col gap-4 pb-3 bg-card rounded-xl shadow-sm border-none animate-pulse">
-              <div className="w-full aspect-square bg-muted" />
-              <CardContent className="p-4 flex flex-col flex-1 gap-2">
-                <div className="h-6 bg-muted rounded w-3/4" />
-                <div className="h-4 bg-muted rounded w-full" />
-                <div className="h-6 bg-muted rounded w-1/4 mt-2" />
-              </CardContent>
-            </Card>
-          ))}
+      <section id="products" className="bg-secondary/30 py-20 md:py-32">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="space-y-4 mb-16">
+            <h2 className="text-3xl md:text-4xl font-semibold tracking-tight">Featured Products</h2>
+            <p className="text-muted-foreground text-lg">Discover our top-rated ergonomic solutions</p>
+          </div>
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+            {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
+              <div key={i} className="group overflow-hidden rounded-xl bg-card animate-pulse">
+                <div className="relative aspect-[4/3] overflow-hidden bg-muted" />
+                <div className="p-5 space-y-4">
+                  <div className="space-y-2">
+                    <div className="h-6 bg-muted rounded w-3/4" />
+                    <div className="h-4 bg-muted rounded w-1/2" />
+                  </div>
+                  <div className="flex items-center justify-between mt-4">
+                    <div className="h-8 bg-muted rounded w-1/3" />
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
     )
@@ -86,12 +92,15 @@ export function FeaturedProducts() {
 
   if (error) {
     return (
-      <section className="py-16 sm:py-24" id="products">
-        <h2 className="text-foreground text-3xl font-bold leading-tight tracking-[-0.015em] px-4 pb-8 text-center">
-          Featured Products
-        </h2>
-        <div className="text-center text-muted-foreground p-4">
-          {error}
+      <section id="products" className="bg-secondary/30 py-20 md:py-32">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="space-y-4 mb-16">
+            <h2 className="text-3xl md:text-4xl font-semibold tracking-tight">Featured Products</h2>
+            <p className="text-muted-foreground text-lg">Discover our top-rated ergonomic solutions</p>
+          </div>
+          <div className="text-center text-muted-foreground p-4">
+            {error}
+          </div>
         </div>
       </section>
     )
@@ -99,74 +108,77 @@ export function FeaturedProducts() {
 
   if (products.length === 0) {
     return (
-      <section className="py-16 sm:py-24" id="products">
-        <h2 className="text-foreground text-3xl font-bold leading-tight tracking-[-0.015em] px-4 pb-8 text-center">
-          Featured Products
-        </h2>
-        <div className="text-center text-muted-foreground p-4">
-          No products available at the moment.
+      <section id="products" className="bg-secondary/30 py-20 md:py-32">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="space-y-4 mb-16">
+            <h2 className="text-3xl md:text-4xl font-semibold tracking-tight">Featured Products</h2>
+            <p className="text-muted-foreground text-lg">Discover our top-rated ergonomic solutions</p>
+          </div>
+          <div className="text-center text-muted-foreground p-4">
+            No products available at the moment.
+          </div>
         </div>
       </section>
     )
   }
 
   return (
-    <section className="py-16 sm:py-24" id="products">
-      <h2 className="text-foreground text-3xl font-bold leading-tight tracking-[-0.015em] px-4 pb-8 text-center">
-        Featured Products
-      </h2>
-      <div className={products.length === 1 ? "flex justify-center p-4" : "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 p-4"}>
-        {products.map((product) => {
-          const productUrl = `/products/${product.slug || product.id}`
-          
-          return (
-            <Link key={product.id} href={productUrl}>
-              <Card
-                className={`flex flex-col gap-4 pb-3 bg-card rounded-xl shadow-sm hover:shadow-lg transition-shadow duration-300 overflow-hidden border-none cursor-pointer ${products.length === 1 ? 'w-full max-w-md' : ''}`}
+    <section id="products" className="bg-secondary/30 py-20 md:py-32">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="space-y-4 mb-16">
+          <h2 className="text-3xl md:text-4xl font-semibold tracking-tight">Featured Products</h2>
+          <p className="text-muted-foreground text-lg">Discover our top-rated ergonomic solutions</p>
+        </div>
+        <div className={products.length === 1 ? "flex justify-center" : "grid gap-6 sm:grid-cols-2 lg:grid-cols-4"}>
+          {products.map((product) => {
+            const productUrl = `/products/${product.slug || product.id}`
+
+            return (
+              <Link
+                key={product.id}
+                href={productUrl}
+                className={`group block overflow-hidden rounded-xl bg-card transition-all hover:shadow-lg ${products.length === 1 ? "w-full max-w-md" : ""
+                  }`}
               >
-                <div
-                  className="w-full bg-center bg-no-repeat aspect-square bg-cover bg-muted"
-                  style={product.primary_image ? { backgroundImage: `url("${product.primary_image}")` } : {}}
-                  aria-label={product.name}
-                />
-                <CardContent className="p-4 flex flex-col flex-1">
-                  <p className="text-card-foreground text-lg font-medium leading-normal">{product.name}</p>
-                  {product.brand_name && (
-                    <p className="text-muted-foreground text-xs font-normal leading-normal mt-1">
-                      {product.brand_name}
-                    </p>
-                  )}
-                  {product.description && (
-                    <p className="text-muted-foreground text-sm font-normal leading-normal mt-1 line-clamp-2">
-                      {product.description}
-                    </p>
-                  )}
-                  {renderRating(product.average_rating, product.review_count)}
-                  <div className="mt-2">
-                    {formatPrice(product.base_price, product.sale_price)}
-                  </div>
-                  {product.stock_quantity > 0 ? (
-                    <Button 
-                      className="w-full mt-4 h-10 px-4 text-sm font-bold hover:opacity-90 bg-primary/20 text-primary"
-                      onClick={(e) => {
-                        e.preventDefault()
-                        e.stopPropagation()
-                        // TODO: Add to cart functionality
-                        console.log('Add to cart:', product.id)
-                      }}
-                    >
-                      Add to Cart
-                    </Button>
+                <div className="relative aspect-[4/3] overflow-hidden bg-muted">
+                  {product.primary_image ? (
+                    <img
+                      src={product.primary_image}
+                      alt={product.name}
+                      className="absolute inset-0 w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                    />
                   ) : (
-                    <Button disabled className="w-full mt-4 h-10 px-4 text-sm font-bold">
-                      Out of Stock
-                    </Button>
+                    <div className="absolute inset-0 w-full h-full bg-muted transition-transform duration-300 group-hover:scale-105" />
                   )}
-                </CardContent>
-              </Card>
-            </Link>
-          )
-        })}
+                </div>
+                <div className="p-5 space-y-4">
+                  <div className="space-y-2">
+                    <h3 className="font-semibold text-lg">{product.name}</h3>
+                    {product.brand_name && (
+                      <p className="text-sm text-muted-foreground">{product.brand_name}</p>
+                    )}
+                    {product.description && (
+                      <p className="text-xs text-muted-foreground line-clamp-2">{product.description}</p>
+                    )}
+                    {renderRating(product.average_rating, product.review_count)}
+                  </div>
+                  <div className="flex items-center justify-between mt-auto">
+                    <div>
+                      {formatPrice(product.base_price, product.sale_price)}
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="opacity-0 transition-opacity group-hover:opacity-100"
+                    >
+                      View <ChevronRight className="ml-1 h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              </Link>
+            )
+          })}
+        </div>
       </div>
     </section>
   )
