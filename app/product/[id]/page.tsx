@@ -1,7 +1,8 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { ProductService, type Product } from "@/services/product-service"
+import { ProductService } from "@/services/product-service"
+import type { ProductWithDetails } from "@/models/product"
 import { Header } from "@/components/header"
 import { Breadcrumbs, type BreadcrumbItem } from "@/components/product/Breadcrumbs"
 import { ProductGallery, type ProductImage } from "@/components/product/ProductGallery"
@@ -39,14 +40,17 @@ const mockRatingDistribution: RatingDistribution[] = [
 ]
 
 export default function ProductPage({ params }: { params: { id: string } }) {
-  const [product, setProduct] = useState<Product | null>(null)
+  const [product, setProduct] = useState<ProductWithDetails | null>(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     async function fetchProduct() {
       try {
-        const data = await ProductService.getProductById(params.id)
-        setProduct(data)
+        const idNum = Number(params.id)
+        if (!isNaN(idNum)) {
+          const data = await ProductService.getProductById(idNum)
+          setProduct(data)
+        }
       } catch (error) {
         console.error('Error fetching product:', error)
       } finally {
@@ -87,13 +91,15 @@ export default function ProductPage({ params }: { params: { id: string } }) {
   }
 
   // Convert product data to component format
-  const productImages: ProductImage[] = product.image_url
-    ? [{ url: product.image_url, alt: product.name, primary: true }]
-    : []
+  const productImages: ProductImage[] = product.images?.map((img, idx) => ({
+    url: img.image_url,
+    alt: product.name,
+    primary: img.is_primary || idx === 0
+  })) || []
 
   const specifications: ProductSpec[] = [
     { label: "Stock", value: `${product.stock_quantity} available` },
-    { label: "Product ID", value: product.id.substring(0, 8) + "..." },
+    { label: "Product ID", value: product.id.toString() },
   ]
 
   const breadcrumbItems: BreadcrumbItem[] = [
@@ -116,11 +122,15 @@ export default function ProductPage({ params }: { params: { id: string } }) {
                   title={product.name}
                   rating={4.5}
                   reviewCount={125}
-                  price={product.price.toString()}
+                  price={`Rs. ${product.base_price}`}
+                  basePrice={product.base_price}
+                  salePrice={product.sale_price}
                   description={product.description || 'No description available.'}
-                  specifications={specifications}
+                  keySpecs={specifications}
+                  productId={product.id}
                 />
               </div>
+
               
               <ReviewSummary
                 averageRating={4.5}

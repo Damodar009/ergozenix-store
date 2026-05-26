@@ -9,6 +9,7 @@ import type {
   Category,
   ProductImage,
   ProductReview,
+  ProductAttribute,
 } from '@/models/product'
 
 export class ProductService {
@@ -400,4 +401,155 @@ export class ProductService {
       offset
     )
   }
+
+  /**
+   * Get all product attributes
+   */
+  static async getAllAttributes(): Promise<ProductAttribute[]> {
+    const { data, error } = await supabase
+      .from('product_attributes')
+      .select('*')
+      .is('deleted_at', null)
+      .order('name', { ascending: true })
+
+    if (error) {
+      console.error('Error fetching attributes:', error)
+      throw error
+    }
+
+    return data || []
+  }
+
+  /**
+   * Create a new product in the database along with its images, attributes, and variants.
+   * Performs all insertions and rolls back (deletes the product) if any child table insert fails.
+   */
+  static async createProduct(data: {
+    name: string
+    slug?: string
+    sku?: string
+    description?: string
+    base_price: number
+    sale_price?: number | null
+    stock_quantity?: number
+    status?: 'active' | 'inactive'
+    brand_id?: number | null
+    category_id?: number | null
+    images?: { image_url: string; is_primary: boolean; sort_order: number }[]
+    attributes?: { attribute_id: number; value_text?: string; value_number?: number }[]
+    variants?: { variant_sku: string; variant_price: number; variant_stock: number }[]
+  }): Promise<Product> {
+    let createdProductId: number | null = null
+    try {
+      // Generate slug if not provided
+      const slug = data.slug || data.name
+        ?.toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/(^-|-$)/g, '') || `product-${Date.now()}`
+
+      // Insert main product
+      const { data: newProduct, error: productError } = await supabase
+        .from('products')
+        .insert({
+          name: data.name,
+          slug,
+          sku: data.sku || null,
+          description: data.description || null,
+          brand_id: data.brand_id || null,
+          category_id: data.category_id || null,
+          base_price: Number(data.base_price) || 0,
+          sale_price: data.sale_price ? Number(data.sale_price) : null,
+          stock_quantity: Number(data.stock_quantity) || 0,
+          status: data.status || 'active',
+        })
+        .select()
+        .single()
+
+      if (productError) {
+        console.error('Error inserting product:', productError)
+        throw productError
+      }
+
+      if (!newProduct) {
+        throw new Error('Product creation failed - no data returned')
+      }
+
+      createdProductId = newProduct.id
+
+      // Insert images if provided
+      if (data.images && data.images.length > 0) {
+        const imageInserts = data.images.map((img) => ({
+          product_id: createdProductId,
+          image_url: img.image_url,
+          is_primary: img.is_primary,
+          sort_order: img.sort_order,
+        }))
+
+        const { error: imageError } = await supabase
+          .from('product_images')
+          .insert(imageInserts)
+
+        if (imageError) {
+          console.error('Error inserting product images:', imageError)
+          throw new Error(`Failed to save images: ${imageError.message}`)
+        }
+      }
+
+      // Insert dynamic attributes if provided
+      if (data.attributes && data.attributes.length > 0) {
+        const attributeInserts = data.attributes.map((attr) => ({
+          product_id: createdProductId,
+          attribute_id: attr.attribute_id,
+          value_text: attr.value_text || null,
+          value_number: attr.value_number !== undefined ? Number(attr.value_number) : null,
+        }))
+
+        const { error: attrError } = await supabase
+          .from('product_attribute_values')
+          .insert(attributeInserts)
+
+        if (attrError) {
+          console.error('Error inserting product attributes:', attrError)
+          throw new Error(`Failed to save product specifications: ${attrError.message}`)
+        }
+      }
+
+      // Insert variants if provided
+      if (data.variants && data.variants.length > 0) {
+        const variantInserts = data.variants.map((v) => ({
+          product_id: createdProductId,
+          variant_sku: v.variant_sku,
+          variant_price: Number(v.variant_price) || 0,
+          variant_stock: Number(v.variant_stock) || 0,
+        }))
+
+        const { error: variantError } = await supabase
+          .from('product_variants')
+          .insert(variantInserts)
+
+        if (variantError) {
+          console.error('Error inserting product variants:', variantError)
+          throw new Error(`Failed to save variants: ${variantError.message}`)
+        }
+      }
+
+      return newProduct as Product
+    } catch (error) {
+      console.error('Transaction failed. Rolling back created product:', error)
+      if (createdProductId) {
+        const { error: rollbackError } = await supabase
+          .from('products')
+          .delete()
+          .eq('id', createdProductId)
+        
+        if (rollbackError) {
+          console.error('Rollback deletion failed:', rollbackError)
+        } else {
+          console.log('Successfully rolled back product ID:', createdProductId)
+        }
+      }
+      throw error
+    }
+  }
 }
+
