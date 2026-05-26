@@ -1,17 +1,17 @@
 "use client"
 
 import { useEffect, useState } from "react"
+import Link from "next/link"
+import { ArrowLeft } from "lucide-react"
 import { ProductService } from "@/services/product-service"
 import type { ProductWithDetails } from "@/models/product"
-import { Header } from "@/components/header"
 import { Breadcrumbs, type BreadcrumbItem } from "@/components/product/Breadcrumbs"
-import { ProductGallery, type ProductImage } from "@/components/product/ProductGallery"
+import { MediaGallery } from "../../../components/product/MediaGallery"
+import type { Media } from "../../../components/product/MediaItem"
 import { ProductDetails, type ProductSpec } from "@/components/product/ProductDetails"
 import { ReviewSummary, type RatingDistribution } from "@/components/product/ReviewSummary"
 import { RelatedProducts, type RelatedProduct } from "@/components/product/RelatedProducts"
 import { Button } from "@/components/ui/button"
-import { ArrowLeft } from "lucide-react"
-import Link from "next/link"
 
 // Mock data for features not yet in database
 const mockRelatedProducts: RelatedProduct[] = [
@@ -91,11 +91,13 @@ export default function ProductPage({ params }: { params: { id: string } }) {
   }
 
   // Convert product data to component format
-  const productImages: ProductImage[] = product.images?.map((img, idx) => ({
-    url: img.image_url,
-    alt: product.name,
-    primary: img.is_primary || idx === 0
-  })) || []
+  const mediaItems: Media[] = product.images?.map((img, idx) => {
+    const isVideo = /\.(mp4|webm|ogg)$/i.test(img.image_url);
+    return {
+      url: img.image_url,
+      type: isVideo ? "video" : "image",
+    };
+  }) ?? [];
 
   const specifications: ProductSpec[] = [
     { label: "Stock", value: `${product.stock_quantity} available` },
@@ -115,9 +117,9 @@ export default function ProductPage({ params }: { params: { id: string } }) {
           <main className="flex-1 px-4 sm:px-6 lg:px-8 py-8">
             <div className="max-w-7xl mx-auto">
               <Breadcrumbs items={breadcrumbItems} />
-              
+
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 mt-6">
-                <ProductGallery images={productImages} />
+                <MediaGallery media={mediaItems} />
                 <ProductDetails
                   title={product.name}
                   rating={4.5}
@@ -131,13 +133,13 @@ export default function ProductPage({ params }: { params: { id: string } }) {
                 />
               </div>
 
-              
+
               <ReviewSummary
                 averageRating={4.5}
                 totalReviews={125}
                 ratingDistribution={mockRatingDistribution}
               />
-              
+
               <RelatedProducts products={mockRelatedProducts} />
             </div>
           </main>

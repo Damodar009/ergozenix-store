@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import fs from "fs"
-import path from "path"
+import { supabase } from '@/lib/supabase/client'; import path from "path"
 
 export async function POST(request: NextRequest) {
   try {
@@ -39,26 +38,27 @@ export async function POST(request: NextRequest) {
     const bytes = await file.arrayBuffer()
     const buffer = Buffer.from(bytes)
 
-    // Ensure the uploads directory exists
-    const uploadDir = path.join(process.cwd(), "public", "uploads", "products")
-    if (!fs.existsSync(uploadDir)) {
-      fs.mkdirSync(uploadDir, { recursive: true })
-    }
-
     // Generate a unique filename to prevent overwrites
-    const ext = path.extname(file.name) || (isImage ? ".jpg" : ".mp4")
+    const ext = file.type.startsWith('image/') ? (path.extname(file.name) || '.jpg') : (path.extname(file.name) || '.mp4')
     const cleanName = path
       .basename(file.name, ext)
-      .replace(/[^a-zA-Z0-9]/g, "-")
+      .replace(/[^a-zA-Z0-9]/g, '-')
       .toLowerCase()
     const uniqueFilename = `${cleanName}-${Date.now()}${ext}`
-    const filePath = path.join(uploadDir, uniqueFilename)
 
-    // Write file to disk
-    await fs.promises.writeFile(filePath, buffer)
+    // Upload to Supabase Storage bucket named 'products'
+    const { data: uploadData, error: uploadError } = await supabase.storage
+      .from('products')
+      .upload(uniqueFilename, buffer, { contentType: file.type })
 
-    // Return the publicly accessible URL path
-    const fileUrl = `/uploads/products/${uniqueFilename}`
+    if (uploadError) {
+      console.error('Supabase upload error:', uploadError)
+      return NextResponse.json({ error: 'Failed to upload file' }, { status: 500 })
+    }
+
+    // Build public url (assuming public bucket)
+    const { data: publicData } = supabase.storage.from('products').getPublicUrl(uniqueFilename)
+    const fileUrl = publicData?.publicUrl ?? ''
 
     return NextResponse.json({
       success: true,

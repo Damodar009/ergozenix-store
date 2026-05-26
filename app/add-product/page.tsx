@@ -4,19 +4,18 @@ import { useEffect, useState, useRef } from "react"
 import { useRouter } from "next/navigation"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
+import { supabase } from '@/lib/supabase/client'
 import * as z from "zod"
-import { 
-  Plus, 
-  Trash2, 
-  Loader2, 
-  ArrowLeft, 
+import {
+  Plus,
+  Trash2,
+  Loader2,
+  ArrowLeft,
   ArrowRight,
-  ArrowUp,
-  ArrowDown,
-  Info, 
-  Image as ImageIcon, 
+  Info,
+  Image as ImageIcon,
   Film,
-  Settings, 
+  Settings,
   Layers,
   Upload,
   X,
@@ -170,40 +169,37 @@ export default function AddProductPage() {
 
     for (let i = 0; i < files.length; i++) {
       const file = files[i]
-      const formData = new FormData()
-      formData.append("file", file)
+      // Generate a safe filename
+      const nameWithoutExt = file.name.replace(/\.[^/.]+$/, "").replace(/[^a-zA-Z0-9]/g, "-").toLowerCase()
+      const ext = file.type.startsWith("image/") ? (file.name.includes('.') ? "." + file.name.split('.').pop() : ".jpg") : (file.name.includes('.') ? "." + file.name.split('.').pop() : ".mp4")
+      const uniqueFilename = `${nameWithoutExt}-${Date.now()}${ext}`
 
-      try {
-        const res = await fetch("/api/upload", {
-          method: "POST",
-          body: formData,
-        })
-        const data = await res.json()
-        if (data.success) {
-          const mediaType: "image" | "video" = file.type.startsWith("video/") ? "video" : "image"
-          newItems.push({ url: data.url, type: mediaType })
-        } else {
-          toast({
-            title: "Upload Error",
-            description: data.error || `Could not upload "${file.name}"`,
-            variant: "destructive"
-          })
-        }
-      } catch (err) {
-        console.error(err)
+      const { data: uploadData, error: uploadError } = await supabase.storage
+        .from('products')
+        .upload(uniqueFilename, file, { contentType: file.type })
+
+      console.log("Print the data uploaded after the supabase ", uploadData)
+
+      if (uploadError) {
+        console.error('Supabase upload error:', uploadError)
         toast({
-          title: "Upload Failed",
-          description: `Server error uploading "${file.name}"`,
-          variant: "destructive"
+          title: 'Upload Error',
+          description: uploadError.message || `Could not upload "${file.name}"`,
+          variant: 'destructive',
         })
+        continue
       }
+
+      const { data: publicData } = supabase.storage.from('products').getPublicUrl(uniqueFilename)
+
+      const fileUrl = publicData?.publicUrl ?? ''
+      const mediaType: "image" | "video" = file.type.startsWith("video/") ? "video" : "image"
+      newItems.push({ url: fileUrl, type: mediaType })
     }
 
-    if (newItems.length > 0) {
-      setUploadedMedia(prev => [...prev, ...newItems])
-    }
+    if (newItems.length > 0) setUploadedMedia(prev => [...prev, ...newItems])
     setUploading(false)
-    if (fileInputRef.current) fileInputRef.current.value = ""
+    if (fileInputRef.current) fileInputRef.current.value = ''
   }
 
   // Remove media item
@@ -239,7 +235,7 @@ export default function AddProductPage() {
     const draggedItem = reorderedMedia[draggedImageIdx]
     reorderedMedia.splice(draggedImageIdx, 1)
     reorderedMedia.splice(index, 0, draggedItem)
-    
+
     setDraggedImageIdx(index)
     setUploadedMedia(reorderedMedia)
   }
@@ -260,7 +256,7 @@ export default function AddProductPage() {
   const handleUpdateAttribute = (id: string, field: "attribute_id" | "value", value: any) => {
     setAttributes(prev => prev.map(row => {
       if (row.id !== id) return row
-      
+
       // If changing attribute selection, reset value
       if (field === "attribute_id") {
         return { ...row, attribute_id: value ? Number(value) : null, value: "" }
@@ -320,7 +316,7 @@ export default function AddProductPage() {
     const variantSKUs = new Set<string>()
     variants.forEach((v, idx) => {
       const label = `Variants Tab: Row ${idx + 1}`
-      
+
       if (!v.variant_sku.trim()) {
         errorsList.push(`${label} is missing its SKU.`)
       } else {
@@ -428,16 +424,16 @@ export default function AddProductPage() {
   return (
     <div className="min-h-screen bg-background text-foreground py-10 px-4 md:px-10 font-sans">
       <div className="max-w-4xl mx-auto space-y-6">
-        
+
         {/* Navigation Banner */}
         <div className="flex items-center justify-between border-b border-border pb-4">
           <div>
             <h1 className="text-2xl font-bold tracking-tight uppercase">Product Catalog Manager</h1>
             <p className="text-xs text-muted-foreground mt-1">Flat design, clean layout, absolute database transactional safety.</p>
           </div>
-          <Button 
-            type="button" 
-            variant="outline" 
+          <Button
+            type="button"
+            variant="outline"
             className="rounded-none border border-border h-9 text-xs uppercase shadow-none hover:bg-muted"
             onClick={() => router.push("/shop")}
           >
@@ -461,7 +457,7 @@ export default function AddProductPage() {
 
         {/* Outer Tab Container - Flat styling, strictly border, no shadows */}
         <div className="border border-border bg-card rounded-none shadow-none">
-          
+
           {/* Tab Selection Header - Clean flat blocks */}
           <div className="grid grid-cols-4 border-b border-border bg-muted/30">
             {[
@@ -488,7 +484,7 @@ export default function AddProductPage() {
 
           {/* Tab Contents */}
           <div className="p-6">
-            
+
             {/* ==================== TAB 1: BASIC INFO ==================== */}
             {activeTab === "basic" && (
               <div className="space-y-6">
@@ -496,15 +492,15 @@ export default function AddProductPage() {
                   <h3 className="text-sm font-bold uppercase text-foreground mb-1">Basic Product Information</h3>
                   <p className="text-xs text-muted-foreground">General identity parameters and standard inventory price definitions.</p>
                 </div>
-                
+
                 {/* Product Name & Slug */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-2">
                     <label className="text-xs font-bold uppercase text-foreground/80 flex justify-between">
                       <span>Product Name *</span>
                     </label>
-                    <Input 
-                      type="text" 
+                    <Input
+                      type="text"
                       placeholder="e.g. ErgoZenix Adjustable Desk"
                       className={`h-10 rounded-none border border-input bg-background/50 shadow-none focus-visible:ring-0 focus-visible:border-primary ${errors.name ? 'border-destructive' : ''}`}
                       {...register("name")}
@@ -517,8 +513,8 @@ export default function AddProductPage() {
                   </div>
                   <div className="space-y-2">
                     <label className="text-xs font-bold uppercase text-foreground/80">Slug *</label>
-                    <Input 
-                      type="text" 
+                    <Input
+                      type="text"
                       placeholder="auto-generated-slug"
                       className={`h-10 rounded-none border border-input bg-background/30 text-muted-foreground shadow-none focus-visible:ring-0 ${errors.slug ? 'border-destructive' : ''}`}
                       {...register("slug")}
@@ -535,8 +531,8 @@ export default function AddProductPage() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-2">
                     <label className="text-xs font-bold uppercase text-foreground/80">SKU (Part Number)</label>
-                    <Input 
-                      type="text" 
+                    <Input
+                      type="text"
                       placeholder="e.g. EZ-SD-205"
                       className="h-10 rounded-none border border-input bg-background/50 shadow-none focus-visible:ring-0 focus-visible:border-primary"
                       {...register("sku")}
@@ -544,7 +540,7 @@ export default function AddProductPage() {
                   </div>
                   <div className="space-y-2">
                     <label className="text-xs font-bold uppercase text-foreground/80">Catalog Status</label>
-                    <select 
+                    <select
                       className="w-full h-10 px-3 rounded-none border border-input bg-background/50 shadow-none text-xs font-semibold focus:outline-none focus:border-primary"
                       {...register("status")}
                     >
@@ -563,7 +559,7 @@ export default function AddProductPage() {
                         Loading brands...
                       </div>
                     ) : (
-                      <select 
+                      <select
                         className="w-full h-10 px-3 rounded-none border border-input bg-background/50 shadow-none text-xs font-semibold focus:outline-none focus:border-primary"
                         {...register("brand_id")}
                       >
@@ -581,7 +577,7 @@ export default function AddProductPage() {
                         Loading categories...
                       </div>
                     ) : (
-                      <select 
+                      <select
                         className="w-full h-10 px-3 rounded-none border border-input bg-background/50 shadow-none text-xs font-semibold focus:outline-none focus:border-primary"
                         {...register("category_id")}
                       >
@@ -598,8 +594,8 @@ export default function AddProductPage() {
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                   <div className="space-y-2">
                     <label className="text-xs font-bold uppercase text-foreground/80">Base Price (NPR) *</label>
-                    <Input 
-                      type="number" 
+                    <Input
+                      type="number"
                       placeholder="0"
                       className={`h-10 rounded-none border border-input bg-background/50 shadow-none focus-visible:ring-0 focus-visible:border-primary ${errors.base_price ? 'border-destructive' : ''}`}
                       {...register("base_price")}
@@ -612,8 +608,8 @@ export default function AddProductPage() {
                   </div>
                   <div className="space-y-2">
                     <label className="text-xs font-bold uppercase text-foreground/80">Sale Price (Optional)</label>
-                    <Input 
-                      type="number" 
+                    <Input
+                      type="number"
                       placeholder="0"
                       className={`h-10 rounded-none border border-input bg-background/50 shadow-none focus-visible:ring-0 focus-visible:border-primary ${errors.sale_price ? 'border-destructive' : ''}`}
                       {...register("sale_price")}
@@ -626,8 +622,8 @@ export default function AddProductPage() {
                   </div>
                   <div className="space-y-2">
                     <label className="text-xs font-bold uppercase text-foreground/80">Stock Quantity</label>
-                    <Input 
-                      type="number" 
+                    <Input
+                      type="number"
                       placeholder="0"
                       className={`h-10 rounded-none border border-input bg-background/50 shadow-none focus-visible:ring-0 focus-visible:border-primary ${errors.stock_quantity ? 'border-destructive' : ''}`}
                       {...register("stock_quantity")}
@@ -643,7 +639,7 @@ export default function AddProductPage() {
                 {/* Description */}
                 <div className="space-y-2">
                   <label className="text-xs font-bold uppercase text-foreground/80">Product Description</label>
-                  <Textarea 
+                  <Textarea
                     placeholder="Provide detailed description regarding features and benefits..."
                     rows={5}
                     className="rounded-none border border-input bg-background/50 shadow-none focus-visible:ring-0 focus-visible:border-primary resize-y text-xs font-medium"
@@ -673,19 +669,19 @@ export default function AddProductPage() {
                     )}
                     Upload Media
                   </Button>
-                  <input 
-                    type="file" 
-                    multiple 
-                    accept="image/*,video/*" 
-                    ref={fileInputRef} 
-                    onChange={handleMediaUpload} 
-                    className="hidden" 
+                  <input
+                    type="file"
+                    multiple
+                    accept="image/*,video/*"
+                    ref={fileInputRef}
+                    onChange={handleMediaUpload}
+                    className="hidden"
                   />
                 </div>
 
                 {/* Drag and Drop Container */}
                 {uploadedMedia.length === 0 ? (
-                  <div 
+                  <div
                     onClick={() => fileInputRef.current?.click()}
                     className="border border-dashed border-border/80 bg-background/25 py-12 px-6 flex flex-col items-center justify-center gap-3 cursor-pointer hover:bg-muted/15"
                   >
@@ -715,10 +711,10 @@ export default function AddProductPage() {
                           />
                         ) : (
                           // eslint-disable-next-line @next/next/no-img-element
-                          <img 
-                            src={media.url} 
-                            alt={`Upload Preview ${idx}`} 
-                            className="h-full w-full object-cover pointer-events-none" 
+                          <img
+                            src={media.url}
+                            alt={`Upload Preview ${idx}`}
+                            className="h-full w-full object-cover pointer-events-none"
                           />
                         )}
 
@@ -810,7 +806,7 @@ export default function AddProductPage() {
 
                           return (
                             <tr key={row.id} className="border-b border-border last:border-b-0 hover:bg-muted/10">
-                              
+
                               {/* Attribute Dropdown Selection */}
                               <td className="p-2">
                                 {loadingOptions ? (
@@ -836,7 +832,7 @@ export default function AddProductPage() {
                                 <Input
                                   type={isNumberInput ? "number" : "text"}
                                   placeholder={
-                                    row.attribute_id 
+                                    row.attribute_id
                                       ? `Enter ${definition?.name} value ${definition?.unit ? `(${definition.unit})` : ""}`
                                       : "Select attribute first..."
                                   }
@@ -902,7 +898,7 @@ export default function AddProductPage() {
                       <tbody>
                         {variants.map((row, idx) => (
                           <tr key={row.id} className="border-b border-border last:border-b-0 hover:bg-muted/10">
-                            
+
                             {/* Variant SKU */}
                             <td className="p-2">
                               <Input
