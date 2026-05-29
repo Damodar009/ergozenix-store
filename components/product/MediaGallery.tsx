@@ -15,8 +15,10 @@ export function MediaGallery({ media }: MediaGalleryProps) {
 
   return (
     <div className="space-y-4">
-      {/* Large preview */}
-      <MediaItem media={activeMedia} isPrimary={activeIdx === 0} />
+      {/* Large preview with size constraint */}
+      <div className="max-w-md">
+        <MediaItem media={activeMedia} isPrimary={activeIdx === 0} />
+      </div>
 
       {/* Thumbnails */}
       <div className="grid grid-cols-4 gap-4">

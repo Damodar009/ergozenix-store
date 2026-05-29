@@ -1,4 +1,8 @@
-import { CartSummary } from "@/app/cart/page";
+interface CartSummary {
+  subtotal: number;
+  shipping: number;
+  total: number;
+}
 import { FC } from "react";
 
 interface CartTotalsProps {

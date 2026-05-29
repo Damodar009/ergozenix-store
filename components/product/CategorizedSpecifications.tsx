@@ -44,16 +44,16 @@ export function CategorizedSpecifications({ categories }: CategorizedSpecificati
   }
 
   return (
-    <div className="mt-12">
-      <h2 className="text-2xl font-bold text-foreground mb-6">Detailed Specifications</h2>
-      
+    <div className="">
+      {/* <h2 className="text-2xl font-bold text-foreground mb-6">Detailed Specifications</h2> */}
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {nonEmptyCategories.map((category) => {
           const isExpanded = expandedCategories.has(category.name)
-          
+
           return (
             <Card key={category.name} className="overflow-hidden">
-              <CardHeader 
+              <CardHeader
                 className="cursor-pointer hover:bg-muted/50 transition-colors"
                 onClick={() => toggleCategory(category.name)}
               >
@@ -74,12 +74,12 @@ export function CategorizedSpecifications({ categories }: CategorizedSpecificati
                   )}
                 </CardTitle>
               </CardHeader>
-              
+
               {isExpanded && (
                 <CardContent className="pt-0">
                   <div className="space-y-3">
                     {category.specs.map((spec, index) => (
-                      <div 
+                      <div
                         key={index}
                         className="flex justify-between items-start py-2 border-b border-border last:border-0"
                       >
@@ -105,7 +105,7 @@ export function CategorizedSpecifications({ categories }: CategorizedSpecificati
 // Helper function to get icon for category
 export function getCategoryIcon(categoryName: string): React.ReactNode {
   const name = categoryName.toLowerCase()
-  
+
   if (name.includes('dimension') || name.includes('weight')) {
     return <Ruler className="h-5 w-5" />
   }

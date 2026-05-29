@@ -4,7 +4,8 @@ import { useEffect, useState, use } from "react"
 import { ProductService } from "@/services/product-service"
 import type { ProductWithDetails, ProductAttributeValue, ProductAttribute } from "@/models/product"
 import { Breadcrumbs, type BreadcrumbItem } from "@/components/product/Breadcrumbs"
-import { ProductGallery, type ProductImage } from "@/components/product/ProductGallery"
+import { MediaGallery } from "@/components/product/MediaGallery"
+import type { Media } from "@/components/product/MediaItem"
 import { ProductDetails } from "@/components/product/ProductDetails"
 import { CategorizedSpecifications, getCategoryIcon, type SpecificationCategory, type ProductSpec } from "@/components/product/CategorizedSpecifications"
 import { ReviewSummary, type RatingDistribution } from "@/components/product/ReviewSummary"
@@ -30,13 +31,13 @@ const CATEGORY_KEYWORDS = {
 
 function categorizeAttribute(attributeName: string): string {
   const lowerName = attributeName.toLowerCase()
-  
+
   for (const [category, keywords] of Object.entries(CATEGORY_KEYWORDS)) {
     if (keywords.some(keyword => lowerName.includes(keyword))) {
       return category
     }
   }
-  
+
   return 'General Info'
 }
 
@@ -89,25 +90,27 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
     )
   }
 
-  // Convert product images to component format
-  const productImages: ProductImage[] = product.images?.map((img, index) => ({
-    url: img.image_url,
-    alt: product.name,
-    primary: img.is_primary || index === 0
-  })) || []
+  // Convert product media (images & videos) to component format
+  const mediaItems: Media[] = product.images?.map((img, index) => {
+    const isVideo = /\.(mp4|webm|ogg)(\?.*)?$/i.test(img.image_url);
+    return {
+      url: img.image_url,
+      type: isVideo ? "video" : "image",
+    };
+  }) || [];
 
   // Categorize attributes
   const categoryMap = new Map<string, Map<string, string[]>>()
   const allSpecs = new Map<string, string>() // Flattened specs for key specs extraction
-  
+
   if (product.attributes && product.attributes.length > 0) {
     product.attributes.forEach((attrValue: ProductAttributeValue & { attribute?: ProductAttribute }) => {
       const attr = attrValue.attribute
       if (!attr) return
-      
-      const value = attrValue.value_text || 
-                   (attrValue.value_number !== null ? `${attrValue.value_number}${attr.unit ? ' ' + attr.unit : ''}` : null)
-      
+
+      const value = attrValue.value_text ||
+        (attrValue.value_number !== null ? `${attrValue.value_number}${attr.unit ? ' ' + attr.unit : ''}` : null)
+
       if (value) {
         // Add to category map
         const category = categorizeAttribute(attr.name)
@@ -132,7 +135,7 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
 
   // Extract Key Specs (Material, Weight, Dimensions)
   const keySpecs: ProductSpec[] = []
-  
+
   // Helper to find spec by loose matching
   const findSpec = (keywords: string[]) => {
     for (const [key, value] of allSpecs.entries()) {
@@ -163,19 +166,19 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
   // Convert to SpecificationCategory format
   const categories: SpecificationCategory[] = []
   const categoryOrder = ['Dimensions & Weight', 'Performance', 'Materials & Finish', 'Features', 'General Info']
-  
+
   categoryOrder.forEach(categoryName => {
     if (categoryMap.has(categoryName)) {
       const specs: ProductSpec[] = []
       const attrs = categoryMap.get(categoryName)!
-      
+
       attrs.forEach((values, label) => {
         specs.push({
           label,
           value: values.join(', ')
         })
       })
-      
+
       if (specs.length > 0) {
         categories.push({
           name: categoryName,
@@ -200,7 +203,7 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
       maximumFractionDigits: 2,
     }).format(price)}` // Using $ as per design image request, can revert to Rs if user insists on previous req
   }
-  
+
   // Reverting to previous currency requirement (NPR) as per project context, 
   // ignoring "copy design" strictly for currency symbol unless explicitly asked to change currency.
   // Actually, user said "ignore the theme. just copy the design". 
@@ -208,7 +211,7 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
   // Usually "design" implies layout/visuals. "Currency" is data/locale. 
   // I will keep Rs (NPR) to be consistent with previous work unless corrected,
   // BUT I will style it like the design (Bold/Large).
-  
+
   const formatPriceNPR = (price: number) => {
     return `Rs ${new Intl.NumberFormat('ne-NP', {
       minimumFractionDigits: 0,
@@ -237,11 +240,11 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
           <main className="flex-1 px-4 sm:px-6 lg:px-8 py-8">
             <div className="max-w-7xl mx-auto">
               <Breadcrumbs items={breadcrumbItems} />
-              
+
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 mt-8">
                 {/* Left Column: Gallery */}
-                <ProductGallery images={productImages} />
-                
+                <MediaGallery media={mediaItems} />
+
                 {/* Right Column: Details */}
                 <ProductDetails
                   title={product.name}
@@ -255,9 +258,9 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
                   productId={product.id}
                 />
               </div>
-              
+
               {/* Tabs Section for Reviews & Specifications */}
-              <ProductTabs 
+              <ProductTabs
                 reviewsContent={
                   <div className="space-y-12">
                     <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-24">
@@ -269,13 +272,13 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
                           ratingDistribution={ratingDistribution}
                         />
                       </div>
-                      
+
                       {/* Right: Write Review Form */}
                       <div className="lg:col-span-7">
                         <ReviewForm productId={product.id} />
                       </div>
                     </div>
-                    
+
                     {/* List of Reviews */}
                     <ReviewList reviews={product.reviews} />
                   </div>
@@ -284,7 +287,7 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
                   <CategorizedSpecifications categories={categories} />
                 }
               />
-              
+
               {mockRelatedProducts.length > 0 && (
                 <RelatedProducts products={mockRelatedProducts} />
               )}
