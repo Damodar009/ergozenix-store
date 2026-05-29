@@ -56,12 +56,11 @@ export class CartService {
   /**
    * Create a new cart
    */
-  static async createCart(sessionId: string, userId?: string) {
+  static async createCart(sessionId: string) {
     const { data, error } = await supabase
       .from('carts')
       .insert({
         session_id: sessionId,
-        user_id: userId || null,
         status: 'active'
       })
       .select()
@@ -132,16 +131,16 @@ export class CartService {
    */
   static async addToCart(
     sessionId: string,
-    userId: string | undefined,
     productId: number,
     quantity: number = 1,
-    attributes: { name: string; value: string }[] = []
+    attributes: { name: string; value: string }[] = [],
+    userId?: string
   ) {
     // 1. Get or create cart
 
     let cart = await this.getCart(sessionId, userId)
     if (!cart) {
-      cart = await this.createCart(sessionId, userId)
+      cart = await this.createCart(sessionId)
     }
 
     // // 2. Fetch product price to ensure integrity

@@ -80,12 +80,12 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
     try {
       await CartService.addToCart(
-        sessionId,
-        userId || undefined,
-        Number(productId),
-        quantity,
-        attributes
-      )
+            sessionId,
+            Number(productId),
+            quantity,
+            attributes,
+            userId || undefined
+          )
       
       // await loadCart() // Refresh cart to get updated list
       
