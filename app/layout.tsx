@@ -6,6 +6,7 @@ import { ThemeProvider } from "@/providers/theme-provider"
 import "./globals.css"
 import { Header } from "@/components/header"
 import { CartProvider } from "@/context/cart-context"
+import DeviceSessionTracker from "@/components/DeviceSessionTracker"
 
 const _geist = Geist({ subsets: ["latin"] })
 const _geistMono = Geist_Mono({ subsets: ["latin"] })
@@ -29,7 +30,8 @@ export default function RootLayout({
       <body className={`font-sans antialiased`}>
         <ThemeProvider>
           <CartProvider>
-            <Header/>
+            <DeviceSessionTracker />
+            <Header />
             {children}
             <Footer />
           </CartProvider>

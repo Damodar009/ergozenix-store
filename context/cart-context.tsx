@@ -2,6 +2,8 @@
 
 import { createContext, useContext, useEffect, useState, useCallback, useMemo } from "react"
 import { supabase } from "@/lib/supabase/client"
+import { retrieveId } from "@/lib/cookieUtils"
+import { initDeviceSession } from "@/lib/deviceSession"
 import { CartService, type CartItem as ServiceCartItem } from "@/services/cart-service"
 import { useToast } from "@/hooks/use-toast"
 
@@ -29,14 +31,14 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const [sessionId, setSessionId] = useState<string | null>(null)
   const { toast } = useToast()
 
-  // Initialize Session ID
+  // Initialize Session ID from device session cookie
   useEffect(() => {
-    let sid = localStorage.getItem('cart_session_id')
-    if (!sid) {
-      sid = crypto.randomUUID()
-      localStorage.setItem('cart_session_id', sid)
+    const sid = retrieveId('session_id')
+    if (sid) {
+      setSessionId(sid)
+    } else {
+      console.warn('Session ID not found in cookies – cart operations may fail')
     }
-    setSessionId(sid)
   }, [])
 
   // Initialize Auth
@@ -72,37 +74,45 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   }, [loadCart])
 
   const addToCart = useCallback(async (
-    productId: string | number, 
+    productId: string | number,
     quantity: number = 1,
     attributes: { name: string; value: string }[] = []
   ) => {
-    if (!sessionId) return
+    // Initialise device session to ensure session_id exists in DB
+    await initDeviceSession();
+    const sid = retrieveId('session_id');
+    if (!sid) {
+      console.warn('Session ID still missing after init');
+      return;
+    }
+    setSessionId(sid);
 
     try {
       await CartService.addToCart(
-            sessionId,
-            Number(productId),
-            quantity,
-            attributes,
-            userId || undefined
-          )
-      
-      // await loadCart() // Refresh cart to get updated list
-      
+        sid,
+        Number(productId),
+        quantity,
+        attributes,
+        userId || undefined
+      );
+
+      // Optionally refresh cart list
+      // await loadCart();
+
       toast({
         title: "Added to cart",
         description: "Item has been added to your cart",
         duration: 2000,
-      })
+      });
     } catch (error) {
-      console.error('Add to cart error:', error)
+      console.error('Add to cart error:', error);
       toast({
         title: "Error",
         description: "Failed to add item to cart",
         variant: "destructive",
-      })
+      });
     }
-  }, [sessionId, userId, loadCart, toast])
+  }, [userId, loadCart, toast]);
 
   const removeFromCart = useCallback(async (cartItemId: number) => {
     try {

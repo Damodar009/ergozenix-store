@@ -22,7 +22,6 @@ export function ProductDetails({
   basePrice,
   salePrice,
   description,
-  keySpecs,
   productId
 }: {
   title: string
@@ -90,10 +89,7 @@ export function ProductDetails({
             Add to Cart
           </Button>
         </div>
-
       </div>
-
-
     </div>
   )
 }
