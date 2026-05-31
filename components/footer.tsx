@@ -1,6 +1,7 @@
 "use client"
 
 import Link from "next/link"
+import { usePathname } from "next/navigation"
 import { LogoIcon } from "@/components/logo-icon"
 import { Separator } from "@/components/ui/separator"
 import { Button } from "@/components/ui/button"

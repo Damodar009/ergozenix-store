@@ -1,6 +1,5 @@
-"use server";
-import CheckoutForm from "@/components/cart/CheckoutForm";
+import CartPage from "@/components/cart/CartPage";
 
-export default function CartPage() {
-  return <CheckoutForm />;
+export default function Page() {
+  return <CartPage />;
 }
