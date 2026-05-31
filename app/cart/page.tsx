@@ -1,6 +1,6 @@
 "use server";
-import { redirect } from "next/navigation";
+import CheckoutForm from "@/components/cart/CheckoutForm";
 
-export default async function CartPage() {
-  redirect("/");
+export default function CartPage() {
+  return <CheckoutForm />;
 }
