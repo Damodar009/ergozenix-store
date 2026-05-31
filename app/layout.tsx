@@ -1,6 +1,7 @@
 import type React from "react"
 import type { Metadata } from "next"
 import { Geist, Geist_Mono } from "next/font/google"
+import { Playfair_Display, Hanken_Grotesk } from "next/font/google"
 import { Footer } from "@/components/footer"
 import { ThemeProvider } from "@/providers/theme-provider"
 import "./globals.css"
@@ -10,6 +11,20 @@ import DeviceSessionTracker from "@/components/DeviceSessionTracker"
 
 const _geist = Geist({ subsets: ["latin"] })
 const _geistMono = Geist_Mono({ subsets: ["latin"] })
+
+const playfairDisplay = Playfair_Display({
+  subsets: ["latin"],
+  weight: ["400", "500", "600"],
+  variable: "--font-playfair-display",
+  display: "swap",
+})
+
+const hankenGrotesk = Hanken_Grotesk({
+  subsets: ["latin"],
+  weight: ["300", "400", "500", "600"],
+  variable: "--font-hanken-grotesk",
+  display: "swap",
+})
 
 export const metadata: Metadata = {
   title: "ErgoZenix",
@@ -27,7 +42,7 @@ export default function RootLayout({
       <head>
         <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
       </head>
-      <body className={`font-sans antialiased`}>
+      <body className={`font-sans antialiased ${playfairDisplay.variable} ${hankenGrotesk.variable}`}>
         <ThemeProvider>
           <CartProvider>
             <DeviceSessionTracker />

@@ -118,6 +118,92 @@
   --color-sidebar-ring: var(--sidebar-ring);
 }
 
+/* ErgoForm Design Tokens */
+:root {
+  /* ErgoForm Colors */
+  --ef-primary: #114734;
+  --ef-primary-container: #2c5f4a;
+  --ef-on-primary: #ffffff;
+  --ef-on-primary-container: #a1d7bc;
+  --ef-on-primary-fixed: #002115;
+  --ef-on-primary-fixed-variant: #1b503c;
+  --ef-primary-fixed: #b8eed3;
+  --ef-primary-fixed-dim: #9cd2b8;
+  --ef-inverse-primary: #9cd2b8;
+
+  --ef-secondary: #5e5e5c;
+  --ef-secondary-container: #e1dfdc;
+  --ef-on-secondary: #ffffff;
+  --ef-on-secondary-container: #636360;
+  --ef-on-secondary-fixed: #1b1c1a;
+  --ef-on-secondary-fixed-variant: #474745;
+  --ef-secondary-fixed: #e4e2df;
+  --ef-secondary-fixed-dim: #c8c6c4;
+
+  --ef-tertiary: #403e3a;
+  --ef-tertiary-container: #575551;
+  --ef-on-tertiary: #ffffff;
+  --ef-on-tertiary-container: #cecac5;
+  --ef-on-tertiary-fixed: #1d1b18;
+  --ef-on-tertiary-fixed-variant: #484743;
+  --ef-tertiary-fixed: #e6e2dc;
+  --ef-tertiary-fixed-dim: #cac6c1;
+
+  --ef-surface: #fdf9f3;
+  --ef-surface-dim: #ddd9d4;
+  --ef-surface-bright: #fdf9f3;
+  --ef-surface-container-lowest: #ffffff;
+  --ef-surface-container-low: #f7f3ee;
+  --ef-surface-container: #f1ede8;
+  --ef-surface-container-high: #ece7e2;
+  --ef-surface-container-highest: #e6e2dd;
+  --ef-surface-variant: #e6e2dd;
+  --ef-surface-tint: #356852;
+
+  --ef-on-surface: #1c1c19;
+  --ef-on-surface-variant: #404944;
+  --ef-on-background: #1c1c19;
+  --ef-background: #fdf9f3;
+  --ef-inverse-surface: #31302d;
+  --ef-inverse-on-surface: #f4f0eb;
+
+  --ef-outline: #707973;
+  --ef-outline-variant: #c0c9c2;
+
+  --ef-error: #ba1a1a;
+  --ef-error-container: #ffdad6;
+  --ef-on-error: #ffffff;
+  --ef-on-error-container: #93000a;
+
+  /* ErgoForm Spacing */
+  --ef-section-padding: 40px;
+  --ef-stack-sm: 8px;
+  --ef-stack-md: 16px;
+  --ef-stack-lg: 24px;
+  --ef-gutter: 16px;
+  --ef-container-padding-x: 24px;
+  --ef-container-max: 1280px;
+}
+
+/* ErgoForm Material Symbols */
+.material-symbols-outlined {
+  font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+}
+
+.material-symbols-outlined.filled {
+  font-variation-settings: 'FILL' 1, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+}
+
+/* ErgoForm Active Thumbnail */
+.ef-active-thumb {
+  border-color: var(--ef-primary) !important;
+}
+
+/* ErgoForm Custom Scrollbar */
+.ef-scrollbar::-webkit-scrollbar { width: 4px; }
+.ef-scrollbar::-webkit-scrollbar-track { background: var(--ef-surface); }
+.ef-scrollbar::-webkit-scrollbar-thumb { background: var(--ef-outline-variant); }
+
 @layer base {
   * {
     @apply border-border outline-ring/50;
