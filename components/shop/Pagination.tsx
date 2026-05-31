@@ -1,26 +1,107 @@
 "use client"
 
-import Link from "next/link"
-import { ChevronLeft, ChevronRight } from "lucide-react"
-
-export function Pagination() {
-  return (
-    <nav aria-label="Pagination" className="mt-12 flex items-center justify-center">
-      <Link className="relative inline-flex items-center rounded-l-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-2 py-2 text-sm font-medium text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700" href="#" aria-label="Previous Page">
-        <span className="sr-only">Previous</span>
-        <ChevronLeft className="h-5 w-5" />
-      </Link>
-      <Link aria-current="page" className="relative z-10 inline-flex items-center border border-primary bg-primary/10 px-4 py-2 text-sm font-medium text-primary" href="#">1</Link>
-      <Link className="relative inline-flex items-center border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-2 text-sm font-medium text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700" href="#">2</Link>
-      <Link className="relative hidden items-center border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-2 text-sm font-medium text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 md:inline-flex" href="#">3</Link>
-      <span className="relative inline-flex items-center border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300">...</span>
-      <Link className="relative hidden items-center border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-2 text-sm font-medium text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 md:inline-flex" href="#">8</Link>
-      <Link className="relative inline-flex items-center rounded-r-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-2 py-2 text-sm font-medium text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700" href="#" aria-label="Next Page">
-        <span className="sr-only">Next</span>
-        <ChevronRight className="h-5 w-5" />
-      </Link>
-    </nav>
-  )
+interface PaginationProps {
+  currentPage: number
+  totalPages: number
+  onPageChange: (page: number) => void
+  loading?: boolean
 }
 
+export function Pagination({ currentPage, totalPages, onPageChange, loading }: PaginationProps) {
+  if (totalPages <= 1) return null
 
+  // Calculate visible page numbers (show up to 5 pages)
+  const getPageNumbers = (): (number | "...")[] => {
+    const pages: (number | "...")[] = []
+    if (totalPages <= 5) {
+      for (let i = 1; i <= totalPages; i++) pages.push(i)
+    } else {
+      if (currentPage <= 3) {
+        pages.push(1, 2, 3, "...", totalPages)
+      } else if (currentPage >= totalPages - 2) {
+        pages.push(1, "...", totalPages - 2, totalPages - 1, totalPages)
+      } else {
+        pages.push(1, "...", currentPage, "...", totalPages)
+      }
+    }
+    return pages
+  }
+
+  const btnBase: React.CSSProperties = {
+    width: 40,
+    height: 40,
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    border: "1px solid var(--ef-outline-variant)",
+    color: "var(--ef-on-surface)",
+    fontFamily: "var(--font-hanken-grotesk), 'Hanken Grotesk', sans-serif",
+    fontSize: "11px",
+    fontWeight: 600,
+    letterSpacing: "2px",
+    textTransform: "uppercase",
+    cursor: "pointer",
+    transition: "background-color 0.2s, color 0.2s",
+    background: "transparent",
+  }
+
+  const activeBtnStyle: React.CSSProperties = {
+    ...btnBase,
+    borderColor: "var(--ef-primary)",
+    backgroundColor: "var(--ef-primary)",
+    color: "var(--ef-on-primary)",
+  }
+
+  return (
+    <div className="flex justify-center items-center gap-[var(--ef-stack-md)]" style={{ marginTop: "var(--ef-section-padding)" }}>
+      {/* Previous */}
+      <button
+        style={btnBase}
+        disabled={currentPage === 1 || loading}
+        onClick={() => onPageChange(currentPage - 1)}
+        className="hover:bg-[var(--ef-surface-container)] disabled:opacity-40 disabled:cursor-not-allowed"
+        aria-label="Previous page"
+      >
+        <span className="material-symbols-outlined" style={{ fontSize: 20 }}>
+          chevron_left
+        </span>
+      </button>
+
+      {/* Page Numbers */}
+      {getPageNumbers().map((page, idx) =>
+        page === "..." ? (
+          <span
+            key={`ellipsis-${idx}`}
+            style={{ ...btnBase, border: "none", cursor: "default" }}
+          >
+            …
+          </span>
+        ) : (
+          <button
+            key={page}
+            style={page === currentPage ? activeBtnStyle : btnBase}
+            onClick={() => onPageChange(page as number)}
+            disabled={loading}
+            className={page !== currentPage ? "hover:bg-[var(--ef-surface-container)]" : ""}
+            aria-current={page === currentPage ? "page" : undefined}
+          >
+            {page}
+          </button>
+        )
+      )}
+
+      {/* Next */}
+      <button
+        style={btnBase}
+        disabled={currentPage === totalPages || loading}
+        onClick={() => onPageChange(currentPage + 1)}
+        className="hover:bg-[var(--ef-surface-container)] disabled:opacity-40 disabled:cursor-not-allowed"
+        aria-label="Next page"
+      >
+        <span className="material-symbols-outlined" style={{ fontSize: 20 }}>
+          chevron_right
+        </span>
+      </button>
+    </div>
+  )
+}

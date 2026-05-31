@@ -297,11 +297,41 @@ export class ProductService {
         return []
       }
 
+      // Get review stats for these products
+      const productIds = products.map(p => p.id)
+      const { data: reviews } = await supabase
+        .from('product_reviews')
+        .select('product_id, rating')
+        .in('product_id', productIds)
+        .is('deleted_at', null)
+
+      // Calculate average ratings and review counts
+      const reviewStats = new Map<number, { average: number; count: number; total?: number }>()
+      if (reviews) {
+        reviews.forEach(review => {
+          const stats = reviewStats.get(review.product_id) || { average: 0, count: 0, total: 0 }
+          reviewStats.set(review.product_id, {
+            average: stats.average,
+            count: stats.count + 1,
+            total: (stats.total || 0) + review.rating,
+          })
+        })
+
+        // Calculate averages
+        reviewStats.forEach((stats, productId) => {
+          reviewStats.set(productId, {
+            average: (stats.total || 0) / stats.count,
+            count: stats.count,
+          })
+        })
+      }
+
       // Transform to ProductCard format
       return products.map(product => {
         const images = product.product_images || []
         const primaryImage = images.find((img: ProductImage) => img.is_primary)
         const firstImage = images.sort((a: ProductImage, b: ProductImage) => a.sort_order - b.sort_order)[0]
+        const stats = reviewStats.get(product.id)
 
         return {
           id: product.id,
@@ -315,6 +345,8 @@ export class ProductService {
           primary_image: primaryImage?.image_url || firstImage?.image_url || null,
           brand_name: product.brands?.name || null,
           category_name: product.categories?.name || null,
+          average_rating: stats?.average,
+          review_count: stats?.count,
         } as ProductCard
       })
     } catch (error) {

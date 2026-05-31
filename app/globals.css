@@ -204,6 +204,21 @@
 .ef-scrollbar::-webkit-scrollbar-track { background: var(--ef-surface); }
 .ef-scrollbar::-webkit-scrollbar-thumb { background: var(--ef-outline-variant); }
 
+/* ErgoForm Shop – Product Card hover overlay */
+.ef-product-card .ef-add-to-cart {
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+.ef-product-card:hover .ef-add-to-cart {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ErgoForm Shop – Filter dropdown */
+.ef-filter-dropdown .ef-dropdown-menu { display: none; }
+.ef-filter-dropdown:hover .ef-dropdown-menu { display: block; }
+
 @layer base {
   * {
     @apply border-border outline-ring/50;

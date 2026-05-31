@@ -1,60 +1,159 @@
 "use client"
 
-import React, { useEffect, useState, useCallback } from "react"
-import { FiltersSidebar } from "@/components/shop/FiltersSidebar"
+import React, { useEffect, useState, useCallback, useRef } from "react"
 import { ProductCard } from "@/components/shop/ProductCard"
-import { SortSelect } from "@/components/shop/SortSelect"
 import { Pagination } from "@/components/shop/Pagination"
 import { ProductService } from "@/services/product-service"
 import type { ProductCard as ProductCardType } from "@/models/product"
 import { Category } from "@/components/shop/CategoryList"
-import { Car, Monitor, Box, Mouse, Loader2, PackageX, SlidersHorizontal } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { cn } from "@/lib/utils"
 
-// Map categories to icons (you can expand this logic or store icon name in DB)
-const getCategoryIcon = (name: string) => {
-  const iconMap: Record<string, any> = {
-    'Chairs': Car,
-    'Desks': Monitor,
-    'Accessories': Mouse,
-    'Stands': Box
-  }
-  return iconMap[name] || Box
+/* ─── Helper: Material Icon ─── */
+function MIcon({ name, size = 20, className = "" }: { name: string; size?: number; className?: string }) {
+  return (
+    <span className={`material-symbols-outlined ${className}`} style={{ fontSize: `${size}px` }}>
+      {name}
+    </span>
+  )
 }
 
-export default function ShopPage() {
-  // Mobile Filter State
-  const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false)
+/* ─── Filter Dropdown Button ─── */
+function FilterDropdown({
+  label,
+  children,
+}: {
+  label: string
+  children: React.ReactNode
+}) {
+  const [open, setOpen] = useState(false)
+  const ref = useRef<HTMLDivElement>(null)
 
+  // Close on outside click
+  useEffect(() => {
+    function handleClick(e: MouseEvent) {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false)
+    }
+    document.addEventListener("mousedown", handleClick)
+    return () => document.removeEventListener("mousedown", handleClick)
+  }, [])
+
+  return (
+    <div ref={ref} className="relative">
+      <button
+        onClick={() => setOpen(!open)}
+        className="flex items-center gap-2 px-4 py-2 cursor-pointer transition-colors"
+        style={{
+          border: "1px solid var(--ef-outline-variant)",
+          backgroundColor: "var(--ef-surface-container-lowest)",
+          color: "var(--ef-on-surface)",
+          fontFamily: "var(--font-hanken-grotesk), 'Hanken Grotesk', sans-serif",
+          fontSize: "11px",
+          fontWeight: 600,
+          letterSpacing: "2px",
+          textTransform: "uppercase" as const,
+        }}
+        onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = "var(--ef-surface-container)" }}
+        onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = "var(--ef-surface-container-lowest)" }}
+      >
+        {label}
+        <MIcon name="keyboard_arrow_down" size={16} />
+      </button>
+      {open && (
+        <div
+          className="absolute top-full left-0 mt-1 z-50 min-w-[200px] shadow-lg"
+          style={{
+            backgroundColor: "var(--ef-surface-container-lowest)",
+            border: "1px solid var(--ef-outline-variant)",
+            borderRadius: "4px",
+          }}
+        >
+          {children}
+        </div>
+      )}
+    </div>
+  )
+}
+
+/* ─── Filter Option Item ─── */
+function FilterOption({
+  label,
+  active,
+  onClick,
+}: {
+  label: string
+  active?: boolean
+  onClick: () => void
+}) {
+  return (
+    <button
+      onClick={onClick}
+      className="w-full text-left px-4 py-2.5 transition-colors cursor-pointer"
+      style={{
+        fontFamily: "var(--font-hanken-grotesk), 'Hanken Grotesk', sans-serif",
+        fontSize: "13px",
+        fontWeight: active ? 600 : 300,
+        color: active ? "var(--ef-primary)" : "var(--ef-on-surface)",
+        backgroundColor: active ? "var(--ef-primary-fixed)" : "transparent",
+      }}
+      onMouseEnter={(e) => {
+        if (!active) e.currentTarget.style.backgroundColor = "var(--ef-surface-container)"
+      }}
+      onMouseLeave={(e) => {
+        if (!active) e.currentTarget.style.backgroundColor = "transparent"
+      }}
+    >
+      {label}
+    </button>
+  )
+}
+
+/* ─── Price Range Options ─── */
+const PRICE_RANGES = [
+  { label: "All Prices", min: 0, max: 150000 },
+  { label: "Under Rs 5,000", min: 0, max: 5000 },
+  { label: "Rs 5,000 – Rs 15,000", min: 5000, max: 15000 },
+  { label: "Rs 15,000 – Rs 50,000", min: 15000, max: 50000 },
+  { label: "Rs 50,000 – Rs 100,000", min: 50000, max: 100000 },
+  { label: "Over Rs 100,000", min: 100000, max: 150000 },
+]
+
+/* ─── Sort Options ─── */
+const SORT_OPTIONS = [
+  { label: "Newest", value: "newest" },
+  { label: "Price: Low to High", value: "price-asc" },
+  { label: "Price: High to Low", value: "price-desc" },
+  { label: "Name: A-Z", value: "name-asc" },
+]
+
+/* ═══════════════════════════════════════════════════════
+   SHOP PAGE
+   ═══════════════════════════════════════════════════════ */
+export default function ShopPage() {
   // Data State
   const [products, setProducts] = useState<ProductCardType[]>([])
-  const [categories, setCategories] = useState<Category[]>([])
+  const [categories, setCategories] = useState<{ id: number; name: string }[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [totalCount, setTotalCount] = useState(0)
 
   // Filter State
-  const [selectedCategory, setSelectedCategory] = useState<string | number | null>(null)
-  const [priceRange, setPriceRange] = useState<[number, number]>([0, 150000])
-  
-  // Sort State
+  const [selectedCategory, setSelectedCategory] = useState<number | null>(null)
+  const [selectedPriceRange, setSelectedPriceRange] = useState(0) // index into PRICE_RANGES
   const [sortBy, setSortBy] = useState("newest")
+
+  // View State
+  const [viewMode, setViewMode] = useState<"grid" | "list">("grid")
 
   // Pagination State
   const [page, setPage] = useState(1)
   const [limit] = useState(9)
-  const [hasMore, setHasMore] = useState(true)
+  const [totalPages, setTotalPages] = useState(1)
 
   // Fetch Categories
   useEffect(() => {
     async function fetchCategories() {
       try {
         const cats = await ProductService.getAllCategories()
-        setCategories(cats.map(c => ({
-          id: c.id,
-          name: c.name,
-          icon: getCategoryIcon(c.name)
-        })))
+        setCategories(cats.map(c => ({ id: c.id, name: c.name })))
       } catch (err) {
         console.error("Failed to load categories")
       }
@@ -68,71 +167,64 @@ export default function ShopPage() {
     setError(null)
     try {
       // Parse sort option
-      let sortOption: { field: 'base_price' | 'view_count' | 'created_at', ascending: boolean } | undefined
-      
-      // Map sort values to API options
-      if (sortBy === 'price-asc') {
-        sortOption = { field: 'base_price', ascending: true }
-      } else if (sortBy === 'price-desc') {
-        sortOption = { field: 'base_price', ascending: false }
-      } else if (sortBy === 'popular') {
-        // 'view_count' might not be in ProductSortOptions type, let's fallback or adjust
-        // If ProductSortOptions only allows specific fields, we must adhere.
-        // models/product.ts says: 'name' | 'base_price' | 'created_at' | 'updated_at'
-        // So 'popular' (view_count) is valid only if valid in type. If not, maybe use 'updated_at' or 'created_at'.
-        // Let's assume 'updated_at' for popular or just remove popular if not supported.
-        // Or if the service accepts 'any' string but type def is strict.
-        // Let's safe fallback to created_at for now if 'view_count' is invalid.
-        // But let's check ProductSortOptions again.
-        // It is: 'name' | 'base_price' | 'created_at' | 'updated_at'
-        // So 'view_count' is invalid. I should remove 'popular' or map it to something valid like 'created_at' (newest) or add it to type.
-        // I will map 'popular' to 'created_at' desc for now to be safe.
-        // actually 'newest' maps to undefined (default).
-        sortOption = undefined
+      let sortOption: { field: 'name' | 'base_price' | 'created_at' | 'updated_at'; ascending: boolean } | undefined
+
+      if (sortBy === "price-asc") {
+        sortOption = { field: "base_price", ascending: true }
+      } else if (sortBy === "price-desc") {
+        sortOption = { field: "base_price", ascending: false }
+      } else if (sortBy === "name-asc") {
+        sortOption = { field: "name", ascending: true }
+      } else {
+        sortOption = undefined // newest — default created_at desc
       }
 
-      // We need to cast sortOption to any or match the type exactly.
-      // The issue was `string` is not assignable to union.
-      
-      const options: any = sortOption
+      const priceRange = PRICE_RANGES[selectedPriceRange]
 
       const data = await ProductService.getProducts(
         {
-          category_id: selectedCategory ? Number(selectedCategory) : undefined,
-          min_price: priceRange[0],
-          max_price: priceRange[1],
-          in_stock: undefined // Show all for now
+          category_id: selectedCategory || undefined,
+          min_price: priceRange.min,
+          max_price: priceRange.max,
+          in_stock: undefined,
         },
-        options,
+        sortOption,
         limit,
-        (page - 1) * limit
+        (page - 1) * limit,
       )
 
       setProducts(data)
-      setHasMore(data.length === limit)
+      // Estimate total pages (if we get a full page, there might be more)
+      if (data.length < limit) {
+        setTotalPages(page)
+        setTotalCount((page - 1) * limit + data.length)
+      } else {
+        // At least one more page possible
+        setTotalPages(page + 1)
+        setTotalCount(page * limit + 1) // approximate
+      }
     } catch (err) {
       setError("Failed to load products. Please try again.")
     } finally {
       setLoading(false)
     }
-  }, [selectedCategory, priceRange, sortBy, page, limit])
+  }, [selectedCategory, selectedPriceRange, sortBy, page, limit])
 
-  // Debounce effect for price filtering to prevent excessive API calls
   useEffect(() => {
     const timer = setTimeout(() => {
       fetchProducts()
-    }, 500)
+    }, 300)
     return () => clearTimeout(timer)
   }, [fetchProducts])
 
   // Handlers
-  const handleCategoryChange = (id: string | number | null) => {
+  const handleCategoryChange = (id: number | null) => {
     setSelectedCategory(id)
-    setPage(1) // Reset to first page
+    setPage(1)
   }
 
-  const handlePriceChange = (range: [number, number]) => {
-    setPriceRange(range)
+  const handlePriceChange = (index: number) => {
+    setSelectedPriceRange(index)
     setPage(1)
   }
 
@@ -141,124 +233,330 @@ export default function ShopPage() {
     setPage(1)
   }
 
-  const handleClearFilters = () => {
-    setSelectedCategory(null)
-    setPriceRange([0, 150000])
-    setSortBy("newest")
-    setPage(1)
-  }
+  // Derive category name for header
+  const selectedCatName = selectedCategory
+    ? categories.find(c => c.id === selectedCategory)?.name || "Products"
+    : "All Products"
 
   return (
-    <div className="bg-background text-foreground min-h-screen">
-      <main className="flex flex-1 justify-center py-8 px-4 sm:px-6 lg:px-8">
-        <div className="flex flex-col w-full max-w-7xl">
-          <div className="flex flex-wrap justify-between gap-4 items-center mb-8">
-            <p className="text-3xl lg:text-4xl font-black leading-tight tracking-[-0.033em] text-foreground">
-              Shop Our Ergonomic Products
-            </p>
+    <main
+      className="mx-auto pb-[var(--ef-section-padding)]"
+      style={{
+        maxWidth: "var(--ef-container-max)",
+        paddingLeft: "var(--ef-container-padding-x)",
+        paddingRight: "var(--ef-container-padding-x)",
+        backgroundColor: "var(--ef-surface)",
+        color: "var(--ef-on-surface)",
+        fontFamily: "var(--font-hanken-grotesk), 'Hanken Grotesk', sans-serif",
+      }}
+    >
+      {/* ─── Page Title Section ─── */}
+      <section
+        className="py-[var(--ef-stack-lg)]"
+        style={{
+          borderBottom: "1px solid var(--ef-outline-variant)",
+          backgroundColor: "var(--ef-surface-container-lowest)",
+          marginLeft: "calc(-1 * var(--ef-container-padding-x))",
+          marginRight: "calc(-1 * var(--ef-container-padding-x))",
+          paddingLeft: "var(--ef-container-padding-x)",
+          paddingRight: "var(--ef-container-padding-x)",
+        }}
+      >
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-[var(--ef-stack-sm)]">
+          <div>
+            <span
+              className="block mb-2"
+              style={{
+                fontFamily: "var(--font-hanken-grotesk), 'Hanken Grotesk', sans-serif",
+                fontSize: "11px",
+                fontWeight: 600,
+                letterSpacing: "2px",
+                textTransform: "uppercase",
+                color: "var(--ef-secondary)",
+              }}
+            >
+              Collections
+            </span>
+            <h1
+              style={{
+                fontFamily: "var(--font-playfair-display), 'Playfair Display', serif",
+                fontSize: "clamp(32px, 4vw, 40px)",
+                lineHeight: "1.2",
+                fontWeight: 400,
+                color: "var(--ef-on-surface)",
+              }}
+            >
+              {selectedCatName}
+            </h1>
           </div>
-
-          <div className="flex flex-col lg:flex-row gap-8">
-            {/* Mobile Filter Toggle */}
-            <div className="lg:hidden mb-4">
-              <Button 
-                onClick={() => setMobileFiltersOpen(!mobileFiltersOpen)}
-                variant="outline" 
-                className="w-full justify-between"
-              >
-                <div className="flex items-center gap-2">
-                  <SlidersHorizontal className="h-4 w-4" />
-                  <span className="font-bold">Filters</span>
-                </div>
-                {mobileFiltersOpen ? "Hide" : "Show"}
-              </Button>
-            </div>
-
-            {/* Sidebar Wrapper */}
-            <div className={cn("w-full lg:w-1/4", mobileFiltersOpen ? "block" : "hidden lg:block")}>
-              <FiltersSidebar 
-                categories={categories} 
-                selectedCategory={selectedCategory}
-                onCategoryChange={handleCategoryChange}
-                priceRange={priceRange}
-                onPriceChange={handlePriceChange}
-                onClearFilters={handleClearFilters}
-              />
-            </div>
-
-            <div className="w-full lg:w-3/4">
-              <div className="flex items-center justify-between mb-6 flex-wrap gap-4">
-                <p className="text-sm text-muted-foreground">
-                  {loading ? 'Loading...' : `Showing ${products.length} results`}
-                </p>
-                <div className="flex gap-3 flex-wrap">
-                  <SortSelect value={sortBy} onChange={handleSortChange} />
-                </div>
-              </div>
-
-              {loading ? (
-                <div className="flex justify-center items-center py-20">
-                  <Loader2 className="h-8 w-8 animate-spin text-primary" />
-                </div>
-              ) : error ? (
-                <div className="flex flex-col items-center justify-center py-20 text-center">
-                  <p className="text-red-500 mb-2">{error}</p>
-                  <button onClick={fetchProducts} className="text-primary hover:underline">Try Again</button>
-                </div>
-              ) : products.length === 0 ? (
-                <div className="flex flex-col items-center justify-center py-20 text-center">
-                  <PackageX className="h-16 w-16 text-muted-foreground mb-4" />
-                  <h3 className="text-xl font-bold mb-2">No Products Found</h3>
-                  <p className="text-muted-foreground mb-4">Try adjusting your filters or price range.</p>
-                  <button onClick={handleClearFilters} className="text-primary font-medium hover:underline">
-                    Clear All Filters
-                  </button>
-                </div>
-              ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
-                  {products.map((product) => (
-                    <ProductCard 
-                      key={product.id} 
-                      product={{
-                        id: product.id,
-                        name: product.name,
-                        description: product.description || '',
-                        price: `Rs ${product.base_price}`,
-                        basePrice: product.base_price,
-                        salePrice: product.sale_price,
-                        imageUrl: product.primary_image || 'https://via.placeholder.com/300',
-                        alt: product.name,
-                        slug: product.slug
-                      }} 
-                    />
-                  ))}
-                </div>
-              )}
-
-              {/* Simple Pagination Control (Can be expanded) */}
-              <div className="mt-8 flex justify-center gap-2">
-                <button 
-                  onClick={() => setPage(p => Math.max(1, p - 1))}
-                  disabled={page === 1 || loading}
-                  className="px-4 py-2 border rounded disabled:opacity-50"
-                >
-                  Previous
-                </button>
-                <span className="px-4 py-2">Page {page}</span>
-                <button 
-                  onClick={() => setPage(p => p + 1)}
-                  disabled={!hasMore || loading}
-                  className="px-4 py-2 border rounded disabled:opacity-50"
-                >
-                  Next
-                </button>
-              </div>
-            </div>
+          <div
+            style={{
+              fontFamily: "var(--font-hanken-grotesk), 'Hanken Grotesk', sans-serif",
+              fontSize: "15px",
+              lineHeight: "1.6",
+              fontWeight: 300,
+              color: "var(--ef-on-surface-variant)",
+            }}
+          >
+            {loading ? "Loading…" : `${products.length} products`}
           </div>
         </div>
-      </main>
-    </div>
+      </section>
+
+      {/* ─── Filter Bar ─── */}
+      <section
+        className="sticky top-[64px] z-40 backdrop-blur-sm py-[var(--ef-stack-md)] flex flex-wrap items-center justify-between gap-[var(--ef-stack-md)] mb-[var(--ef-stack-lg)]"
+        style={{
+          backgroundColor: "rgba(253, 249, 243, 0.95)", // ef-surface with opacity
+          borderBottom: "1px solid var(--ef-outline-variant)",
+        }}
+      >
+        <div className="flex flex-wrap items-center gap-[var(--ef-stack-md)]">
+          {/* Category Filter */}
+          <FilterDropdown label="Category">
+            <FilterOption
+              label="All Categories"
+              active={selectedCategory === null}
+              onClick={() => handleCategoryChange(null)}
+            />
+            {categories.map(cat => (
+              <FilterOption
+                key={cat.id}
+                label={cat.name}
+                active={selectedCategory === cat.id}
+                onClick={() => handleCategoryChange(cat.id)}
+              />
+            ))}
+          </FilterDropdown>
+
+          {/* Price Filter */}
+          <FilterDropdown label="Price">
+            {PRICE_RANGES.map((range, idx) => (
+              <FilterOption
+                key={idx}
+                label={range.label}
+                active={selectedPriceRange === idx}
+                onClick={() => handlePriceChange(idx)}
+              />
+            ))}
+          </FilterDropdown>
+
+          {/* Sort By */}
+          <FilterDropdown label="Sort By">
+            {SORT_OPTIONS.map(opt => (
+              <FilterOption
+                key={opt.value}
+                label={opt.label}
+                active={sortBy === opt.value}
+                onClick={() => handleSortChange(opt.value)}
+              />
+            ))}
+          </FilterDropdown>
+        </div>
+
+        {/* View Toggle */}
+        <div className="flex items-center gap-4">
+          <button
+            onClick={() => setViewMode("grid")}
+            className="material-symbols-outlined p-1"
+            style={{
+              color: viewMode === "grid" ? "var(--ef-primary)" : "var(--ef-on-surface-variant)",
+              borderBottom: viewMode === "grid" ? "2px solid var(--ef-primary)" : "2px solid transparent",
+              fontSize: 20,
+              background: "none",
+              cursor: "pointer",
+            }}
+            aria-label="Grid view"
+          >
+            grid_view
+          </button>
+          <button
+            onClick={() => setViewMode("list")}
+            className="material-symbols-outlined p-1"
+            style={{
+              color: viewMode === "list" ? "var(--ef-primary)" : "var(--ef-on-surface-variant)",
+              borderBottom: viewMode === "list" ? "2px solid var(--ef-primary)" : "2px solid transparent",
+              fontSize: 20,
+              background: "none",
+              cursor: "pointer",
+            }}
+            aria-label="List view"
+          >
+            view_list
+          </button>
+        </div>
+      </section>
+
+      {/* ─── Product Grid / List ─── */}
+      {loading ? (
+        /* Loading Skeleton */
+        <section
+          className={
+            viewMode === "grid"
+              ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-[var(--ef-gutter)] gap-y-[var(--ef-stack-lg)]"
+              : "flex flex-col gap-[var(--ef-stack-lg)]"
+          }
+        >
+          {Array.from({ length: 6 }).map((_, i) => (
+            <div
+              key={i}
+              className="animate-pulse overflow-hidden"
+              style={{
+                borderRadius: "6px",
+                border: "1px solid var(--ef-outline-variant)",
+                backgroundColor: "var(--ef-surface-container-lowest)",
+              }}
+            >
+              <div
+                className="aspect-[4/5]"
+                style={{ backgroundColor: "var(--ef-surface-container)" }}
+              />
+              <div className="p-6 space-y-3">
+                <div className="h-5 rounded" style={{ backgroundColor: "var(--ef-surface-container-high)", width: "70%" }} />
+                <div className="h-3 rounded" style={{ backgroundColor: "var(--ef-surface-container)", width: "40%" }} />
+                <div className="h-4 rounded" style={{ backgroundColor: "var(--ef-surface-container)", width: "100%" }} />
+                <div className="h-4 rounded" style={{ backgroundColor: "var(--ef-surface-container)", width: "80%" }} />
+              </div>
+            </div>
+          ))}
+        </section>
+      ) : error ? (
+        /* Error State */
+        <div className="flex flex-col items-center justify-center py-20 text-center">
+          <span
+            className="material-symbols-outlined mb-4"
+            style={{ fontSize: 48, color: "var(--ef-error)" }}
+          >
+            error_outline
+          </span>
+          <p
+            className="mb-2"
+            style={{
+              fontFamily: "var(--font-playfair-display), 'Playfair Display', serif",
+              fontSize: "20px",
+              fontWeight: 500,
+              color: "var(--ef-on-surface)",
+            }}
+          >
+            Something went wrong
+          </p>
+          <p
+            className="mb-4"
+            style={{
+              fontSize: "15px",
+              fontWeight: 300,
+              color: "var(--ef-on-surface-variant)",
+            }}
+          >
+            {error}
+          </p>
+          <button
+            onClick={fetchProducts}
+            className="cursor-pointer hover:underline"
+            style={{
+              fontFamily: "var(--font-hanken-grotesk), 'Hanken Grotesk', sans-serif",
+              fontSize: "11px",
+              fontWeight: 600,
+              letterSpacing: "2px",
+              textTransform: "uppercase",
+              color: "var(--ef-primary)",
+              background: "none",
+              border: "none",
+            }}
+          >
+            Try Again
+          </button>
+        </div>
+      ) : products.length === 0 ? (
+        /* Empty State */
+        <div className="flex flex-col items-center justify-center py-20 text-center">
+          <span
+            className="material-symbols-outlined mb-4"
+            style={{ fontSize: 48, color: "var(--ef-on-surface-variant)" }}
+          >
+            inventory_2
+          </span>
+          <p
+            className="mb-2"
+            style={{
+              fontFamily: "var(--font-playfair-display), 'Playfair Display', serif",
+              fontSize: "20px",
+              fontWeight: 500,
+              color: "var(--ef-on-surface)",
+            }}
+          >
+            No Products Found
+          </p>
+          <p
+            className="mb-4"
+            style={{
+              fontSize: "15px",
+              fontWeight: 300,
+              color: "var(--ef-on-surface-variant)",
+            }}
+          >
+            Try adjusting your filters or price range.
+          </p>
+          <button
+            onClick={() => {
+              setSelectedCategory(null)
+              setSelectedPriceRange(0)
+              setSortBy("newest")
+              setPage(1)
+            }}
+            className="cursor-pointer hover:underline"
+            style={{
+              fontFamily: "var(--font-hanken-grotesk), 'Hanken Grotesk', sans-serif",
+              fontSize: "11px",
+              fontWeight: 600,
+              letterSpacing: "2px",
+              textTransform: "uppercase",
+              color: "var(--ef-primary)",
+              background: "none",
+              border: "none",
+            }}
+          >
+            Clear All Filters
+          </button>
+        </div>
+      ) : (
+        <section
+          className={
+            viewMode === "grid"
+              ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-[var(--ef-gutter)] gap-y-[var(--ef-stack-lg)]"
+              : "flex flex-col gap-[var(--ef-stack-lg)]"
+          }
+        >
+          {products.map((product) => (
+            <ProductCard
+              key={product.id}
+              product={{
+                id: product.id,
+                name: product.name,
+                description: product.description || "",
+                price: `Rs ${product.base_price}`,
+                basePrice: product.base_price,
+                salePrice: product.sale_price,
+                imageUrl: product.primary_image || "https://via.placeholder.com/400x500",
+                alt: product.name,
+                slug: product.slug,
+                averageRating: product.average_rating,
+                reviewCount: product.review_count,
+              }}
+            />
+          ))}
+        </section>
+      )}
+
+      {/* ─── Pagination ─── */}
+      {!loading && !error && products.length > 0 && (
+        <Pagination
+          currentPage={page}
+          totalPages={totalPages}
+          onPageChange={setPage}
+          loading={loading}
+        />
+      )}
+    </main>
   )
 }
-
-
