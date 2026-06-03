@@ -41,7 +41,7 @@ export function Pagination({ currentPage, totalPages, onPageChange, loading }: P
       <button
         disabled={currentPage === 1 || loading}
         onClick={() => onPageChange(currentPage - 1)}
-        className="w-10 h-10 flex items-center justify-center border border-[var(--ef-outline-variant)] text-[var(--ef-on-surface)] hover:bg-[var(--ef-surface-container)] transition-colors disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+        className="w-10 h-10 flex items-center justify-center border border-border text-foreground hover:bg-muted transition-colors disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
         aria-label="Previous page"
       >
         <span className="material-symbols-outlined">chevron_left</span>
@@ -52,8 +52,7 @@ export function Pagination({ currentPage, totalPages, onPageChange, loading }: P
         page === "..." ? (
           <span
             key={`ellipsis-${idx}`}
-            className="w-10 h-10 flex items-center justify-center text-[var(--ef-on-surface)]"
-            style={baseFontStyles}
+            className="w-10 h-10 flex items-center justify-center text-foreground font-label-caps"
           >
             …
           </span>
@@ -62,13 +61,12 @@ export function Pagination({ currentPage, totalPages, onPageChange, loading }: P
             key={page}
             onClick={() => onPageChange(page as number)}
             disabled={loading}
-            className={`w-10 h-10 flex items-center justify-center transition-colors disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer ${
+            className={`w-10 h-10 flex items-center justify-center transition-colors disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer font-label-caps text-[11px] uppercase tracking-[2px] ${
               page === currentPage
-                ? "border border-[var(--ef-primary)] bg-[var(--ef-primary)] text-[var(--ef-on-primary)]"
-                : "border border-[var(--ef-outline-variant)] text-[var(--ef-on-surface)] hover:bg-[var(--ef-surface-container)]"
+                ? "border border-primary bg-primary text-primary-foreground"
+                : "border border-border text-foreground hover:bg-muted"
             }`}
             aria-current={page === currentPage ? "page" : undefined}
-            style={baseFontStyles}
           >
             {page}
           </button>
@@ -79,7 +77,7 @@ export function Pagination({ currentPage, totalPages, onPageChange, loading }: P
       <button
         disabled={currentPage === totalPages || loading}
         onClick={() => onPageChange(currentPage + 1)}
-        className="w-10 h-10 flex items-center justify-center border border-[var(--ef-outline-variant)] text-[var(--ef-on-surface)] hover:bg-[var(--ef-surface-container)] transition-colors disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+        className="w-10 h-10 flex items-center justify-center border border-border text-foreground hover:bg-muted transition-colors disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
         aria-label="Next page"
       >
         <span className="material-symbols-outlined">chevron_right</span>

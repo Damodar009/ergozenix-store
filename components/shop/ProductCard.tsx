@@ -60,21 +60,11 @@ function StarRating({ rating = 0, count = 0 }: { rating?: number; count?: number
 
   return (
     <div className="flex items-center gap-1 mb-2">
-      <div className="flex" style={{ color: "var(--ef-primary)" }}>
+      <div className="flex text-primary">
         {stars}
       </div>
       {count > 0 && (
-        <span
-          className="font-[var(--font-hanken-grotesk)]"
-          style={{
-            fontFamily: "var(--font-hanken-grotesk), 'Hanken Grotesk', sans-serif",
-            fontSize: "10px",
-            fontWeight: 600,
-            letterSpacing: "2px",
-            textTransform: "uppercase",
-            color: "var(--ef-on-surface-variant)",
-          }}
-        >
+        <span className="font-label-caps text-[10px] tracking-[2px] text-muted-foreground uppercase">
           ({count} {count === 1 ? "Review" : "Reviews"})
         </span>
       )}
@@ -92,53 +82,25 @@ export function ProductCard({ product }: { product: ProductItem }) {
 
   return (
     <div
-      className="ef-product-card group overflow-hidden transition-all duration-300"
-      style={{
-        backgroundColor: "var(--ef-surface-container-lowest)",
-        border: "1px solid var(--ef-outline-variant)",
-        borderRadius: "6px",
-        maxWidth: "320px",
-      }}
-      onMouseEnter={(e) => {
-        e.currentTarget.style.borderColor = "var(--ef-primary)"
-      }}
-      onMouseLeave={(e) => {
-        e.currentTarget.style.borderColor = "var(--ef-outline-variant)"
-      }}
+      className="ef-product-card group overflow-hidden transition-all duration-300 bg-card border border-border rounded-[6px] max-w-[320px] hover:border-primary"
     >
       {/* Image */}
       <Link href={`/products/${product.slug || product.id}`} className="block">
-        <div
-          className="relative aspect-square overflow-hidden"
-          style={{ backgroundColor: "var(--ef-surface-container)" }}
-        >
+        <div className="relative aspect-square overflow-hidden bg-accent">
           <img
             alt={product.alt}
             className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
             src={product.imageUrl}
           />
           {/* Hover Add-to-Cart Overlay */}
-          <div
-            className="ef-add-to-cart absolute inset-x-0 bottom-0 py-2.5 text-center backdrop-blur-md"
-            style={{ backgroundColor: "rgba(255, 255, 255, 0.8)" }}
-          >
+          <div className="ef-add-to-cart absolute inset-x-0 bottom-0 py-2.5 text-center backdrop-blur-md bg-white/80">
             <button
               onClick={(e) => {
                 e.preventDefault()
                 e.stopPropagation()
                 addToCart(product.id, 1, [])
               }}
-              className="cursor-pointer hover:underline"
-              style={{
-                fontFamily: "var(--font-hanken-grotesk), 'Hanken Grotesk', sans-serif",
-                fontSize: "10px",
-                fontWeight: 600,
-                letterSpacing: "2px",
-                textTransform: "uppercase",
-                color: "var(--ef-primary)",
-                background: "none",
-                border: "none",
-              }}
+              className="cursor-pointer hover:underline font-label-caps text-[10px] tracking-[2px] uppercase text-primary bg-transparent border-none"
             >
               Add to Cart — {formatPrice(displayPrice)}
             </button>
@@ -150,57 +112,22 @@ export function ProductCard({ product }: { product: ProductItem }) {
       <div className="p-3">
         <div className="flex justify-between items-start mb-1">
           <Link href={`/products/${product.slug || product.id}`}>
-            <h3
-              className="hover:underline"
-              style={{
-                fontFamily: "var(--font-playfair-display), 'Playfair Display', serif",
-                fontSize: "15px",
-                lineHeight: "1.3",
-                fontWeight: 500,
-                color: "var(--ef-on-surface)",
-              }}
-            >
+            <h3 className="hover:underline font-headline-card text-[15px] leading-snug text-foreground">
               {product.name}
             </h3>
           </Link>
           <div className="flex flex-col items-end gap-0.5 shrink-0 ml-3">
             {hasSale ? (
               <>
-                <span
-                  style={{
-                    fontFamily: "var(--font-hanken-grotesk), 'Hanken Grotesk', sans-serif",
-                    fontSize: "12px",
-                    fontWeight: 700,
-                    letterSpacing: "2px",
-                    textTransform: "uppercase",
-                    color: "var(--ef-error)",
-                  }}
-                >
+                <span className="font-label-caps text-[12px] tracking-[2px] uppercase text-destructive font-bold">
                   {formatPrice(product.salePrice!)}
                 </span>
-                <span
-                className="line-through"
-                  style={{
-                    fontFamily: "var(--font-hanken-grotesk), 'Hanken Grotesk', sans-serif",
-                    fontSize: "10px",
-                    fontWeight: 600,
-                    color: "var(--ef-on-surface-variant)",
-                  }}
-                >
+                <span className="line-through font-label-caps text-[10px] text-muted-foreground">
                   {formatPrice(product.basePrice!)}
                 </span>
               </>
             ) : (
-              <span
-                style={{
-                  fontFamily: "var(--font-hanken-grotesk), 'Hanken Grotesk', sans-serif",
-                  fontSize: "12px",
-                  fontWeight: 700,
-                  letterSpacing: "2px",
-                  textTransform: "uppercase",
-                  color: "var(--ef-primary)",
-                }}
-              >
+              <span className="font-label-caps text-[12px] tracking-[2px] uppercase text-primary font-bold">
                 {formatPrice(displayPrice)}
               </span>
             )}
@@ -211,16 +138,7 @@ export function ProductCard({ product }: { product: ProductItem }) {
         <StarRating rating={product.averageRating} count={product.reviewCount} />
 
         {/* Description */}
-        <p
-          className="line-clamp-1"
-          style={{
-            fontFamily: "var(--font-hanken-grotesk), 'Hanken Grotesk', sans-serif",
-            fontSize: "13px",
-            lineHeight: "1.5",
-            fontWeight: 300,
-            color: "var(--ef-secondary)",
-          }}
-        >
+        <p className="line-clamp-1 font-body-main text-[13px] font-light text-muted-foreground">
           {product.description}
         </p>
       </div>

@@ -22,7 +22,7 @@ export function Header() {
     <header className="bg-[var(--ef-surface-container-lowest)] sticky top-0 z-50 border-b border-[var(--ef-outline-variant)]">
       <div className="flex justify-between items-center h-[64px] w-full px-8 md:px-12 lg:px-16">
         <div className="flex-1 flex justify-start items-center">
-          <Link href="/" className="flex items-center gap-2 text-[var(--ef-on-surface)] cursor-pointer">
+          <Link href="/" className="flex items-center gap-2 text-foreground cursor-pointer">
             <LogoIcon className="w-6 h-6" />
             <div 
               className="font-semibold"
@@ -43,7 +43,7 @@ export function Header() {
             href="/shop" 
             className={cn(
               "pb-1 cursor-pointer transition-colors duration-200 uppercase",
-              pathname === "/shop" ? "text-[var(--ef-primary)] border-b-2 border-[var(--ef-primary)]" : "text-[var(--ef-on-surface-variant)] hover:text-[var(--ef-primary-container)]"
+              pathname === "/shop" ? "text-primary border-b-2 border-primary" : "text-muted-foreground hover:text-foreground"
             )}
             style={{
               fontFamily: "var(--font-hanken-grotesk), 'Hanken Grotesk', sans-serif",
@@ -58,7 +58,7 @@ export function Header() {
             href="/contact" 
             className={cn(
               "pb-1 cursor-pointer transition-colors duration-200 uppercase",
-              pathname === "/contact" ? "text-[var(--ef-primary)] border-b-2 border-[var(--ef-primary)]" : "text-[var(--ef-on-surface-variant)] hover:text-[var(--ef-primary-container)]"
+              pathname === "/contact" ? "text-primary border-b-2 border-primary" : "text-muted-foreground hover:text-foreground"
             )}
             style={{
               fontFamily: "var(--font-hanken-grotesk), 'Hanken Grotesk', sans-serif",
@@ -73,7 +73,7 @@ export function Header() {
             href="/about" 
             className={cn(
               "pb-1 cursor-pointer transition-colors duration-200 uppercase",
-              pathname === "/about" ? "text-[var(--ef-primary)] border-b-2 border-[var(--ef-primary)]" : "text-[var(--ef-on-surface-variant)] hover:text-[var(--ef-primary-container)]"
+              pathname === "/about" ? "text-primary border-b-2 border-primary" : "text-muted-foreground hover:text-foreground"
             )}
             style={{
               fontFamily: "var(--font-hanken-grotesk), 'Hanken Grotesk', sans-serif",
@@ -87,13 +87,13 @@ export function Header() {
         </nav>
         
         <div className="flex-1 flex justify-end items-center gap-[var(--ef-stack-sm)] md:gap-[var(--ef-stack-md)]">
-          <Link href="/wishlist" className="relative text-[var(--ef-on-surface-variant)] cursor-pointer hover:text-[var(--ef-primary)] transition-colors flex items-center justify-center w-10 h-10">
+          <Link href="/wishlist" className="relative text-muted-foreground cursor-pointer hover:text-primary transition-colors flex items-center justify-center w-10 h-10">
             <span className="material-symbols-outlined">favorite</span>
           </Link>
-          <Link href="/cart" className="relative text-[var(--ef-on-surface-variant)] cursor-pointer hover:text-[var(--ef-primary)] transition-colors flex items-center justify-center w-10 h-10">
+          <Link href="/cart" className="relative text-muted-foreground cursor-pointer hover:text-primary transition-colors flex items-center justify-center w-10 h-10">
             <span className="material-symbols-outlined">shopping_cart</span>
             {itemCount > 0 && (
-              <span className="absolute top-0 right-0 bg-[var(--ef-primary)] text-white text-[10px] font-bold rounded-full h-4 w-4 flex items-center justify-center">
+              <span className="absolute top-0 right-0 bg-primary text-primary-foreground text-[10px] font-bold rounded-full h-4 w-4 flex items-center justify-center">
                 {itemCount}
               </span>
             )}
@@ -102,15 +102,15 @@ export function Header() {
           {/* Mobile Menu */}
           <Sheet>
             <SheetTrigger asChild>
-              <button className="md:hidden flex items-center justify-center w-10 h-10 text-[var(--ef-on-surface-variant)] hover:text-[var(--ef-primary)] transition-colors">
+              <button className="md:hidden flex items-center justify-center w-10 h-10 text-muted-foreground hover:text-primary transition-colors">
                 <span className="material-symbols-outlined">menu</span>
                 <span className="sr-only">Toggle menu</span>
               </button>
             </SheetTrigger>
-            <SheetContent side="right" className="w-[280px] sm:w-[320px] p-6 flex flex-col h-full bg-[var(--ef-surface-container-lowest)] border-l border-[var(--ef-outline-variant)]">
+            <SheetContent side="right" className="w-[280px] sm:w-[320px] p-6 flex flex-col h-full bg-card border-l border-border">
               <SheetHeader className="mb-6 text-left">
                 <SheetTitle>
-                  <Link href="/" className="flex items-center gap-2 text-[var(--ef-on-surface)] cursor-pointer">
+                  <Link href="/" className="flex items-center gap-2 text-foreground cursor-pointer">
                     <LogoIcon className="w-6 h-6" />
                     <div 
                       className="font-semibold"
@@ -138,7 +138,7 @@ export function Header() {
                       href={href}
                       className={cn(
                         "font-medium px-4 py-3 rounded-md transition-colors",
-                        pathname === href ? "bg-[var(--ef-surface-container-highest)] text-[var(--ef-primary)]" : "text-[var(--ef-on-surface)] hover:bg-[var(--ef-surface-container)]"
+                        pathname === href ? "bg-muted text-primary" : "text-foreground hover:bg-muted"
                       )}
                       style={{
                         fontFamily: "var(--font-hanken-grotesk), 'Hanken Grotesk', sans-serif",

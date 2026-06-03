@@ -16,9 +16,7 @@ export async function initDeviceSession(): Promise<void> {
   try {
     // 1️⃣ Retrieve IDs from cookies, fallback to localStorage.
     let deviceId = retrieveId(DEVICE_ID_COOKIE);
-    console.log("///////////////////deviceId", deviceId)
     let sessionId = retrieveId(SESSION_ID_COOKIE);
-    console.log("///////////////////sessionId", sessionId)
 
     // 2️⃣ If missing, generate new UUIDs.
     let isNewSession = false;
@@ -37,24 +35,16 @@ export async function initDeviceSession(): Promise<void> {
 
     // 4️⃣ Collect fingerprint and derive metadata.
     const fp = collectFingerprint();
-    console.log("///////////////////fp", fp)
     const deviceType = detectDeviceType(fp);
-    console.log("///////////////////deviceType", deviceType)
     const os = detectOS(fp);
-    console.log("///////////////////os", os)
     const browser = detectBrowser(fp);
-    console.log("///////////////////browser", browser)
     const fingerprint = await fingerprintHash(fp);
-    console.log("///////////////////fingerprint", fingerprint)
 
     const now = new Date().toISOString();
-    console.log("///////////////////now", now)
     const pageUrl = window.location.href;
-    console.log("///////////////////pageUrl", pageUrl)
     const referrer = document.referrer || null;
-    console.log("///////////////////referrer", referrer)
 
-    
+
 
     // 5️⃣ Upsert (or update) the session record on every init.
     const { data: sessionData, error: sessionError } = await supabase

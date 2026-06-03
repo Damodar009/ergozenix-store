@@ -40,31 +40,14 @@ function FilterDropdown({
     <div ref={ref} className="relative">
       <button
         onClick={() => setOpen(!open)}
-        className="flex items-center gap-2 px-4 py-2 cursor-pointer transition-colors"
-        style={{
-          border: "1px solid var(--ef-outline-variant)",
-          backgroundColor: "var(--ef-surface-container-lowest)",
-          color: "var(--ef-on-surface)",
-          fontFamily: "var(--font-hanken-grotesk), 'Hanken Grotesk', sans-serif",
-          fontSize: "11px",
-          fontWeight: 600,
-          letterSpacing: "2px",
-          textTransform: "uppercase" as const,
-        }}
-        onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = "var(--ef-surface-container)" }}
-        onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = "var(--ef-surface-container-lowest)" }}
+        className="flex items-center gap-2 px-4 py-2 cursor-pointer transition-colors border border-border bg-card text-foreground font-label-caps text-[11px] uppercase tracking-[2px] hover:bg-accent"
       >
         {label}
         <MIcon name="keyboard_arrow_down" size={16} />
       </button>
       {open && (
         <div
-          className="absolute top-full left-0 mt-1 z-50 min-w-[200px] shadow-lg"
-          style={{
-            backgroundColor: "var(--ef-surface-container-lowest)",
-            border: "1px solid var(--ef-outline-variant)",
-            borderRadius: "4px",
-          }}
+          className="absolute top-full left-0 mt-1 z-50 min-w-[200px] shadow-lg bg-card border border-border rounded-[4px]"
         >
           {children}
         </div>
@@ -86,20 +69,10 @@ function FilterOption({
   return (
     <button
       onClick={onClick}
-      className="w-full text-left px-4 py-2.5 transition-colors cursor-pointer"
-      style={{
-        fontFamily: "var(--font-hanken-grotesk), 'Hanken Grotesk', sans-serif",
-        fontSize: "13px",
-        fontWeight: active ? 600 : 300,
-        color: active ? "var(--ef-primary)" : "var(--ef-on-surface)",
-        backgroundColor: active ? "var(--ef-primary-fixed)" : "transparent",
-      }}
-      onMouseEnter={(e) => {
-        if (!active) e.currentTarget.style.backgroundColor = "var(--ef-surface-container)"
-      }}
-      onMouseLeave={(e) => {
-        if (!active) e.currentTarget.style.backgroundColor = "transparent"
-      }}
+      className={`w-full text-left px-4 py-2.5 transition-colors cursor-pointer font-body-main text-[13px] ${active
+        ? "font-semibold text-primary bg-primary/10"
+        : "font-light text-foreground bg-transparent hover:bg-muted"
+        }`}
     >
       {label}
     </button>
@@ -238,14 +211,7 @@ export default function ShopPage() {
     : "All Products"
 
   return (
-    <main
-      className="pb-[var(--ef-section-padding)]"
-      style={{
-        backgroundColor: "var(--ef-surface)",
-        color: "var(--ef-on-surface)",
-        fontFamily: "var(--font-hanken-grotesk), 'Hanken Grotesk', sans-serif",
-      }}
-    >
+    <main className="pb-[var(--ef-section-padding)] bg-background text-foreground font-body-main">
       {/* ─── Page Title Section ─── */}
       {/* <section
         className="py-[var(--ef-stack-lg)] px-8 md:px-12 lg:px-16"
@@ -297,11 +263,7 @@ export default function ShopPage() {
 
       {/* ─── Filter Bar ─── */}
       <section
-        className="sticky top-[64px] z-40 backdrop-blur-sm py-[var(--ef-stack-md)] px-8 md:px-12 lg:px-16 flex flex-wrap items-center justify-between gap-[var(--ef-stack-md)] mb-[var(--ef-stack-lg)]"
-        style={{
-          backgroundColor: "rgba(253, 249, 243, 0.95)", // ef-surface with opacity
-          borderBottom: "1px solid var(--ef-outline-variant)",
-        }}
+        className="sticky top-[64px] z-40 backdrop-blur-sm py-[var(--ef-stack-md)] px-8 md:px-12 lg:px-16 flex flex-wrap items-center justify-between gap-[var(--ef-stack-md)] mb-[var(--ef-stack-lg)] bg-background/95 border-b border-border"
       >
         <div className="flex flex-wrap items-center gap-[var(--ef-stack-md)]">
           {/* Category Filter */}
@@ -358,22 +320,13 @@ export default function ShopPage() {
           {Array.from({ length: 6 }).map((_, i) => (
             <div
               key={i}
-              className="animate-pulse overflow-hidden"
-              style={{
-                borderRadius: "6px",
-                border: "1px solid var(--ef-outline-variant)",
-                backgroundColor: "var(--ef-surface-container-lowest)",
-                maxWidth: "320px",
-              }}
+              className="animate-pulse overflow-hidden bg-card border border-border rounded-[6px] max-w-[320px]"
             >
-              <div
-                className="aspect-square"
-                style={{ backgroundColor: "var(--ef-surface-container)" }}
-              />
+              <div className="aspect-square bg-muted" />
               <div className="p-3 space-y-2">
-                <div className="h-4 rounded" style={{ backgroundColor: "var(--ef-surface-container-high)", width: "70%" }} />
-                <div className="h-3 rounded" style={{ backgroundColor: "var(--ef-surface-container)", width: "40%" }} />
-                <div className="h-3 rounded" style={{ backgroundColor: "var(--ef-surface-container)", width: "100%" }} />
+                <div className="h-4 rounded bg-muted w-[70%]" />
+                <div className="h-3 rounded bg-muted w-[40%]" />
+                <div className="h-3 rounded bg-muted w-[100%]" />
               </div>
             </div>
           ))}
@@ -381,46 +334,18 @@ export default function ShopPage() {
       ) : error ? (
         /* Error State */
         <div className="flex flex-col items-center justify-center py-20 text-center">
-          <span
-            className="material-symbols-outlined mb-4"
-            style={{ fontSize: 48, color: "var(--ef-error)" }}
-          >
+          <span className="material-symbols-outlined mb-4 text-[48px] text-destructive">
             error_outline
           </span>
-          <p
-            className="mb-2"
-            style={{
-              fontFamily: "var(--font-playfair-display), 'Playfair Display', serif",
-              fontSize: "20px",
-              fontWeight: 500,
-              color: "var(--ef-on-surface)",
-            }}
-          >
+          <p className="mb-2 font-headline-card text-[20px] font-medium text-foreground">
             Something went wrong
           </p>
-          <p
-            className="mb-4"
-            style={{
-              fontSize: "15px",
-              fontWeight: 300,
-              color: "var(--ef-on-surface-variant)",
-            }}
-          >
+          <p className="mb-4 font-body-main text-[15px] font-light text-muted-foreground">
             {error}
           </p>
           <button
             onClick={fetchProducts}
-            className="cursor-pointer hover:underline"
-            style={{
-              fontFamily: "var(--font-hanken-grotesk), 'Hanken Grotesk', sans-serif",
-              fontSize: "11px",
-              fontWeight: 600,
-              letterSpacing: "2px",
-              textTransform: "uppercase",
-              color: "var(--ef-primary)",
-              background: "none",
-              border: "none",
-            }}
+            className="cursor-pointer hover:underline font-label-caps text-[11px] font-semibold tracking-[2px] uppercase text-primary bg-transparent border-none"
           >
             Try Again
           </button>
@@ -428,31 +353,13 @@ export default function ShopPage() {
       ) : products.length === 0 ? (
         /* Empty State */
         <div className="flex flex-col items-center justify-center py-20 text-center">
-          <span
-            className="material-symbols-outlined mb-4"
-            style={{ fontSize: 48, color: "var(--ef-on-surface-variant)" }}
-          >
+          <span className="material-symbols-outlined mb-4 text-[48px] text-muted-foreground">
             inventory_2
           </span>
-          <p
-            className="mb-2"
-            style={{
-              fontFamily: "var(--font-playfair-display), 'Playfair Display', serif",
-              fontSize: "20px",
-              fontWeight: 500,
-              color: "var(--ef-on-surface)",
-            }}
-          >
+          <p className="mb-2 font-headline-card text-[20px] font-medium text-foreground">
             No Products Found
           </p>
-          <p
-            className="mb-4"
-            style={{
-              fontSize: "15px",
-              fontWeight: 300,
-              color: "var(--ef-on-surface-variant)",
-            }}
-          >
+          <p className="mb-4 font-body-main text-[15px] font-light text-muted-foreground">
             Try adjusting your filters or price range.
           </p>
           <button
@@ -462,17 +369,7 @@ export default function ShopPage() {
               setSortBy("newest")
               setPage(1)
             }}
-            className="cursor-pointer hover:underline"
-            style={{
-              fontFamily: "var(--font-hanken-grotesk), 'Hanken Grotesk', sans-serif",
-              fontSize: "11px",
-              fontWeight: 600,
-              letterSpacing: "2px",
-              textTransform: "uppercase",
-              color: "var(--ef-primary)",
-              background: "none",
-              border: "none",
-            }}
+            className="cursor-pointer hover:underline font-label-caps text-[11px] font-semibold tracking-[2px] uppercase text-primary bg-transparent border-none"
           >
             Clear All Filters
           </button>

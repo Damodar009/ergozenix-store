@@ -1,55 +1,36 @@
 "use client"
 
-import { Mail, Phone, MapPin } from "lucide-react"
-
 export function ContactDetails() {
   return (
-    <div className="flex flex-col gap-8">
-      <div>
-        <h3 className="text-xl font-bold mb-4 text-foreground">Contact Information</h3>
-        <div className="flex flex-col gap-4">
-          <div className="flex items-center gap-3">
-            <Mail className="h-6 w-6 text-primary" />
-            <a 
-              className="text-base text-foreground hover:text-primary transition-colors" 
-              href="mailto:ergozenix.store@gmail.com"
-            >
-              ergozenix.store@gmail.com
-            </a>
-          </div>
-          <div className="flex items-center gap-3">
-            <Phone className="h-6 w-6 text-primary" />
-            <a 
-              className="text-base text-[#111718] dark:text-white hover:text-primary dark:hover:text-primary transition-colors" 
-              href="tel:+9779768602990"
-            >
-              +977 9768602990
-            </a>
-          </div>
-          <div className="flex items-center gap-3">
-            <MapPin className="h-6 w-6 text-primary" />
-            <a 
-              className="text-base text-[#111718] dark:text-white hover:text-primary dark:hover:text-primary transition-colors" 
-              href="https://www.google.com/maps/place/Basundhara+Kathmandu"
-            >
-              Basundhara, Kathmandu
-            </a>
+    <div className="flex flex-col justify-between space-y-12">
+      <div className="space-y-10">
+        {/* Address */}
+        <div>
+          <span className="font-label-caps text-label-caps text-primary mb-[var(--ef-stack-sm)] block">
+            REGISTERED ADDRESS
+          </span>
+          <div className="flex gap-4">
+            <span className="material-symbols-outlined text-primary shrink-0">location_on</span>
+            <p className="font-body-main text-body-main text-secondary-foreground leading-relaxed">
+              #114, Ramtekdi Industrial Estate,<br />
+              Hadapsar, Pune 411013,<br />
+              Maharashtra, India.
+            </p>
           </div>
         </div>
-      </div>
-      <div>
-        <h3 className="text-xl font-bold mb-4 text-[#111718] dark:text-white">Our Location</h3>
-        <div className="aspect-w-16 aspect-h-9 rounded-lg overflow-hidden">
-          <iframe 
-            allowFullScreen 
-            data-location="Basundhara, Kathmandu" 
-            height="100%" 
-            loading="lazy" 
-            src="https://maps.google.com/maps?q=27.7405123,85.3350013&t=&z=15&ie=UTF8&iwloc=&output=embed"
-            style={{ border: 0 }} 
+
+        {/* Map */}
+        <div className="relative w-full h-48 bg-muted rounded-lg overflow-hidden border border-border group">
+          <iframe
+            allowFullScreen
+            data-location="Ramtekdi Industrial Estate, Pune"
+            height="100%"
+            loading="lazy"
+            src="https://maps.google.com/maps?q=Ramtekdi+Industrial+Estate,+Hadapsar,+Pune&t=&z=14&ie=UTF8&iwloc=&output=embed"
+            style={{ border: 0 }}
             width="100%"
             title="Map Location"
-            className="w-full h-64"
+            className="w-full h-full grayscale opacity-80 group-hover:grayscale-0 group-hover:opacity-100 transition-all duration-700"
           />
         </div>
       </div>
