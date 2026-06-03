@@ -1,7 +1,7 @@
 "use client"
 
 import { createContext, useContext, useEffect, useState, useCallback, useMemo } from "react"
-import { supabase } from "@/lib/supabase/client"
+import { supabase } from "@/services/supabase"
 import { retrieveId } from "@/lib/cookieUtils"
 import { initDeviceSession } from "@/lib/deviceSession"
 import { CartService, type CartItem as ServiceCartItem } from "@/services/cart-service"

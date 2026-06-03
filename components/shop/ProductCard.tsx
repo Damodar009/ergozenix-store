@@ -59,7 +59,7 @@ function StarRating({ rating = 0, count = 0 }: { rating?: number; count?: number
   }
 
   return (
-    <div className="flex items-center gap-1 mb-4">
+    <div className="flex items-center gap-1 mb-2">
       <div className="flex" style={{ color: "var(--ef-primary)" }}>
         {stars}
       </div>
@@ -97,6 +97,7 @@ export function ProductCard({ product }: { product: ProductItem }) {
         backgroundColor: "var(--ef-surface-container-lowest)",
         border: "1px solid var(--ef-outline-variant)",
         borderRadius: "6px",
+        maxWidth: "320px",
       }}
       onMouseEnter={(e) => {
         e.currentTarget.style.borderColor = "var(--ef-primary)"
@@ -108,7 +109,7 @@ export function ProductCard({ product }: { product: ProductItem }) {
       {/* Image */}
       <Link href={`/products/${product.slug || product.id}`} className="block">
         <div
-          className="relative aspect-[4/5] overflow-hidden"
+          className="relative aspect-square overflow-hidden"
           style={{ backgroundColor: "var(--ef-surface-container)" }}
         >
           <img
@@ -118,7 +119,7 @@ export function ProductCard({ product }: { product: ProductItem }) {
           />
           {/* Hover Add-to-Cart Overlay */}
           <div
-            className="ef-add-to-cart absolute inset-x-0 bottom-0 py-4 text-center backdrop-blur-md"
+            className="ef-add-to-cart absolute inset-x-0 bottom-0 py-2.5 text-center backdrop-blur-md"
             style={{ backgroundColor: "rgba(255, 255, 255, 0.8)" }}
           >
             <button
@@ -130,7 +131,7 @@ export function ProductCard({ product }: { product: ProductItem }) {
               className="cursor-pointer hover:underline"
               style={{
                 fontFamily: "var(--font-hanken-grotesk), 'Hanken Grotesk', sans-serif",
-                fontSize: "11px",
+                fontSize: "10px",
                 fontWeight: 600,
                 letterSpacing: "2px",
                 textTransform: "uppercase",
@@ -146,15 +147,15 @@ export function ProductCard({ product }: { product: ProductItem }) {
       </Link>
 
       {/* Card Info */}
-      <div className="p-6">
-        <div className="flex justify-between items-start mb-2">
+      <div className="p-3">
+        <div className="flex justify-between items-start mb-1">
           <Link href={`/products/${product.slug || product.id}`}>
             <h3
               className="hover:underline"
               style={{
                 fontFamily: "var(--font-playfair-display), 'Playfair Display', serif",
-                fontSize: "20px",
-                lineHeight: "1.4",
+                fontSize: "15px",
+                lineHeight: "1.3",
                 fontWeight: 500,
                 color: "var(--ef-on-surface)",
               }}
@@ -211,11 +212,11 @@ export function ProductCard({ product }: { product: ProductItem }) {
 
         {/* Description */}
         <p
-          className="line-clamp-2"
+          className="line-clamp-1"
           style={{
             fontFamily: "var(--font-hanken-grotesk), 'Hanken Grotesk', sans-serif",
-            fontSize: "15px",
-            lineHeight: "1.6",
+            fontSize: "13px",
+            lineHeight: "1.5",
             fontWeight: 300,
             color: "var(--ef-secondary)",
           }}

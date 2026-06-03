@@ -7,10 +7,10 @@ export type RatingDistribution = {
   percent: number
 }
 
-export function ReviewSummary({ 
-  averageRating, 
-  totalReviews, 
-  ratingDistribution 
+export function ReviewSummary({
+  averageRating,
+  totalReviews,
+  ratingDistribution
 }: {
   averageRating: number
   totalReviews: number
@@ -44,8 +44,8 @@ export function ReviewSummary({
                 {rating}
               </p>
               <div className="flex h-2 flex-1 overflow-hidden rounded-full bg-gray-200 dark:bg-gray-700">
-                <div 
-                  className="rounded-full bg-[#00B5D8]" 
+                <div
+                  className="rounded-full bg-[#00B5D8]"
                   style={{ width: `${percent}%` }}
                 ></div>
               </div>

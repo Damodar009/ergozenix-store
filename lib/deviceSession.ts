@@ -1,5 +1,5 @@
 // lib/deviceSession.ts
-import { supabase } from '@/lib/supabase/client';
+import { supabase } from '@/services/supabase';
 import { getCookie, setCookie, retrieveId, storeId } from '@/lib/cookieUtils';
 import { collectFingerprint, detectDeviceType, detectOS, detectBrowser, fingerprintHash } from '@/lib/deviceFingerprint';
 

@@ -1,4 +1,4 @@
-import { supabase } from '@/lib/supabase/client'
+import { supabase } from '@/services/supabase'
 
 export interface CartAttribute {
   id?: number

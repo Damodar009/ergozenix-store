@@ -2,13 +2,9 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { useTheme } from "@/providers/theme-provider"
-import { useEffect, useState } from "react"
-import { cn } from "@/lib/utils"
 import { LogoIcon } from "@/components/logo-icon"
-import CartButtons from "./cart-button"
-import { Button } from "@/components/ui/button"
-import { Moon, Sun, Menu } from "lucide-react"
+import { cn } from "@/lib/utils"
+import { useCart } from "@/context/cart-context"
 import {
   Sheet,
   SheetContent,
@@ -20,113 +16,148 @@ import {
 
 export function Header() {
   const pathname = usePathname()
-  const { theme, setTheme } = useTheme()
-  const [mounted, setMounted] = useState(false)
-
-  // ✅ Prevent theme mismatch during hydration
-  useEffect(() => {
-    setMounted(true)
-  }, [])
-
-  const navLinkClass = (href: string, base?: string) =>
-    cn(
-      "text-sm font-medium leading-normal",
-      base,
-      pathname === href
-        ? "text-primary"
-        : "hover:text-primary dark:hover:text-primary"
-    )
+  const { itemCount } = useCart()
 
   return (
-    <header className="flex items-center justify-between whitespace-nowrap border-b border-border px-6 md:px-10 py-4 bg-background sticky top-0 z-10">
-      <Link href="/" className="flex items-center gap-4 text-foreground">
-        <LogoIcon />
-        <h2 className="text-xl font-bold leading-tight tracking-[-0.015em]">
-          ErgoZenix
-        </h2>
-      </Link>
-
-      <nav className="hidden md:flex items-center gap-9 text-foreground">
-        <Link className={navLinkClass("/")} href="/">
-          Home
-        </Link>
-        <Link className={navLinkClass("/shop")} href="/shop">
-          Shop
-        </Link>
-        <Link className={navLinkClass("/about")} href="/about">
-          About
-        </Link>
-        <Link className={navLinkClass("/contact")} href="/contact">
-          Contact
-        </Link>
-      </nav>
-
-      <div className="flex items-center gap-3">
-        <CartButtons />
-
-        {/* ✅ Only render theme toggle after mounted */}
-        {mounted && (
-          <Button
-            variant="ghost"
-            size="icon"
-            className="rounded-full h-10 w-10 bg-secondary text-foreground hover:bg-secondary/80 hidden md:flex" 
-            onClick={() => {
-              console.log("/////////////////",theme)
-              setTheme(theme === "dark" ? "light" : "dark")
-            }}
-            aria-label="Toggle theme"
-          >
-            {theme === "dark" ? (
-              <Sun className="h-5 w-5" />
-            ) : (
-              <Moon className="h-5 w-5" />
+    <header className="bg-[var(--ef-surface-container-lowest)] sticky top-0 z-50 border-b border-[var(--ef-outline-variant)]">
+      <div className="flex justify-between items-center h-[64px] w-full px-8 md:px-12 lg:px-16">
+        <div className="flex-1 flex justify-start items-center">
+          <Link href="/" className="flex items-center gap-2 text-[var(--ef-on-surface)] cursor-pointer">
+            <LogoIcon className="w-6 h-6" />
+            <div 
+              className="font-semibold"
+              style={{
+                fontFamily: "var(--font-hanken-grotesk), 'Hanken Grotesk', sans-serif",
+                fontSize: "13px",
+                letterSpacing: "3px",
+                textTransform: "uppercase",
+              }}
+            >
+              ErgoZenix
+            </div>
+          </Link>
+        </div>
+        
+        <nav className="hidden md:flex flex-none justify-center gap-[var(--ef-stack-lg)] h-full items-center">
+          <Link 
+            href="/shop" 
+            className={cn(
+              "pb-1 cursor-pointer transition-colors duration-200 uppercase",
+              pathname === "/shop" ? "text-[var(--ef-primary)] border-b-2 border-[var(--ef-primary)]" : "text-[var(--ef-on-surface-variant)] hover:text-[var(--ef-primary-container)]"
             )}
-          </Button>
-        )}
+            style={{
+              fontFamily: "var(--font-hanken-grotesk), 'Hanken Grotesk', sans-serif",
+              fontSize: "13px",
+              fontWeight: 600,
+              letterSpacing: "2px",
+            }}
+          >
+            Shop
+          </Link>
+          <Link 
+            href="/contact" 
+            className={cn(
+              "pb-1 cursor-pointer transition-colors duration-200 uppercase",
+              pathname === "/contact" ? "text-[var(--ef-primary)] border-b-2 border-[var(--ef-primary)]" : "text-[var(--ef-on-surface-variant)] hover:text-[var(--ef-primary-container)]"
+            )}
+            style={{
+              fontFamily: "var(--font-hanken-grotesk), 'Hanken Grotesk', sans-serif",
+              fontSize: "13px",
+              fontWeight: 600,
+              letterSpacing: "2px",
+            }}
+          >
+            Contact
+          </Link>
+          <Link 
+            href="/about" 
+            className={cn(
+              "pb-1 cursor-pointer transition-colors duration-200 uppercase",
+              pathname === "/about" ? "text-[var(--ef-primary)] border-b-2 border-[var(--ef-primary)]" : "text-[var(--ef-on-surface-variant)] hover:text-[var(--ef-primary-container)]"
+            )}
+            style={{
+              fontFamily: "var(--font-hanken-grotesk), 'Hanken Grotesk', sans-serif",
+              fontSize: "13px",
+              fontWeight: 600,
+              letterSpacing: "2px",
+            }}
+          >
+            About
+          </Link>
+        </nav>
+        
+        <div className="flex-1 flex justify-end items-center gap-[var(--ef-stack-sm)] md:gap-[var(--ef-stack-md)]">
+          <Link href="/wishlist" className="relative text-[var(--ef-on-surface-variant)] cursor-pointer hover:text-[var(--ef-primary)] transition-colors flex items-center justify-center w-10 h-10">
+            <span className="material-symbols-outlined">favorite</span>
+          </Link>
+          <Link href="/cart" className="relative text-[var(--ef-on-surface-variant)] cursor-pointer hover:text-[var(--ef-primary)] transition-colors flex items-center justify-center w-10 h-10">
+            <span className="material-symbols-outlined">shopping_cart</span>
+            {itemCount > 0 && (
+              <span className="absolute top-0 right-0 bg-[var(--ef-primary)] text-white text-[10px] font-bold rounded-full h-4 w-4 flex items-center justify-center">
+                {itemCount}
+              </span>
+            )}
+          </Link>
 
-        {/* Mobile Menu */}
-        <Sheet>
-          <SheetTrigger asChild>
-            <Button variant="ghost" size="icon" className="md:hidden">
-              <Menu className="h-6 w-6" />
-              <span className="sr-only">Toggle menu</span>
-            </Button>
-          </SheetTrigger>
-          <SheetContent side="right" className="w-[280px] sm:w-[320px] p-6 flex flex-col h-full">
-            <SheetHeader className="mb-6 text-left">
-              <SheetTitle>
-                <Link href="/" className="flex items-center gap-2">
-                  <LogoIcon className="h-6 w-6" />
-                  <span className="font-bold text-xl">ErgoZenix</span>
-                </Link>
-              </SheetTitle>
-            </SheetHeader>
-            
-            <nav className="flex flex-col gap-1 flex-1">
-              {[
-                { href: "/", label: "Home" },
-                { href: "/shop", label: "Shop" },
-                { href: "/about", label: "About" },
-                { href: "/contact", label: "Contact" },
-              ].map(({ href, label }) => (
-                <SheetClose key={href} asChild>
-                  <Link
-                    href={href}
-                    className={cn(
-                      "text-lg font-medium px-4 py-3 rounded-md transition-colors hover:bg-secondary/50",
-                      pathname === href ? "bg-secondary/80 text-primary" : "text-foreground"
-                    )}
-                  >
-                    {label}
+          {/* Mobile Menu */}
+          <Sheet>
+            <SheetTrigger asChild>
+              <button className="md:hidden flex items-center justify-center w-10 h-10 text-[var(--ef-on-surface-variant)] hover:text-[var(--ef-primary)] transition-colors">
+                <span className="material-symbols-outlined">menu</span>
+                <span className="sr-only">Toggle menu</span>
+              </button>
+            </SheetTrigger>
+            <SheetContent side="right" className="w-[280px] sm:w-[320px] p-6 flex flex-col h-full bg-[var(--ef-surface-container-lowest)] border-l border-[var(--ef-outline-variant)]">
+              <SheetHeader className="mb-6 text-left">
+                <SheetTitle>
+                  <Link href="/" className="flex items-center gap-2 text-[var(--ef-on-surface)] cursor-pointer">
+                    <LogoIcon className="w-6 h-6" />
+                    <div 
+                      className="font-semibold"
+                      style={{
+                        fontFamily: "var(--font-hanken-grotesk), 'Hanken Grotesk', sans-serif",
+                        fontSize: "13px",
+                        letterSpacing: "3px",
+                        textTransform: "uppercase",
+                      }}
+                    >
+                      ErgoZenix
+                    </div>
                   </Link>
-                </SheetClose>
-              ))}
-            </nav>
-
-
-          </SheetContent>
-        </Sheet>
+                </SheetTitle>
+              </SheetHeader>
+              
+              <nav className="flex flex-col gap-1 flex-1 mt-4">
+                {[
+                  { href: "/shop", label: "Shop" },
+                  { href: "/contact", label: "Contact" },
+                  { href: "/about", label: "About" },
+                ].map(({ href, label }) => (
+                  <SheetClose key={href} asChild>
+                    <Link
+                      href={href}
+                      className={cn(
+                        "font-medium px-4 py-3 rounded-md transition-colors",
+                        pathname === href ? "bg-[var(--ef-surface-container-highest)] text-[var(--ef-primary)]" : "text-[var(--ef-on-surface)] hover:bg-[var(--ef-surface-container)]"
+                      )}
+                      style={{
+                        fontFamily: "var(--font-hanken-grotesk), 'Hanken Grotesk', sans-serif",
+                        textTransform: "uppercase",
+                        letterSpacing: "2px",
+                        fontSize: "13px",
+                        fontWeight: 600
+                      }}
+                    >
+                      {label}
+                    </Link>
+                  </SheetClose>
+                ))}
+              </nav>
+            </SheetContent>
+          </Sheet>
+        </div>
       </div>
     </header>
   )
 }
+

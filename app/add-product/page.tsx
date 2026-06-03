@@ -4,7 +4,7 @@ import { useEffect, useState, useRef } from "react"
 import { useRouter } from "next/navigation"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { supabase } from '@/lib/supabase/client'
+import { supabase } from '@/services/supabase'
 import * as z from "zod"
 import {
   Plus,

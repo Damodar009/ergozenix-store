@@ -27,44 +27,24 @@ export function Pagination({ currentPage, totalPages, onPageChange, loading }: P
     return pages
   }
 
-  const btnBase: React.CSSProperties = {
-    width: 40,
-    height: 40,
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    border: "1px solid var(--ef-outline-variant)",
-    color: "var(--ef-on-surface)",
+  const baseFontStyles = {
     fontFamily: "var(--font-hanken-grotesk), 'Hanken Grotesk', sans-serif",
     fontSize: "11px",
     fontWeight: 600,
     letterSpacing: "2px",
-    textTransform: "uppercase",
-    cursor: "pointer",
-    transition: "background-color 0.2s, color 0.2s",
-    background: "transparent",
-  }
-
-  const activeBtnStyle: React.CSSProperties = {
-    ...btnBase,
-    borderColor: "var(--ef-primary)",
-    backgroundColor: "var(--ef-primary)",
-    color: "var(--ef-on-primary)",
+    textTransform: "uppercase" as const,
   }
 
   return (
-    <div className="flex justify-center items-center gap-[var(--ef-stack-md)]" style={{ marginTop: "var(--ef-section-padding)" }}>
+    <div className="mt-[var(--ef-section-padding)] flex justify-center items-center gap-[var(--ef-stack-md)]">
       {/* Previous */}
       <button
-        style={btnBase}
         disabled={currentPage === 1 || loading}
         onClick={() => onPageChange(currentPage - 1)}
-        className="hover:bg-[var(--ef-surface-container)] disabled:opacity-40 disabled:cursor-not-allowed"
+        className="w-10 h-10 flex items-center justify-center border border-[var(--ef-outline-variant)] text-[var(--ef-on-surface)] hover:bg-[var(--ef-surface-container)] transition-colors disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
         aria-label="Previous page"
       >
-        <span className="material-symbols-outlined" style={{ fontSize: 20 }}>
-          chevron_left
-        </span>
+        <span className="material-symbols-outlined">chevron_left</span>
       </button>
 
       {/* Page Numbers */}
@@ -72,18 +52,23 @@ export function Pagination({ currentPage, totalPages, onPageChange, loading }: P
         page === "..." ? (
           <span
             key={`ellipsis-${idx}`}
-            style={{ ...btnBase, border: "none", cursor: "default" }}
+            className="w-10 h-10 flex items-center justify-center text-[var(--ef-on-surface)]"
+            style={baseFontStyles}
           >
             …
           </span>
         ) : (
           <button
             key={page}
-            style={page === currentPage ? activeBtnStyle : btnBase}
             onClick={() => onPageChange(page as number)}
             disabled={loading}
-            className={page !== currentPage ? "hover:bg-[var(--ef-surface-container)]" : ""}
+            className={`w-10 h-10 flex items-center justify-center transition-colors disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer ${
+              page === currentPage
+                ? "border border-[var(--ef-primary)] bg-[var(--ef-primary)] text-[var(--ef-on-primary)]"
+                : "border border-[var(--ef-outline-variant)] text-[var(--ef-on-surface)] hover:bg-[var(--ef-surface-container)]"
+            }`}
             aria-current={page === currentPage ? "page" : undefined}
+            style={baseFontStyles}
           >
             {page}
           </button>
@@ -92,15 +77,12 @@ export function Pagination({ currentPage, totalPages, onPageChange, loading }: P
 
       {/* Next */}
       <button
-        style={btnBase}
         disabled={currentPage === totalPages || loading}
         onClick={() => onPageChange(currentPage + 1)}
-        className="hover:bg-[var(--ef-surface-container)] disabled:opacity-40 disabled:cursor-not-allowed"
+        className="w-10 h-10 flex items-center justify-center border border-[var(--ef-outline-variant)] text-[var(--ef-on-surface)] hover:bg-[var(--ef-surface-container)] transition-colors disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
         aria-label="Next page"
       >
-        <span className="material-symbols-outlined" style={{ fontSize: 20 }}>
-          chevron_right
-        </span>
+        <span className="material-symbols-outlined">chevron_right</span>
       </button>
     </div>
   )

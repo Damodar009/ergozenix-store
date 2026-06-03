@@ -1,31 +1,35 @@
 "use client"
 
 import Link from "next/link"
-import { usePathname } from "next/navigation"
 import { LogoIcon } from "@/components/logo-icon"
 import { Separator } from "@/components/ui/separator"
 import { Button } from "@/components/ui/button"
-import { Facebook, Instagram, Twitter } from "lucide-react"
 import { Link as UiLink } from "@/components/ui/link"
 import { socialLinks } from "@/lib/social-links"
+import { Mail, Phone, MapPin } from "lucide-react"
 
 export function Footer() {
   return (
-    <footer className="bg-card border-t border-border">
-      <div className="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-          <div className="col-span-2 md:col-span-1">
-            <div className="flex items-center gap-2 text-card-foreground">
-              <LogoIcon className="size-6 text-primary" />
-              <h2 className="text-xl font-bold">ErgoZenix Store</h2>
-            </div>
-            <p className="mt-4 text-sm text-muted-foreground">Comfort for a better life.</p>
+    <footer className="bg-[var(--ef-surface-container-low)] w-full py-[var(--ef-section-padding)] border-t border-[var(--ef-outline-variant)]">
+      <div className="max-w-[var(--ef-container-max)] mx-auto px-[var(--ef-container-padding-x)]">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-16">
+
+          {/* Brand Mission */}
+          <div className="flex flex-col gap-[var(--ef-stack-md)]">
+            <span className="font-label-caps text-label-caps text-[var(--ef-on-surface)] tracking-[3px]">
+              ERGOZENIX STORE
+            </span>
+            <p className="font-body-main text-body-main text-[var(--ef-on-surface-variant)] mt-2">
+              Comfort for a better life. Redefining workspaces with Scandinavian precision and functionalist beauty.
+            </p>
           </div>
 
-          <div>
-            <h3 className="text-sm font-semibold text-card-foreground tracking-wider uppercase">Quick Links</h3>
-            <ul className="mt-4 space-y-4">
-            <ul className="mt-4 space-y-4">
+          {/* Quick Links */}
+          <div className="flex flex-col gap-[var(--ef-stack-md)]">
+            <h4 className="font-label-caps text-label-caps tracking-widest text-[var(--ef-on-surface-variant)]">
+              QUICK LINKS
+            </h4>
+            <ul className="flex flex-col gap-2">
               {[
                 { label: "Home", href: "/" },
                 { label: "Shop", href: "/shop" },
@@ -33,45 +37,86 @@ export function Footer() {
                 { label: "Contact", href: "/contact" },
               ].map(({ label, href }) => (
                 <li key={`footer-${label}`}>
-                  <UiLink className="text-base text-muted-foreground hover:text-card-foreground" href={href}>
+                  <UiLink
+                    className="font-body-main text-body-main text-[var(--ef-on-surface-variant)] hover:text-[var(--ef-primary)] transition-colors"
+                    href={href}
+                  >
                     {label}
                   </UiLink>
                 </li>
               ))}
             </ul>
+          </div>
+
+          {/* Contact Info */}
+          <div className="flex flex-col gap-[var(--ef-stack-md)]">
+            <h4 className="font-label-caps text-label-caps tracking-widest text-[var(--ef-on-surface-variant)]">
+              CONTACT INFO
+            </h4>
+            <ul className="flex flex-col gap-3">
+              <li className="flex items-start gap-2">
+                <Mail className="w-[18px] h-[18px] text-[var(--ef-primary)] shrink-0 mt-0.5" />
+                <span className="font-body-main text-body-main text-[var(--ef-on-surface-variant)]">
+                  ergozenix.store@gmail.com
+                </span>
+              </li>
+              <li className="flex items-start gap-2">
+                <Phone className="w-[18px] h-[18px] text-[var(--ef-primary)] shrink-0 mt-0.5" />
+                <span className="font-body-main text-body-main text-[var(--ef-on-surface-variant)]">
+                  +977 9768602990
+                </span>
+              </li>
+              <li className="flex items-start gap-2">
+                <MapPin className="w-[18px] h-[18px] text-[var(--ef-primary)] shrink-0 mt-0.5" />
+                <span className="font-body-main text-body-main text-[var(--ef-on-surface-variant)]">
+                  Basundhara, Kathmandu
+                </span>
+              </li>
             </ul>
           </div>
 
-          <div>
-            <h3 className="text-sm font-semibold text-card-foreground tracking-wider uppercase">Contact Info</h3>
-            <ul className="mt-4 space-y-4 text-base text-muted-foreground">
-              <li>ergozenix.store@gmail.com</li>
-              <li>+977 9768602990</li>
-              <li>Basundhara, Kathmandu</li>
-            </ul>
-          </div>
-
-          <div>
-            <h3 className="text-sm font-semibold text-card-foreground tracking-wider uppercase">Follow Us</h3>
-            <div className="flex mt-4 gap-3">
+          {/* Follow Us */}
+          <div className="flex flex-col gap-[var(--ef-stack-md)]">
+            <h4 className="font-label-caps text-label-caps tracking-widest text-[var(--ef-on-surface-variant)]">
+              FOLLOW US
+            </h4>
+            <div className="flex gap-4">
               {socialLinks.map(({ name, href, Icon }) => (
-                <Button key={name} variant="outline" size="icon" className="rounded-full" asChild>
-                  <Link href={href} aria-label={name}>
-                    <Icon className="h-4 w-4" />
-                  </Link>
-                </Button>
+                <Link
+                  key={name}
+                  href={href}
+                  aria-label={name}
+                  className="text-[var(--ef-on-surface-variant)] hover:text-[var(--ef-primary)] transition-colors"
+                >
+                  <Icon className="w-5 h-5 fill-current" />
+                </Link>
               ))}
             </div>
           </div>
+
         </div>
 
-        <Separator className="mt-8" />
-        <div className="pt-8 text-center text-sm text-muted-foreground">
-          <p>© 2024 ErgoZenix Store. All rights reserved.</p>
+        {/* Bottom Bar */}
+        <div className="pt-8 border-t border-[var(--ef-outline-variant)] flex flex-col md:flex-row justify-between items-center gap-4">
+          <p className="text-[var(--ef-on-surface-variant)] font-body-main text-xs opacity-60">
+            © 2024 ErgoZenix Store. All rights reserved.
+          </p>
+          <div className="flex gap-[var(--ef-stack-lg)]">
+            <Link
+              href="#"
+              className="font-label-caps text-[10px] text-[var(--ef-on-surface-variant)] hover:text-[var(--ef-primary)] transition-colors uppercase tracking-widest"
+            >
+              Privacy Policy
+            </Link>
+            <Link
+              href="#"
+              className="font-label-caps text-[10px] text-[var(--ef-on-surface-variant)] hover:text-[var(--ef-primary)] transition-colors uppercase tracking-widest"
+            >
+              Terms of Service
+            </Link>
+          </div>
         </div>
       </div>
     </footer>
   )
 }
-
-

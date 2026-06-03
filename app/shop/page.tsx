@@ -140,8 +140,7 @@ export default function ShopPage() {
   const [selectedPriceRange, setSelectedPriceRange] = useState(0) // index into PRICE_RANGES
   const [sortBy, setSortBy] = useState("newest")
 
-  // View State
-  const [viewMode, setViewMode] = useState<"grid" | "list">("grid")
+
 
   // Pagination State
   const [page, setPage] = useState(1)
@@ -240,26 +239,19 @@ export default function ShopPage() {
 
   return (
     <main
-      className="mx-auto pb-[var(--ef-section-padding)]"
+      className="pb-[var(--ef-section-padding)]"
       style={{
-        maxWidth: "var(--ef-container-max)",
-        paddingLeft: "var(--ef-container-padding-x)",
-        paddingRight: "var(--ef-container-padding-x)",
         backgroundColor: "var(--ef-surface)",
         color: "var(--ef-on-surface)",
         fontFamily: "var(--font-hanken-grotesk), 'Hanken Grotesk', sans-serif",
       }}
     >
       {/* ─── Page Title Section ─── */}
-      <section
-        className="py-[var(--ef-stack-lg)]"
+      {/* <section
+        className="py-[var(--ef-stack-lg)] px-8 md:px-12 lg:px-16"
         style={{
           borderBottom: "1px solid var(--ef-outline-variant)",
           backgroundColor: "var(--ef-surface-container-lowest)",
-          marginLeft: "calc(-1 * var(--ef-container-padding-x))",
-          marginRight: "calc(-1 * var(--ef-container-padding-x))",
-          paddingLeft: "var(--ef-container-padding-x)",
-          paddingRight: "var(--ef-container-padding-x)",
         }}
       >
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-[var(--ef-stack-sm)]">
@@ -301,11 +293,11 @@ export default function ShopPage() {
             {loading ? "Loading…" : `${products.length} products`}
           </div>
         </div>
-      </section>
+      </section> */}
 
       {/* ─── Filter Bar ─── */}
       <section
-        className="sticky top-[64px] z-40 backdrop-blur-sm py-[var(--ef-stack-md)] flex flex-wrap items-center justify-between gap-[var(--ef-stack-md)] mb-[var(--ef-stack-lg)]"
+        className="sticky top-[64px] z-40 backdrop-blur-sm py-[var(--ef-stack-md)] px-8 md:px-12 lg:px-16 flex flex-wrap items-center justify-between gap-[var(--ef-stack-md)] mb-[var(--ef-stack-lg)]"
         style={{
           backgroundColor: "rgba(253, 249, 243, 0.95)", // ef-surface with opacity
           borderBottom: "1px solid var(--ef-outline-variant)",
@@ -354,48 +346,14 @@ export default function ShopPage() {
           </FilterDropdown>
         </div>
 
-        {/* View Toggle */}
-        <div className="flex items-center gap-4">
-          <button
-            onClick={() => setViewMode("grid")}
-            className="material-symbols-outlined p-1"
-            style={{
-              color: viewMode === "grid" ? "var(--ef-primary)" : "var(--ef-on-surface-variant)",
-              borderBottom: viewMode === "grid" ? "2px solid var(--ef-primary)" : "2px solid transparent",
-              fontSize: 20,
-              background: "none",
-              cursor: "pointer",
-            }}
-            aria-label="Grid view"
-          >
-            grid_view
-          </button>
-          <button
-            onClick={() => setViewMode("list")}
-            className="material-symbols-outlined p-1"
-            style={{
-              color: viewMode === "list" ? "var(--ef-primary)" : "var(--ef-on-surface-variant)",
-              borderBottom: viewMode === "list" ? "2px solid var(--ef-primary)" : "2px solid transparent",
-              fontSize: 20,
-              background: "none",
-              cursor: "pointer",
-            }}
-            aria-label="List view"
-          >
-            view_list
-          </button>
-        </div>
+
       </section>
 
       {/* ─── Product Grid / List ─── */}
       {loading ? (
         /* Loading Skeleton */
         <section
-          className={
-            viewMode === "grid"
-              ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-[var(--ef-gutter)] gap-y-[var(--ef-stack-lg)]"
-              : "flex flex-col gap-[var(--ef-stack-lg)]"
-          }
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-[var(--ef-gutter)] gap-y-[var(--ef-stack-md)] px-8 md:px-12 lg:px-16 py-8"
         >
           {Array.from({ length: 6 }).map((_, i) => (
             <div
@@ -405,17 +363,17 @@ export default function ShopPage() {
                 borderRadius: "6px",
                 border: "1px solid var(--ef-outline-variant)",
                 backgroundColor: "var(--ef-surface-container-lowest)",
+                maxWidth: "320px",
               }}
             >
               <div
-                className="aspect-[4/5]"
+                className="aspect-square"
                 style={{ backgroundColor: "var(--ef-surface-container)" }}
               />
-              <div className="p-6 space-y-3">
-                <div className="h-5 rounded" style={{ backgroundColor: "var(--ef-surface-container-high)", width: "70%" }} />
+              <div className="p-3 space-y-2">
+                <div className="h-4 rounded" style={{ backgroundColor: "var(--ef-surface-container-high)", width: "70%" }} />
                 <div className="h-3 rounded" style={{ backgroundColor: "var(--ef-surface-container)", width: "40%" }} />
-                <div className="h-4 rounded" style={{ backgroundColor: "var(--ef-surface-container)", width: "100%" }} />
-                <div className="h-4 rounded" style={{ backgroundColor: "var(--ef-surface-container)", width: "80%" }} />
+                <div className="h-3 rounded" style={{ backgroundColor: "var(--ef-surface-container)", width: "100%" }} />
               </div>
             </div>
           ))}
@@ -521,11 +479,7 @@ export default function ShopPage() {
         </div>
       ) : (
         <section
-          className={
-            viewMode === "grid"
-              ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-[var(--ef-gutter)] gap-y-[var(--ef-stack-lg)]"
-              : "flex flex-col gap-[var(--ef-stack-lg)]"
-          }
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-[var(--ef-gutter)] gap-y-[var(--ef-stack-md)] px-8 md:px-12 lg:px-16 py-8"
         >
           {products.map((product) => (
             <ProductCard

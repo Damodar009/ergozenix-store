@@ -65,7 +65,7 @@ export default function CartPage() {
       />
 
       <div className="font-body-main min-h-screen bg-[#fdf9f3] text-[#1c1c19] flex flex-col selection:bg-[#a1d7bc] selection:text-[#114734]">
-        
+
         {/* Cart Page Header */}
         <header className="pt-12 pb-6 max-w-[1280px] mx-auto w-full px-6 md:px-16">
           <h1 className="font-headline-section text-[36px] md:text-[48px] leading-[1.3] text-[#1c1c19] font-normal">
@@ -92,7 +92,7 @@ export default function CartPage() {
           ) : (
             /* Cart Grid populated */
             <div className="flex flex-col lg:flex-row gap-8 items-start">
-              
+
               {/* Left: Cart Items (60% / lg:w-[60%]) */}
               <section className="w-full lg:w-[60%] flex flex-col gap-6">
                 {items.map((item) => {
@@ -148,7 +148,7 @@ export default function CartPage() {
                               <span className="material-symbols-outlined text-[18px]">add</span>
                             </button>
                           </div>
-                          
+
                           {/* Product Price */}
                           <span className="font-semibold text-[15px] text-[#1c1c19] whitespace-nowrap min-w-[90px] text-right">
                             Rs. {itemTotal.toLocaleString()}
@@ -196,7 +196,7 @@ export default function CartPage() {
                   >
                     CHECKOUT
                   </button>
-                  
+
                   <Link
                     href="/shop"
                     className="block text-center mt-4 text-[11px] font-semibold text-[#404944] hover:text-[#114734] transition-colors uppercase tracking-[2px]"

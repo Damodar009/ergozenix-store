@@ -1,5 +1,5 @@
 
-import { supabase } from "@/lib/supabase/client"
+import { supabase } from "@/services/supabase"
 
 
 
