@@ -3,6 +3,7 @@
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { LogoIcon } from "@/components/logo-icon"
+import Image from "next/image"
 import { cn } from "@/lib/utils"
 import { useCart } from "@/context/cart-context"
 import {
@@ -22,13 +23,20 @@ export function Header() {
     <header className="bg-[var(--ef-surface-container-lowest)] sticky top-0 z-50 border-b border-[var(--ef-outline-variant)]">
       <div className="flex justify-between items-center h-[64px] w-full px-8 md:px-12 lg:px-16">
         <div className="flex-1 flex justify-start items-center">
-          <Link href="/" className="flex items-center gap-2 text-foreground cursor-pointer">
-            <LogoIcon className="w-6 h-6" />
-            <div 
+          <Link href="/" className="flex items-center text-foreground cursor-pointer">
+            <Image
+              src="/logo_v2.1.png"
+              alt="ErgoZenix logo"
+              width={32}
+              height={32}
+              className="w-10 h-10 object-contain"
+              style={{ mixBlendMode: 'multiply' }}
+            />
+            <div
               className="font-semibold"
               style={{
                 fontFamily: "var(--font-hanken-grotesk), 'Hanken Grotesk', sans-serif",
-                fontSize: "13px",
+                fontSize: "16px",
                 letterSpacing: "3px",
                 textTransform: "uppercase",
               }}
@@ -37,10 +45,10 @@ export function Header() {
             </div>
           </Link>
         </div>
-        
+
         <nav className="hidden md:flex flex-none justify-center gap-[var(--ef-stack-lg)] h-full items-center">
-          <Link 
-            href="/shop" 
+          <Link
+            href="/shop"
             className={cn(
               "pb-1 cursor-pointer transition-colors duration-200 uppercase",
               pathname === "/shop" ? "text-primary border-b-2 border-primary" : "text-muted-foreground hover:text-foreground"
@@ -54,8 +62,8 @@ export function Header() {
           >
             Shop
           </Link>
-          <Link 
-            href="/contact" 
+          <Link
+            href="/contact"
             className={cn(
               "pb-1 cursor-pointer transition-colors duration-200 uppercase",
               pathname === "/contact" ? "text-primary border-b-2 border-primary" : "text-muted-foreground hover:text-foreground"
@@ -69,8 +77,8 @@ export function Header() {
           >
             Contact
           </Link>
-          <Link 
-            href="/about" 
+          <Link
+            href="/about"
             className={cn(
               "pb-1 cursor-pointer transition-colors duration-200 uppercase",
               pathname === "/about" ? "text-primary border-b-2 border-primary" : "text-muted-foreground hover:text-foreground"
@@ -85,7 +93,7 @@ export function Header() {
             About
           </Link>
         </nav>
-        
+
         <div className="flex-1 flex justify-end items-center gap-[var(--ef-stack-sm)] md:gap-[var(--ef-stack-md)]">
           <Link href="/wishlist" className="relative text-muted-foreground cursor-pointer hover:text-primary transition-colors flex items-center justify-center w-10 h-10">
             <span className="material-symbols-outlined">favorite</span>
@@ -112,7 +120,7 @@ export function Header() {
                 <SheetTitle>
                   <Link href="/" className="flex items-center gap-2 text-foreground cursor-pointer">
                     <LogoIcon className="w-6 h-6" />
-                    <div 
+                    <div
                       className="font-semibold"
                       style={{
                         fontFamily: "var(--font-hanken-grotesk), 'Hanken Grotesk', sans-serif",
@@ -126,7 +134,7 @@ export function Header() {
                   </Link>
                 </SheetTitle>
               </SheetHeader>
-              
+
               <nav className="flex flex-col gap-1 flex-1 mt-4">
                 {[
                   { href: "/shop", label: "Shop" },

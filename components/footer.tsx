@@ -1,9 +1,6 @@
 "use client"
 
 import Link from "next/link"
-import { LogoIcon } from "@/components/logo-icon"
-import { Separator } from "@/components/ui/separator"
-import { Button } from "@/components/ui/button"
 import { Link as UiLink } from "@/components/ui/link"
 import { socialLinks } from "@/lib/social-links"
 import { Mail, Phone, MapPin } from "lucide-react"
@@ -99,7 +96,7 @@ export function Footer() {
         {/* Bottom Bar */}
         <div className="pt-8 border-t border-border flex flex-col md:flex-row justify-between items-center gap-4">
           <p className="text-muted-foreground font-body-main text-xs opacity-60">
-            © 2024 ErgoZenix Store. All rights reserved.
+            © 2026 ErgoZenix Store. All rights reserved.
           </p>
           <div className="flex gap-[var(--ef-stack-lg)]">
             <Link

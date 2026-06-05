@@ -7,6 +7,10 @@ import { ProductService } from "@/services/product-service"
 import { ReviewService } from "@/services/review-service"
 import type { ProductWithDetails, ProductImage, ProductReview } from "@/models/product"
 import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Textarea } from "@/components/ui/textarea"
+import { Label } from "@/components/ui/label"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { useCart } from "@/context/cart-context"
 import {
   Accordion,
@@ -205,175 +209,88 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
 
   const renderReviewForm = () => {
     return (
-      <div
-        className="transition-all"
-        style={{
-          padding: "var(--ef-stack-md)",
-          background: "var(--ef-surface-container-lowest)",
-          border: "1px solid var(--ef-outline-variant)",
-          borderRadius: "0.5rem",
-        }}
-      >
-        <h3
-          className="uppercase mb-3"
-          style={{
-            fontFamily: "var(--font-hanken-grotesk)",
-            fontSize: "12px",
-            fontWeight: 600,
-            letterSpacing: "2px",
-            color: "var(--ef-on-surface)",
-          }}
-        >
-          Write a Review
-        </h3>
-        <form onSubmit={handleReviewSubmit} className="flex flex-col gap-3">
-          {/* Name field */}
-          <div className="flex flex-col gap-1">
-            <label
-              className="uppercase"
-              style={{
-                fontFamily: "var(--font-hanken-grotesk)",
-                fontSize: "10px",
-                letterSpacing: "1px",
-                fontWeight: 600,
-                color: "var(--ef-on-surface-variant)",
-              }}
-            >
-              Name
-            </label>
-            <input
-              type="text"
-              placeholder="Your full name"
-              value={newReviewName}
-              onChange={(e) => setNewReviewName(e.target.value)}
-              required
-              className="w-full px-3 py-1.5 bg-transparent text-sm transition-all focus:outline-none"
-              style={{
-                border: "1px solid var(--ef-outline-variant)",
-                borderRadius: "0.25rem",
-                fontFamily: "var(--font-hanken-grotesk)",
-                color: "var(--ef-on-surface)",
-              }}
-            />
-          </div>
-
-          {/* Email field */}
-          <div className="flex flex-col gap-1">
-            <label
-              className="uppercase"
-              style={{
-                fontFamily: "var(--font-hanken-grotesk)",
-                fontSize: "10px",
-                letterSpacing: "1px",
-                fontWeight: 600,
-                color: "var(--ef-on-surface-variant)",
-              }}
-            >
-              Email Address
-            </label>
-            <input
-              type="email"
-              placeholder="your.email@example.com"
-              value={newReviewEmail}
-              onChange={(e) => setNewReviewEmail(e.target.value)}
-              required
-              className="w-full px-3 py-1.5 bg-transparent text-sm transition-all focus:outline-none"
-              style={{
-                border: "1px solid var(--ef-outline-variant)",
-                borderRadius: "0.25rem",
-                fontFamily: "var(--font-hanken-grotesk)",
-                color: "var(--ef-on-surface)",
-              }}
-            />
-          </div>
-
-          {/* Rating Selector */}
-          <div className="flex flex-col gap-1">
-            <label
-              className="uppercase"
-              style={{
-                fontFamily: "var(--font-hanken-grotesk)",
-                fontSize: "10px",
-                letterSpacing: "1px",
-                fontWeight: 600,
-                color: "var(--ef-on-surface-variant)",
-              }}
-            >
-              Rating
-            </label>
-            <div className="flex gap-1">
-              {[1, 2, 3, 4, 5].map((star) => (
-                <button
-                  key={star}
-                  type="button"
-                  className="focus:outline-none transition-transform hover:scale-110"
-                  onMouseEnter={() => setNewReviewHoverRating(star)}
-                  onMouseLeave={() => setNewReviewHoverRating(0)}
-                  onClick={() => setNewReviewRating(star)}
-                >
-                  <MIcon
-                    name="star"
-                    filled={(newReviewHoverRating || newReviewRating) >= star}
-                    className={(newReviewHoverRating || newReviewRating) >= star ? "text-[var(--ef-primary)]" : "text-[var(--ef-outline-variant)]"}
-                    size={20}
-                  />
-                </button>
-              ))}
+      <Card className="transition-all bg-card border border-border shadow-sm">
+        <CardHeader className="pb-3">
+          <CardTitle className="font-label-caps text-label-caps text-foreground">
+            Write a Review
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleReviewSubmit} className="flex flex-col gap-4">
+            {/* Name field */}
+            <div className="flex flex-col gap-2">
+              <Label variant="ef-caps">Name</Label>
+              <Input
+                type="text"
+                placeholder="Your full name"
+                value={newReviewName}
+                onChange={(e) => setNewReviewName(e.target.value)}
+                required
+                className="bg-background"
+              />
             </div>
-          </div>
 
-          {/* Review text */}
-          <div className="flex flex-col gap-1">
-            <label
-              className="uppercase"
-              style={{
-                fontFamily: "var(--font-hanken-grotesk)",
-                fontSize: "10px",
-                letterSpacing: "1px",
-                fontWeight: 600,
-                color: "var(--ef-on-surface-variant)",
-              }}
+            {/* Email field */}
+            <div className="flex flex-col gap-2">
+              <Label variant="ef-caps">Email Address</Label>
+              <Input
+                type="email"
+                placeholder="your.email@example.com"
+                value={newReviewEmail}
+                onChange={(e) => setNewReviewEmail(e.target.value)}
+                required
+                className="bg-background"
+              />
+            </div>
+
+            {/* Rating Selector */}
+            <div className="flex flex-col gap-2">
+              <Label variant="ef-caps">Rating</Label>
+              <div className="flex gap-1">
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <button
+                    key={star}
+                    type="button"
+                    className="focus:outline-none transition-transform hover:scale-110"
+                    onMouseEnter={() => setNewReviewHoverRating(star)}
+                    onMouseLeave={() => setNewReviewHoverRating(0)}
+                    onClick={() => setNewReviewRating(star)}
+                  >
+                    <MIcon
+                      name="star"
+                      filled={(newReviewHoverRating || newReviewRating) >= star}
+                      className={(newReviewHoverRating || newReviewRating) >= star ? "text-primary" : "text-border"}
+                      size={20}
+                    />
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Review text */}
+            <div className="flex flex-col gap-2">
+              <Label variant="ef-caps">Message</Label>
+              <Textarea
+                placeholder="Share your thoughts about this product..."
+                value={newReviewText}
+                onChange={(e) => setNewReviewText(e.target.value)}
+                required
+                rows={3}
+                className="bg-background resize-none"
+              />
+            </div>
+
+            <Button
+              type="submit"
+              disabled={submittingReview}
+              size="ef"
+              className="w-full mt-2"
             >
-              Message
-            </label>
-            <textarea
-              placeholder="Share your thoughts about this product..."
-              value={newReviewText}
-              onChange={(e) => setNewReviewText(e.target.value)}
-              required
-              rows={3}
-              className="w-full px-3 py-1.5 bg-transparent text-sm transition-all focus:outline-none resize-none"
-              style={{
-                border: "1px solid var(--ef-outline-variant)",
-                borderRadius: "0.25rem",
-                fontFamily: "var(--font-hanken-grotesk)",
-                color: "var(--ef-on-surface)",
-              }}
-            />
-          </div>
-
-          <button
-            type="submit"
-            disabled={submittingReview}
-            className="w-full py-2 uppercase transition-colors duration-300 mt-1 text-xs font-semibold tracking-wider"
-            style={{
-              borderRadius: "0.25rem",
-              backgroundColor: "var(--ef-primary-container)",
-              color: "var(--ef-on-secondary)",
-              fontFamily: "var(--font-hanken-grotesk)",
-            }}
-            onMouseEnter={(e) =>
-              ((e.currentTarget as HTMLElement).style.backgroundColor = "var(--ef-primary)")
-            }
-            onMouseLeave={(e) =>
-            ((e.currentTarget as HTMLElement).style.backgroundColor =
-              "var(--ef-primary-container)")
-            }
-          >
-            {submittingReview ? "Submitting..." : "Submit Review"}
-          </button>
-        </form>
-      </div>
+              {submittingReview ? "Submitting..." : "Submit Review"}
+            </Button>
+          </form>
+        </CardContent>
+      </Card>
     )
   }
 
@@ -463,30 +380,12 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
         <nav className="flex items-center gap-2 mb-5">
           <Link
             href="/shop"
-            className="uppercase hover:underline"
-            style={{
-              fontFamily: "var(--font-hanken-grotesk)",
-              fontSize: "11px",
-              lineHeight: "1",
-              letterSpacing: "2px",
-              fontWeight: 600,
-              color: "var(--ef-on-surface-variant)",
-            }}
+            className="font-label-caps text-label-caps text-muted-foreground hover:underline"
           >
             Products
           </Link>
-          <span style={{ color: "var(--ef-on-surface-variant)" }}>/</span>
-          <span
-            className="uppercase"
-            style={{
-              fontFamily: "var(--font-hanken-grotesk)",
-              fontSize: "11px",
-              lineHeight: "1",
-              letterSpacing: "2px",
-              fontWeight: 600,
-              color: "var(--ef-primary)",
-            }}
-          >
+          <span className="text-muted-foreground">/</span>
+          <span className="font-label-caps text-label-caps text-primary">
             {product.name}
           </span>
         </nav>
@@ -495,14 +394,7 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
           {/* ─── Left Column: Images (55%) ─── */}
           <div className="w-full lg:w-[55%] flex flex-col" style={{ gap: "var(--ef-stack-md)" }}>
             {/* Main Image */}
-            <div
-              className="aspect-[4/5] lg:aspect-auto lg:h-[calc(100vh-150px)] overflow-hidden"
-              style={{
-                background: "var(--ef-surface-container-low)",
-                borderRadius: "0.25rem",
-                border: "1px solid var(--ef-outline-variant)",
-              }}
-            >
+            <div className="aspect-[4/5] lg:aspect-auto lg:h-[calc(100vh-150px)] overflow-hidden bg-accent rounded-[6px] border border-border">
               {mainImage ? (
                 isVideoUrl(mainImage) ? (
                   <video
@@ -519,43 +411,24 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
                   <img
                     src={mainImage}
                     alt={product.name}
-                    className="w-full h-full object-cover"
-                    style={{ mixBlendMode: "multiply" }}
+                    className="w-full h-full object-cover mix-blend-multiply"
                   />
                 )
               ) : (
                 <div className="w-full h-full flex items-center justify-center">
-                  <MIcon name="image" size={64} className="text-[var(--ef-outline-variant)]" />
+                  <MIcon name="image" size={64} className="text-muted-foreground" />
                 </div>
               )}
             </div>
 
             {/* Thumbnails */}
             {sortedImages.length > 0 && (
-              <div className="grid grid-cols-4" style={{ gap: "var(--ef-stack-sm)" }}>
+              <div className="grid grid-cols-4 gap-2">
                 {sortedImages.map((img, idx) => (
                   <div
                     key={img.id}
-                    className={`aspect-square overflow-hidden cursor-pointer transition-all ${idx === activeThumbIdx ? "ef-active-thumb" : ""
-                      }`}
-                    style={{
-                      background: "var(--ef-surface-container)",
-                      borderRadius: "0.125rem",
-                      border: idx === activeThumbIdx
-                        ? "1px solid var(--ef-primary)"
-                        : "1px solid transparent",
-                    }}
+                    className={`aspect-square overflow-hidden cursor-pointer transition-all bg-accent rounded-[2px] border ${idx === activeThumbIdx ? "border-primary" : "border-transparent hover:border-border"}`}
                     onClick={() => handleThumbClick(img, idx)}
-                    onMouseEnter={(e) => {
-                      if (idx !== activeThumbIdx) {
-                        (e.currentTarget as HTMLElement).style.borderColor = "var(--ef-outline)"
-                      }
-                    }}
-                    onMouseLeave={(e) => {
-                      if (idx !== activeThumbIdx) {
-                        (e.currentTarget as HTMLElement).style.borderColor = "transparent"
-                      }
-                    }}
                   >
                     {isVideoUrl(img.image_url) ? (
                       <div className="relative w-full h-full">
@@ -588,17 +461,8 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
             style={{ gap: "var(--ef-stack-lg)" }}
           >
             {/* Title & Price */}
-            <div className="flex flex-col" style={{ gap: "var(--ef-stack-sm)" }}>
-              <h1
-                className="text-[40px] lg:text-[56px]"
-                style={{
-                  fontFamily: "var(--font-playfair-display)",
-                  lineHeight: "1.1",
-                  letterSpacing: "-0.02em",
-                  fontWeight: 400,
-                  color: "var(--ef-on-surface)",
-                }}
-              >
+            <div className="flex flex-col gap-[var(--ef-stack-sm)]">
+              <h1 className="text-[40px] lg:text-[56px] font-headline-section leading-[1.1] tracking-[-0.02em] text-foreground">
                 {product.name}
               </h1>
 
@@ -612,47 +476,22 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
                 {averageRating > 0 ? (
                   <>
                     <StarRating rating={averageRating} />
-                    <span
-                      style={{
-                        fontFamily: "var(--font-hanken-grotesk)",
-                        fontSize: "13px",
-                        fontWeight: 600,
-                        color: "var(--ef-primary)",
-                      }}
-                    >
+                    <span className="font-body-main text-[13px] font-semibold text-primary">
                       {averageRating.toFixed(1)} ({reviewCount} review{reviewCount !== 1 ? "s" : ""})
                     </span>
                   </>
                 ) : (
-                  <span
-                    style={{
-                      fontFamily: "var(--font-hanken-grotesk)",
-                      fontSize: "13px",
-                      fontWeight: 300,
-                      color: "var(--ef-on-surface-variant)",
-                    }}
-                  >
+                  <span className="font-body-main text-[13px] font-light text-muted-foreground">
                     No reviews yet. Be the first to write one!
                   </span>
                 )}
               </div>
 
-              <p
-                style={{
-                  fontFamily: "var(--font-playfair-display)",
-                  fontSize: "20px",
-                  lineHeight: "1.4",
-                  fontWeight: 500,
-                  color: "var(--ef-secondary)",
-                }}
-              >
+              <p className="font-headline-section text-[20px] leading-[1.4] font-medium text-secondary">
                 {product.sale_price && product.sale_price < product.base_price ? (
                   <>
                     <span>Rs. {product.sale_price.toLocaleString()}</span>
-                    <span
-                      className="ml-3 line-through"
-                      style={{ color: "var(--ef-outline)", fontSize: "16px" }}
-                    >
+                    <span className="ml-3 line-through text-muted-foreground text-[16px]">
                       Rs. {product.base_price.toLocaleString()}
                     </span>
                   </>
@@ -663,35 +502,23 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
             </div>
 
             {/* Color Selector */}
-            <div className="flex flex-col" style={{ gap: "var(--ef-stack-sm)" }}>
-              <span
-                className="uppercase"
-                style={{
-                  fontFamily: "var(--font-hanken-grotesk)",
-                  fontSize: "11px",
-                  lineHeight: "1",
-                  letterSpacing: "2px",
-                  fontWeight: 600,
-                  color: "var(--ef-on-surface-variant)",
-                }}
-              >
+            <div className="flex flex-col gap-[var(--ef-stack-sm)]">
+              <span className="font-label-caps text-label-caps text-muted-foreground">
                 Selected Color: {colorSwatches[selectedColor]?.name}
               </span>
-              <div className="flex" style={{ gap: "var(--ef-stack-sm)" }}>
+              <div className="flex gap-[var(--ef-stack-sm)]">
                 {colorSwatches.map((swatch, idx) => (
                   <button
                     key={swatch.hex}
                     className="w-8 h-8 rounded-full transition-all"
                     style={{
                       backgroundColor: swatch.hex,
-                      border:
-                        idx === selectedColor
-                          ? "2px solid var(--ef-primary)"
-                          : "1px solid var(--ef-outline-variant)",
-                      boxShadow:
-                        idx === selectedColor
-                          ? "0 0 0 2px var(--ef-surface), 0 0 0 4px transparent"
-                          : undefined,
+                      border: idx === selectedColor
+                        ? "2px solid hsl(var(--primary))"
+                        : "1px solid hsl(var(--border))",
+                      boxShadow: idx === selectedColor
+                        ? "0 0 0 2px hsl(var(--background)), 0 0 0 4px transparent"
+                        : undefined,
                     }}
                     onClick={() => setSelectedColor(idx)}
                   />
@@ -700,45 +527,16 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
             </div>
 
             {/* Size / Variant Selector */}
-            <div className="flex flex-col" style={{ gap: "var(--ef-stack-sm)" }}>
-              <span
-                className="uppercase"
-                style={{
-                  fontFamily: "var(--font-hanken-grotesk)",
-                  fontSize: "11px",
-                  lineHeight: "1",
-                  letterSpacing: "2px",
-                  fontWeight: 600,
-                  color: "var(--ef-on-surface-variant)",
-                }}
-              >
+            <div className="flex flex-col gap-[var(--ef-stack-sm)]">
+              <span className="font-label-caps text-label-caps text-muted-foreground">
                 Frame Size
               </span>
-              <div className="flex" style={{ gap: "var(--ef-stack-sm)" }}>
+              <div className="flex gap-[var(--ef-stack-sm)]">
                 {variants.length > 0 ? (
                   variants.map((variant, idx) => (
                     <button
                       key={variant.id}
-                      className="px-6 py-2 transition-all uppercase"
-                      style={{
-                        borderRadius: "0.25rem",
-                        fontFamily: "var(--font-hanken-grotesk)",
-                        fontSize: "12px",
-                        fontWeight: 600,
-                        letterSpacing: "2px",
-                        border:
-                          idx === selectedSize
-                            ? "1px solid var(--ef-primary)"
-                            : "1px solid var(--ef-outline-variant)",
-                        backgroundColor:
-                          idx === selectedSize
-                            ? "var(--ef-primary-container)"
-                            : "transparent",
-                        color:
-                          idx === selectedSize
-                            ? "var(--ef-on-primary-container)"
-                            : "var(--ef-on-surface)",
-                      }}
+                      className={`px-6 py-2 transition-all font-label-caps text-[12px] font-semibold tracking-[2px] rounded ${idx === selectedSize ? "bg-primary text-primary-foreground border-primary" : "bg-transparent text-foreground border-border border"}`}
                       onClick={() => setSelectedSize(idx)}
                     >
                       {variant.variant_sku || `Variant ${idx + 1}`}
@@ -747,47 +545,13 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
                 ) : (
                   <>
                     <button
-                      className="px-6 py-2 transition-all uppercase"
-                      style={{
-                        borderRadius: "0.25rem",
-                        fontFamily: "var(--font-hanken-grotesk)",
-                        fontSize: "12px",
-                        fontWeight: 600,
-                        letterSpacing: "2px",
-                        border:
-                          selectedSize === 0
-                            ? "1px solid var(--ef-primary)"
-                            : "1px solid var(--ef-outline-variant)",
-                        backgroundColor:
-                          selectedSize === 0 ? "var(--ef-primary-container)" : "transparent",
-                        color:
-                          selectedSize === 0
-                            ? "var(--ef-on-primary-container)"
-                            : "var(--ef-on-surface)",
-                      }}
+                      className={`px-6 py-2 transition-all font-label-caps text-[12px] font-semibold tracking-[2px] rounded ${selectedSize === 0 ? "bg-primary text-primary-foreground border-primary" : "bg-transparent text-foreground border-border border"}`}
                       onClick={() => setSelectedSize(0)}
                     >
                       STANDARD
                     </button>
                     <button
-                      className="px-6 py-2 transition-all uppercase"
-                      style={{
-                        borderRadius: "0.25rem",
-                        fontFamily: "var(--font-hanken-grotesk)",
-                        fontSize: "12px",
-                        fontWeight: 600,
-                        letterSpacing: "2px",
-                        border:
-                          selectedSize === 1
-                            ? "1px solid var(--ef-primary)"
-                            : "1px solid var(--ef-outline-variant)",
-                        backgroundColor:
-                          selectedSize === 1 ? "var(--ef-primary-container)" : "transparent",
-                        color:
-                          selectedSize === 1
-                            ? "var(--ef-on-primary-container)"
-                            : "var(--ef-on-surface)",
-                      }}
+                      className={`px-6 py-2 transition-all font-label-caps text-[12px] font-semibold tracking-[2px] rounded ${selectedSize === 1 ? "bg-primary text-primary-foreground border-primary" : "bg-transparent text-foreground border-border border"}`}
                       onClick={() => setSelectedSize(1)}
                     >
                       EXTENDED
@@ -798,47 +562,20 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
             </div>
 
             {/* Quantity and Actions */}
-            <div className="flex flex-col pt-4" style={{ gap: "var(--ef-stack-md)" }}>
+            <div className="flex flex-col pt-4 gap-[var(--ef-stack-md)]">
               {/* Quantity Selector */}
-              <div
-                className="flex items-center w-fit"
-                style={{
-                  border: "1px solid var(--ef-outline-variant)",
-                  borderRadius: "0.25rem",
-                }}
-              >
+              <div className="flex items-center w-fit border border-border rounded">
                 <button
-                  className="px-4 py-3 transition-colors"
-                  style={{ color: "var(--ef-on-surface)" }}
-                  onMouseEnter={(e) =>
-                    ((e.currentTarget as HTMLElement).style.color = "var(--ef-primary)")
-                  }
-                  onMouseLeave={(e) =>
-                    ((e.currentTarget as HTMLElement).style.color = "var(--ef-on-surface)")
-                  }
+                  className="px-4 py-3 transition-colors text-foreground hover:text-primary"
                   onClick={() => updateQty(-1)}
                 >
                   <MIcon name="remove" size={18} />
                 </button>
-                <span
-                  className="w-12 text-center"
-                  style={{
-                    fontFamily: "var(--font-hanken-grotesk)",
-                    fontSize: "15px",
-                    fontWeight: 300,
-                  }}
-                >
+                <span className="w-12 text-center font-body-main text-[15px] font-light">
                   {quantity}
                 </span>
                 <button
-                  className="px-4 py-3 transition-colors"
-                  style={{ color: "var(--ef-on-surface)" }}
-                  onMouseEnter={(e) =>
-                    ((e.currentTarget as HTMLElement).style.color = "var(--ef-primary)")
-                  }
-                  onMouseLeave={(e) =>
-                    ((e.currentTarget as HTMLElement).style.color = "var(--ef-on-surface)")
-                  }
+                  className="px-4 py-3 transition-colors text-foreground hover:text-primary"
                   onClick={() => updateQty(1)}
                 >
                   <MIcon name="add" size={18} />
@@ -846,109 +583,43 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
               </div>
 
               {/* Add to Cart Button */}
-              <button
-                className="w-full py-4 uppercase transition-colors duration-300"
-                style={{
-                  borderRadius: "0.25rem",
-                  backgroundColor: "var(--ef-primary-container)",
-                  color: "var(--ef-on-secondary)",
-                  fontFamily: "var(--font-hanken-grotesk)",
-                  fontSize: "13px",
-                  fontWeight: 600,
-                  letterSpacing: "3px",
-                }}
-                onMouseEnter={(e) =>
-                  ((e.currentTarget as HTMLElement).style.backgroundColor = "var(--ef-primary)")
-                }
-                onMouseLeave={(e) =>
-                ((e.currentTarget as HTMLElement).style.backgroundColor =
-                  "var(--ef-primary-container)")
-                }
+              <Button
+                className="w-full"
+                size="ef"
                 onClick={() => addToCart(product.id, quantity, [])}
               >
                 Add to Cart
-              </button>
+              </Button>
 
               {/* Save to Wishlist Button */}
-              <button
-                className="w-full py-4 uppercase transition-colors duration-300 flex items-center justify-center gap-2"
-                style={{
-                  borderRadius: "0.25rem",
-                  border: "1px solid var(--ef-outline-variant)",
-                  color: "var(--ef-on-surface)",
-                  fontFamily: "var(--font-hanken-grotesk)",
-                  fontSize: "13px",
-                  fontWeight: 600,
-                  letterSpacing: "3px",
-                }}
-                onMouseEnter={(e) =>
-                  ((e.currentTarget as HTMLElement).style.borderColor = "var(--ef-primary)")
-                }
-                onMouseLeave={(e) =>
-                  ((e.currentTarget as HTMLElement).style.borderColor = "var(--ef-outline-variant)")
-                }
+              <Button
+                variant="outline"
+                className="w-full font-label-caps tracking-[3px]"
+                size="ef"
               >
-                <MIcon name="favorite" size={18} />
+                <MIcon name="favorite" size={18} className="mr-2" />
                 Save to Wishlist
-              </button>
+              </Button>
             </div>
 
             {/* ─── Accordions ─── */}
-            <div
-              className="flex flex-col mt-4"
-              style={{ borderTop: "1px solid var(--ef-outline-variant)" }}
-            >
+            <div className="flex flex-col mt-4 border-t border-border">
               <Accordion type="multiple" className="w-full">
                 {/* Product Description */}
-                <AccordionItem
-                  value="description"
-                  className="border-b"
-                  style={{ borderColor: "var(--ef-outline-variant)" }}
-                >
-                  <AccordionTrigger
-                    className="py-4 uppercase hover:no-underline"
-                    style={{
-                      fontFamily: "var(--font-hanken-grotesk)",
-                      fontSize: "12px",
-                      fontWeight: 600,
-                      letterSpacing: "2px",
-                      color: "var(--ef-on-surface)",
-                    }}
-                  >
+                <AccordionItem value="description" className="border-b border-border">
+                  <AccordionTrigger className="py-4 font-label-caps text-[12px] tracking-[2px] font-semibold text-foreground hover:no-underline">
                     Product Description
                   </AccordionTrigger>
                   <AccordionContent>
-                    <div
-                      className="leading-relaxed"
-                      style={{
-                        color: "var(--ef-on-surface-variant)",
-                        fontFamily: "var(--font-hanken-grotesk)",
-                        fontSize: "15px",
-                        fontWeight: 300,
-                        lineHeight: "1.6",
-                      }}
-                    >
+                    <div className="leading-relaxed text-muted-foreground font-body-main text-[15px] font-light">
                       {product.description || "No description available."}
                     </div>
                   </AccordionContent>
                 </AccordionItem>
 
                 {/* Specifications */}
-                <AccordionItem
-                  value="specifications"
-                  className="border-b"
-                  style={{ borderColor: "var(--ef-outline-variant)" }}
-                >
-                  <AccordionTrigger
-                    className="py-4 uppercase hover:no-underline"
-                    style={{
-                      fontFamily: "var(--font-hanken-grotesk)",
-                      fontSize: "12px",
-                      fontWeight: 600,
-                      letterSpacing: "2px",
-                      color: "var(--ef-on-surface)",
-                    }}
-                  >
+                <AccordionItem value="specifications" className="border-b border-border">
+                  <AccordionTrigger className="py-4 font-label-caps text-[12px] tracking-[2px] font-semibold text-foreground hover:no-underline">
                     Specifications
                   </AccordionTrigger>
                   <AccordionContent>
@@ -957,91 +628,31 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
                         specItems.map((spec, idx) => (
                           <div
                             key={idx}
-                            className="flex justify-between pb-2"
-                            style={{
-                              borderBottom:
-                                idx < specItems.length - 1
-                                  ? "1px solid var(--ef-outline-variant)"
-                                  : "none",
-                            }}
+                            className={`flex justify-between pb-2 ${idx < specItems.length - 1 ? "border-b border-border" : ""}`}
                           >
-                            <span
-                              className="uppercase"
-                              style={{
-                                fontFamily: "var(--font-hanken-grotesk)",
-                                fontSize: "11px",
-                                lineHeight: "1",
-                                letterSpacing: "2px",
-                                fontWeight: 600,
-                                color: "var(--ef-on-surface-variant)",
-                              }}
-                            >
+                            <span className="font-label-caps text-[11px] tracking-[2px] font-semibold text-muted-foreground">
                               {spec.label}
                             </span>
-                            <span
-                              style={{
-                                fontFamily: "var(--font-hanken-grotesk)",
-                                fontSize: "15px",
-                                lineHeight: "1.6",
-                                fontWeight: 300,
-                              }}
-                            >
+                            <span className="font-body-main text-[15px] leading-[1.6] font-light text-foreground">
                               {spec.value}
                             </span>
                           </div>
                         ))
                       ) : (
                         <>
-                          <div
-                            className="flex justify-between pb-2"
-                            style={{ borderBottom: "1px solid var(--ef-outline-variant)" }}
-                          >
-                            <span
-                              className="uppercase"
-                              style={{
-                                fontFamily: "var(--font-hanken-grotesk)",
-                                fontSize: "11px",
-                                lineHeight: "1",
-                                letterSpacing: "2px",
-                                fontWeight: 600,
-                                color: "var(--ef-on-surface-variant)",
-                              }}
-                            >
+                          <div className="flex justify-between pb-2 border-b border-border">
+                            <span className="font-label-caps text-[11px] tracking-[2px] font-semibold text-muted-foreground">
                               Stock
                             </span>
-                            <span
-                              style={{
-                                fontFamily: "var(--font-hanken-grotesk)",
-                                fontSize: "15px",
-                                lineHeight: "1.6",
-                                fontWeight: 300,
-                              }}
-                            >
+                            <span className="font-body-main text-[15px] leading-[1.6] font-light text-foreground">
                               {product.stock_quantity} available
                             </span>
                           </div>
                           <div className="flex justify-between pb-2">
-                            <span
-                              className="uppercase"
-                              style={{
-                                fontFamily: "var(--font-hanken-grotesk)",
-                                fontSize: "11px",
-                                lineHeight: "1",
-                                letterSpacing: "2px",
-                                fontWeight: 600,
-                                color: "var(--ef-on-surface-variant)",
-                              }}
-                            >
+                            <span className="font-label-caps text-[11px] tracking-[2px] font-semibold text-muted-foreground">
                               SKU
                             </span>
-                            <span
-                              style={{
-                                fontFamily: "var(--font-hanken-grotesk)",
-                                fontSize: "15px",
-                                lineHeight: "1.6",
-                                fontWeight: 300,
-                              }}
-                            >
+                            <span className="font-body-main text-[15px] leading-[1.6] font-light text-foreground">
                               {product.sku || "—"}
                             </span>
                           </div>
@@ -1058,56 +669,25 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
         {/* ─── Reviews Section Below Fold ─── */}
         <section
           ref={reviewsSectionRef}
-          className="transition-all duration-700 opacity-0 translate-y-10"
-          style={{
-            marginTop: "var(--ef-section-padding)",
-            paddingTop: "var(--ef-section-padding)",
-            borderTop: "1px solid var(--ef-outline-variant)",
-          }}
+          className="transition-all duration-700 opacity-0 translate-y-10 mt-[var(--ef-section-padding)] pt-[var(--ef-section-padding)] border-t border-border"
         >
           {reviews.length > 0 ? (
-            <div className="grid grid-cols-1 lg:grid-cols-12" style={{ gap: "var(--ef-stack-lg)" }}>
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-[var(--ef-stack-lg)]">
               {/* Rating Summary */}
-              <div className="lg:col-span-4 flex flex-col" style={{ gap: "var(--ef-stack-md)" }}>
-                <div className="flex flex-col" style={{ gap: "var(--ef-stack-sm)" }}>
-                  <h2
-                    className="uppercase"
-                    style={{
-                      fontFamily: "var(--font-hanken-grotesk)",
-                      fontSize: "11px",
-                      lineHeight: "1",
-                      letterSpacing: "2px",
-                      fontWeight: 600,
-                      color: "var(--ef-on-surface-variant)",
-                    }}
-                  >
+              <div className="lg:col-span-4 flex flex-col gap-[var(--ef-stack-md)]">
+                <div className="flex flex-col gap-[var(--ef-stack-sm)]">
+                  <h2 className="font-label-caps text-label-caps text-muted-foreground">
                     Reviews
                   </h2>
                   <div className="flex items-baseline gap-4">
-                    <span
-                      className="text-[64px]"
-                      style={{
-                        fontFamily: "var(--font-playfair-display)",
-                        lineHeight: "1.1",
-                        fontWeight: 400,
-                        color: "var(--ef-primary)",
-                      }}
-                    >
+                    <span className="text-[64px] font-headline-section leading-[1.1] font-normal text-primary">
                       {averageRating > 0 ? averageRating.toFixed(1) : "—"}
                     </span>
                     <div className="flex flex-col">
                       {averageRating > 0 && (
-                        <StarRating rating={averageRating} className="text-[var(--ef-primary)]" />
+                        <StarRating rating={averageRating} className="text-primary" />
                       )}
-                      <span
-                        style={{
-                          fontFamily: "var(--font-hanken-grotesk)",
-                          fontSize: "15px",
-                          lineHeight: "1.6",
-                          fontWeight: 300,
-                          color: "var(--ef-on-surface-variant)",
-                        }}
-                      >
+                      <span className="font-body-main text-[15px] leading-[1.6] font-light text-muted-foreground">
                         Based on {reviewCount} review{reviewCount !== 1 ? "s" : ""}
                       </span>
                     </div>
@@ -1119,93 +699,49 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
               </div>
 
               {/* Review Cards */}
-              <div className="lg:col-span-8" style={{ display: "flex", flexDirection: "column", gap: "var(--ef-stack-md)" }}>
+              <div className="lg:col-span-8 flex flex-col gap-[var(--ef-stack-md)]">
                 {(showAllReviews ? reviews : reviews.slice(0, 3)).map((review: ProductReview) => (
-                  <div
-                    key={review.id}
-                    className="transition-all"
-                    style={{
-                      padding: "var(--ef-stack-lg)",
-                      background: "var(--ef-surface-container-lowest)",
-                      border: "1px solid var(--ef-outline-variant)",
-                      borderRadius: "0.5rem",
-                    }}
-                    onMouseEnter={(e) =>
-                      ((e.currentTarget as HTMLElement).style.borderColor = "var(--ef-primary)")
-                    }
-                    onMouseLeave={(e) =>
-                    ((e.currentTarget as HTMLElement).style.borderColor =
-                      "var(--ef-outline-variant)")
-                    }
-                  >
-                    <div className="flex justify-between items-start mb-4">
-                      <div>
-                        <p
-                          className="uppercase"
-                          style={{
-                            fontFamily: "var(--font-hanken-grotesk)",
-                            fontSize: "13px",
-                            fontWeight: 600,
-                            letterSpacing: "2px",
-                            color: "var(--ef-on-surface)",
-                          }}
-                        >
-                          {review.full_name}
-                        </p>
-                        <p
-                          style={{
-                            fontSize: "12px",
-                            color: "var(--ef-on-surface-variant)",
-                          }}
-                        >
-                          Verified Buyer •{" "}
-                          {formatDistanceToNow(new Date(review.created_at), {
-                            addSuffix: true,
-                          })}
-                        </p>
+                  <Card key={review.id} className="transition-all hover:border-primary">
+                    <CardContent className="p-[var(--ef-stack-lg)]">
+                      <div className="flex justify-between items-start mb-4">
+                        <div>
+                          <p className="font-label-caps text-label-caps text-foreground">
+                            {review.full_name}
+                          </p>
+                          <p className="text-[12px] text-muted-foreground">
+                            Verified Buyer •{" "}
+                            {formatDistanceToNow(new Date(review.created_at), {
+                              addSuffix: true,
+                            })}
+                          </p>
+                        </div>
+                        <div className="flex text-[16px] text-primary">
+                          {Array.from({ length: 5 }).map((_, i) => (
+                            <MIcon
+                              key={i}
+                              name="star"
+                              filled={i < review.rating}
+                              className={
+                                i < review.rating
+                                  ? "text-primary"
+                                  : "text-border"
+                              }
+                              size={16}
+                            />
+                          ))}
+                        </div>
                       </div>
-                      <div className="flex text-[16px]" style={{ color: "var(--ef-primary)" }}>
-                        {Array.from({ length: 5 }).map((_, i) => (
-                          <MIcon
-                            key={i}
-                            name="star"
-                            filled={i < review.rating}
-                            className={
-                              i < review.rating
-                                ? "text-[var(--ef-primary)]"
-                                : "text-[var(--ef-outline-variant)]"
-                            }
-                            size={16}
-                          />
-                        ))}
-                      </div>
-                    </div>
-                    <p
-                      className="italic"
-                      style={{
-                        fontFamily: "var(--font-hanken-grotesk)",
-                        fontSize: "15px",
-                        lineHeight: "1.6",
-                        fontWeight: 300,
-                        color: "var(--ef-on-surface)",
-                      }}
-                    >
-                      &ldquo;{review.review}&rdquo;
-                    </p>
-                  </div>
+                      <p className="italic font-body-main text-[15px] leading-[1.6] font-light text-foreground">
+                        &ldquo;{review.review}&rdquo;
+                      </p>
+                    </CardContent>
+                  </Card>
                 ))}
 
                 {reviewCount > 3 && (
                   <button
-                    className="transition-all hover:underline uppercase self-start"
+                    className="transition-all hover:underline font-label-caps text-[11px] tracking-[3px] font-semibold text-primary self-start"
                     onClick={() => setShowAllReviews(!showAllReviews)}
-                    style={{
-                      fontFamily: "var(--font-hanken-grotesk)",
-                      fontSize: "11px",
-                      fontWeight: 600,
-                      letterSpacing: "3px",
-                      color: "var(--ef-primary)",
-                    }}
                   >
                     {showAllReviews ? "Show less reviews" : `View all ${reviewCount} reviews`}
                   </button>
@@ -1213,38 +749,17 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
               </div>
             </div>
           ) : (
-            <div className="grid grid-cols-1 lg:grid-cols-12 items-center" style={{ gap: "var(--ef-stack-lg)" }}>
+            <div className="grid grid-cols-1 lg:grid-cols-12 items-center gap-[var(--ef-stack-lg)]">
               {/* Premium Empty State Column */}
               <div className="lg:col-span-5 flex flex-col gap-5 text-left py-6">
-                <div
-                  className="flex items-center justify-center w-14 h-14 rounded-full"
-                  style={{
-                    background: "var(--ef-surface-container-low)",
-                    border: "1px solid var(--ef-outline-variant)",
-                  }}
-                >
-                  <MIcon name="rate_review" size={28} className="text-[var(--ef-primary)]" />
+                <div className="flex items-center justify-center w-14 h-14 rounded-full bg-secondary text-secondary-foreground">
+                  <MIcon name="rate_review" size={28} className="text-secondary-foreground" />
                 </div>
                 <div className="flex flex-col gap-2">
-                  <h2
-                    style={{
-                      fontFamily: "var(--font-playfair-display)",
-                      fontSize: "32px",
-                      lineHeight: "1.2",
-                      color: "var(--ef-on-surface)",
-                    }}
-                  >
+                  <h2 className="font-headline-section text-[32px] leading-[1.2] font-normal text-foreground">
                     Customer Reviews
                   </h2>
-                  <p
-                    style={{
-                      fontFamily: "var(--font-hanken-grotesk)",
-                      fontSize: "15px",
-                      fontWeight: 300,
-                      lineHeight: "1.6",
-                      color: "var(--ef-on-surface-variant)",
-                    }}
-                  >
+                  <p className="font-body-main text-[15px] font-light leading-[1.6] text-muted-foreground">
                     There are no reviews for this product yet. Share your experience to help other buyers make informed choices and let us know what you think!
                   </p>
                 </div>

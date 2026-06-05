@@ -27,9 +27,61 @@ const hankenGrotesk = Hanken_Grotesk({
 })
 
 export const metadata: Metadata = {
-  title: "ErgoZenix",
-  description: "ErgoZenix - Your premium destination for ergonomic office furniture and accessories. Discover high-quality ergonomic chairs, standing desks, and workspace solutions designed for comfort, productivity, and long-term health. Shop now for the perfect ergonomic setup.",
-  generator: "v0.app",
+  title: {
+    default: "ErgoZenix",
+    template: "%s | ErgoZenix",
+  },
+  description: "ErgoZenix - Your premium destination for ergonomic office furniture and accessories. Discover high-quality ergonomic chairs, standing desks, and workspace solutions designed for comfort, productivity, and long-term health.",
+
+  keywords: [
+    "ergonomic chair", "standing desk", "ergonomic office furniture",
+    "workspace accessories", "ergonomic setup", "office health",
+  ],
+
+  metadataBase: new URL("https://ergozenix.com"),
+  alternates: {
+    canonical: "/",
+  },
+
+  openGraph: {
+    title: "ErgoZenix – Premium Ergonomic Furniture",
+    description: "High-quality ergonomic chairs, standing desks, and workspace solutions for comfort and productivity.",
+    url: "https://ergozenix.com",
+    siteName: "ErgoZenix",
+    images: [
+      {
+        url: "/logo_v2.1.png",
+        width: 2400,      // ← increased
+        height: 1260,     // ← increased
+        alt: "ErgoZenix – Ergonomic Office Furniture",
+      },
+    ],
+    locale: "en_US",
+    type: "website",
+  },
+
+  twitter: {
+    card: "summary_large_image",
+    title: "ErgoZenix – Premium Ergonomic Furniture",
+    description: "Discover ergonomic chairs, standing desks, and workspace solutions.",
+    images: ["/logo_v2.1.png"],
+  },
+
+  icons: {
+    icon: "/logo_v2.1.png",
+    shortcut: "/logo_v2.1.png",
+    apple: "/logo_v2.1.png",
+  },
+
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-image-preview": "large",
+    },
+  },
 }
 
 export default function RootLayout({
