@@ -8,16 +8,15 @@ const categories = [
     details: (
       <>
         <div>
-          <span className="font-label-caps text-label-caps block text-border mb-1 uppercase">Toll Free</span>
-          <p className="font-body-main text-body-main font-medium">1800 103 3464</p>
+          <span className="font-label-caps text-label-caps block text-border mb-1 uppercase">Phone</span>
+          <a className="font-body-main text-body-main font-medium hover:text-primary transition-colors" href="tel:+9779760682990">+977 9760682990</a>
         </div>
         <div>
           <span className="font-label-caps text-label-caps block text-border mb-1 uppercase">Availability</span>
-          <p className="font-body-main text-body-main">Mon-Fri 10am-6pm</p>
-          <p className="font-body-main text-body-main">Sat 10am-5pm</p>
+          <p className="font-body-main text-body-main">Sun–Fri 9am–6pm</p>
         </div>
-        <a className="text-primary font-medium hover:underline font-body-main text-body-main break-words" href="mailto:support.ergoyou@innofitt.com">
-          support.ergoyou@innofitt.com
+        <a className="text-primary font-medium hover:underline font-body-main text-body-main break-words" href="mailto:ergozenix@gmail.com">
+          ergozenix@gmail.com
         </a>
       </>
     ),
@@ -30,15 +29,14 @@ const categories = [
       <>
         <div>
           <span className="font-label-caps text-label-caps block text-border mb-1 uppercase">Direct Line</span>
-          <p className="font-body-main text-body-main font-medium">1800 103 3464</p>
+          <a className="font-body-main text-body-main font-medium hover:text-primary transition-colors" href="tel:+9779760682990">+977 9760682990</a>
         </div>
         <div>
           <span className="font-label-caps text-label-caps block text-border mb-1 uppercase">Availability</span>
-          <p className="font-body-main text-body-main">Mon-Fri 10am-6pm</p>
-          <p className="font-body-main text-body-main">Sat 10am-5pm</p>
+          <p className="font-body-main text-body-main">Sun–Fri 9am–6pm</p>
         </div>
-        <a className="text-primary font-medium hover:underline font-body-main text-body-main break-words" href="mailto:navin@innofitt.com">
-          navin@innofitt.com
+        <a className="text-primary font-medium hover:underline font-body-main text-body-main break-words" href="mailto:ergozenix@gmail.com">
+          ergozenix@gmail.com
         </a>
       </>
     ),
@@ -49,10 +47,10 @@ const categories = [
     description: "Include photos/videos, Order ID, and Invoice in your email.",
     details: (
       <>
-        <a className="text-primary font-medium hover:underline font-body-main text-body-main break-words" href="mailto:support.ergoyou@innofitt.com">
-          support.ergoyou@innofitt.com
+        <a className="text-primary font-medium hover:underline font-body-main text-body-main break-words" href="mailto:ergozenix@gmail.com">
+          ergozenix@gmail.com
         </a>
-        <p className="text-[12px] text-muted-foreground leading-relaxed">Response time: 24-48 business hours.</p>
+        <p className="text-[12px] text-muted-foreground leading-relaxed">Response time: 24–48 business hours.</p>
       </>
     ),
   },
@@ -62,10 +60,10 @@ const categories = [
     description: "We value your complaints and suggestions to improve.",
     details: (
       <>
-        <a className="text-primary font-medium hover:underline font-body-main text-body-main break-words" href="mailto:support.ergoyou@innofitt.com">
-          support.ergoyou@innofitt.com
+        <a className="text-primary font-medium hover:underline font-body-main text-body-main break-words" href="mailto:ergozenix@gmail.com">
+          ergozenix@gmail.com
         </a>
-        <p className="text-[12px] text-muted-foreground italic">&ldquo;Scandinavian Functionalism starts with listening.&rdquo;</p>
+        <p className="text-[12px] text-muted-foreground italic">&ldquo;Good design starts with listening.&rdquo;</p>
       </>
     ),
   },

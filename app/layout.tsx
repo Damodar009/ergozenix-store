@@ -52,7 +52,7 @@ export const metadata: Metadata = {
       {
         url: "/logo_v2.1.png",
         width: 2400,      // ← increased
-        height: 1260,     // ← increased
+        height: 1260,     // ← increased 
         alt: "ErgoZenix – Ergonomic Office Furniture",
       },
     ],

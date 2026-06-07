@@ -583,5 +583,117 @@ export class ProductService {
       throw error
     }
   }
+
+  /**
+   * Get active Editor's Pick
+   */
+  static async getActiveEditorsPick(): Promise<{ editorsPick: any, product: ProductWithDetails } | null> {
+    try {
+      const { data: pick, error } = await supabase
+        .from('editors_picks')
+        .select(`
+          *,
+          products:product_id (
+            *,
+            brands:brand_id (*),
+            categories:category_id (*),
+            product_images (*),
+            product_variants (*),
+            product_reviews (*)
+          )
+        `)
+        .eq('is_active', true)
+        .limit(1)
+        .maybeSingle()
+
+      if (error) {
+        console.error('Error fetching active editors pick:', error)
+        return null
+      }
+
+      if (!pick || !pick.products) {
+        return null
+      }
+
+      const product = pick.products
+      const reviews = product.product_reviews || []
+      const validReviews = reviews.filter((r: any) => !r.deleted_at)
+      const average_rating = validReviews.length > 0
+        ? validReviews.reduce((sum: number, r: any) => sum + r.rating, 0) / validReviews.length
+        : undefined
+
+      const productWithDetails = {
+        ...product,
+        brand: product.brands,
+        category: product.categories,
+        images: product.product_images?.filter((img: any) => !img.deleted_at) || [],
+        variants: product.product_variants || [],
+        reviews: validReviews,
+        average_rating,
+        review_count: validReviews.length,
+      } as ProductWithDetails
+
+      const { products, ...editorsPickData } = pick
+
+      return {
+        editorsPick: editorsPickData,
+        product: productWithDetails
+      }
+    } catch (error) {
+      console.error('Error in getActiveEditorsPick:', error)
+      return null
+    }
+  }
+
+  /**
+   * Save or update Editor's Pick
+   */
+  static async saveEditorsPick(data: {
+    product_id: number
+    custom_title?: string | null
+    badge_text?: string
+    description_1?: string | null
+    description_2?: string | null
+    frame_spec?: string
+    surface_spec?: string
+    warranty_spec?: string
+    is_active?: boolean
+  }): Promise<any> {
+    try {
+      if (data.is_active !== false) {
+        await supabase
+          .from('editors_picks')
+          .update({ is_active: false })
+          .neq('product_id', data.product_id)
+      }
+
+      const { data: upsertedPick, error } = await supabase
+        .from('editors_picks')
+        .upsert({
+          product_id: data.product_id,
+          custom_title: data.custom_title || null,
+          badge_text: data.badge_text || 'EDITOR\'S PICK',
+          description_1: data.description_1 || null,
+          description_2: data.description_2 || null,
+          frame_spec: data.frame_spec || 'Forest Green Steel',
+          surface_spec: data.surface_spec || 'Solid European Oak',
+          warranty_spec: data.warranty_spec || '10 Years',
+          is_active: data.is_active ?? true,
+          updated_at: new Date().toISOString(),
+        }, { onConflict: 'product_id' })
+        .select()
+        .single()
+
+      if (error) {
+        console.error('Error saving editors pick:', error)
+        throw error
+      }
+
+      return upsertedPick
+    } catch (error) {
+      console.error('Error in saveEditorsPick:', error)
+      throw error
+    }
+  }
 }
 
