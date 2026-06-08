@@ -107,8 +107,12 @@ export function ContactForm() {
       toast({ title: "Name is required", variant: "destructive" })
       return
     }
-    if (!formData.email.trim()) {
-      toast({ title: "Email is required", variant: "destructive" })
+    if (!formData.email.trim() && !formData.phone.trim()) {
+      toast({
+        title: "Email or Phone is required",
+        description: "Please enter either your email address or phone number.",
+        variant: "destructive"
+      })
       return
     }
     if (!formData.message.trim()) {
@@ -134,13 +138,13 @@ export function ContactForm() {
       const urls = warrantyFiles.map(f => f.url).filter(Boolean) as string[]
 
       await ContactService.sendMessage({
-        name: formData.name,
-        email: formData.email,
-        phone: formData.phone || undefined,
+        name: formData.name.trim(),
+        email: formData.email.trim() || undefined,
+        phone: formData.phone.trim() || undefined,
         media_urls: urls.length > 0 ? urls : undefined,
         subject: formData.subject,
-        order_id: isWarranty && formData.orderId ? formData.orderId : undefined,
-        message: formData.message,
+        order_id: isWarranty && formData.orderId ? formData.orderId.trim() : undefined,
+        message: formData.message.trim(),
         session_id: sessionId || "",
       })
 
@@ -196,36 +200,6 @@ export function ContactForm() {
             />
           </div>
           <div className="flex flex-col gap-2">
-            <Label htmlFor="email" variant="ef-caps">
-              EMAIL ADDRESS
-            </Label>
-            <Input
-              id="email"
-              variant="underline"
-              type="email"
-              value={formData.email}
-              onChange={handleChange}
-              placeholder="john@example.com"
-              required
-            />
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-[var(--ef-stack-lg)]">
-          <div className="flex flex-col gap-2">
-            <Label htmlFor="phone" variant="ef-caps">
-              PHONE NUMBER <span className="text-muted-foreground font-normal normal-case">(optional)</span>
-            </Label>
-            <Input
-              id="phone"
-              variant="underline"
-              type="tel"
-              value={formData.phone}
-              onChange={handleChange}
-              placeholder="+1 (555) 000-0000"
-            />
-          </div>
-          <div className="flex flex-col gap-2">
             <Label htmlFor="subject" variant="ef-caps">
               SUBJECT
             </Label>
@@ -241,6 +215,40 @@ export function ContactForm() {
               <option value="feedback">Feedback</option>
             </select>
           </div>
+        </div>
+
+        <div className="flex flex-col gap-2">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-[var(--ef-stack-lg)]">
+            <div className="flex flex-col gap-2">
+              <Label htmlFor="phone" variant="ef-caps">
+                PHONE NUMBER
+              </Label>
+              <Input
+                id="phone"
+                variant="underline"
+                type="tel"
+                value={formData.phone}
+                onChange={handleChange}
+                placeholder="+977 9XXXXXXXXX"
+              />
+            </div>
+            <div className="flex flex-col gap-2">
+              <Label htmlFor="email" variant="ef-caps">
+                EMAIL ADDRESS
+              </Label>
+              <Input
+                id="email"
+                variant="underline"
+                type="email"
+                value={formData.email}
+                onChange={handleChange}
+                placeholder="john@example.com"
+              />
+            </div>
+          </div>
+          <span className="text-[12px] text-muted-foreground font-body-main mt-1">
+            * Please provide at least one contact method (email or phone number) so we can respond to your request.
+          </span>
         </div>
 
         {/* Order ID — only shown for warranty */}

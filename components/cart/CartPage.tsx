@@ -106,21 +106,26 @@ export default function CartPage() {
                   return (
                     <div
                       key={item.id}
-                      className="scandi-card p-6 rounded-lg flex gap-6 items-center"
+                      className="scandi-card p-4 sm:p-6 rounded-lg flex gap-4 sm:gap-6 items-center"
                     >
                       <img
                         alt={item.product?.name || "Product image"}
                         src={imageUrl}
-                        className="w-20 h-20 object-cover rounded-sm border border-[#c0c9c2] transition-transform duration-500 hover:scale-105"
+                        className="w-16 h-16 sm:w-20 sm:h-20 object-cover rounded-sm border border-[#c0c9c2] transition-transform duration-500 hover:scale-105 shrink-0"
                       />
                       <div className="flex-grow grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                          <h3 className="font-headline-card text-[20px] font-semibold text-[#1c1c19]">
+                          <h3 className="font-headline-card text-[18px] sm:text-[20px] font-semibold text-[#1c1c19]">
                             {item.product?.name}
                           </h3>
-                          <p className="text-[#404944] text-[15px] font-light mt-0.5">
+                          <p className="text-[#404944] text-[14px] sm:text-[15px] font-light mt-0.5">
                             {attributeStr}
                           </p>
+                          <div className="mt-1.5 md:hidden">
+                            <span className="font-semibold text-[15px] text-[#1c1c19]">
+                              Rs. {itemTotal.toLocaleString()}
+                            </span>
+                          </div>
                           <button
                             onClick={() => removeFromCart(item.id)}
                             className="mt-2 text-[11px] font-semibold tracking-[2px] text-[#114734] hover:underline transition-all uppercase block"
@@ -150,7 +155,7 @@ export default function CartPage() {
                           </div>
 
                           {/* Product Price */}
-                          <span className="font-semibold text-[15px] text-[#1c1c19] whitespace-nowrap min-w-[90px] text-right">
+                          <span className="hidden md:inline font-semibold text-[15px] text-[#1c1c19] whitespace-nowrap min-w-[90px] text-right">
                             Rs. {itemTotal.toLocaleString()}
                           </span>
                         </div>
@@ -163,7 +168,7 @@ export default function CartPage() {
               {/* Right: Summary (40% / lg:w-[40%]) */}
               <aside className="w-full lg:w-[40%]">
                 <div
-                  className="p-8 rounded-lg border border-[#c0c9c2] sticky top-[96px]"
+                  className="p-6 sm:p-8 rounded-lg border border-[#c0c9c2] sticky top-[96px]"
                   style={{ backgroundColor: "#f1ede8" }}
                 >
                   <h2 className="font-label-caps text-[11px] font-semibold text-[#404944] uppercase mb-6">
@@ -178,14 +183,14 @@ export default function CartPage() {
                     </div>
                     <div className="flex justify-between items-center">
                       <span className="text-[15px] text-[#404944] font-light">Shipping</span>
-                      <span className="text-[12px] text-[#114734] font-bold uppercase tracking-wider">
-                        Complimentary
+                      <span className="text-[15px] font-semibold text-[#1c1c19]">
+                        Rs. 1,000
                       </span>
                     </div>
                     <div className="flex justify-between items-center border-t border-[#c0c9c2] pt-4">
                       <span className="font-headline-card text-[20px] font-semibold text-[#1c1c19]">Total</span>
                       <span className="font-headline-card text-[20px] font-bold text-[#114734]">
-                        Rs. {cartTotal.toLocaleString()}
+                        Rs. {(cartTotal + 1000).toLocaleString()}
                       </span>
                     </div>
                   </div>

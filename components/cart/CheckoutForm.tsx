@@ -25,7 +25,7 @@ const CheckoutForm: FC = () => {
   const { toast } = useToast();
   const router = useRouter();
 
-  const shipping = items.length > 0 ? 200 : 0;
+  const shipping = items.length > 0 ? 1000 : 0;
   const total = cartTotal + shipping;
 
   const handleProvinceChange = (value: string) => {
@@ -47,7 +47,7 @@ const CheckoutForm: FC = () => {
     const checkoutData: any = {
       fullName: name,
       phoneNumber: formData.get("phone") as string,
-      email: formData.get("email") as string,
+      email: (formData.get("email") as string) || "",
       province,
       district,
       city: formData.get("city") as string,
@@ -59,7 +59,7 @@ const CheckoutForm: FC = () => {
     try {
       const summary = { subtotal: cartTotal, shipping, total };
 
-      await OrderService.placeOrder(
+      const placedOrder = await OrderService.placeOrder(
         checkoutData,
         items,
         summary,
@@ -67,28 +67,8 @@ const CheckoutForm: FC = () => {
         sessionId || null
       );
 
-      // Save order snapshot to localStorage for confirmation page
-      const randomOrderNum = `EZ-${Date.now().toString().slice(-6)}`;
-      const orderSnapshot = {
-        orderNumber: randomOrderNum,
-        customerName: name,
-        email: checkoutData.email,
-        items: items.map((item) => ({
-          id: item.id,
-          name: item.product?.name || "Product",
-          imageUrl: item.product?.image_url || null,
-          price: item.product?.price || 0,
-          quantity: item.quantity,
-          attributes: item.attributes || [],
-        })),
-        subtotal: cartTotal,
-        shipping,
-        total,
-      };
-      localStorage.setItem("last_order", JSON.stringify(orderSnapshot));
-
       await clearCart();
-      router.push("/order-confirmation");
+      router.push(`/order-confirmation?orderId=${placedOrder.id}`);
     } catch (error: any) {
       console.error("Order Error:", error);
       toast({
@@ -184,31 +164,10 @@ const CheckoutForm: FC = () => {
             {/* ── Left Column: Forms (58%) ── */}
             <div className="md:w-[58%] space-y-12">
 
-              {/* Contact */}
               <section className="space-y-8">
-                <h2
-                  className="text-[36px] leading-[1.3] font-normal"
-                  style={{ fontFamily: "'Playfair Display', serif", color: "#1c1c19" }}
-                >
-                  Contact
-                </h2>
-
-                <div className="space-y-4">
-                  <div>
-                    <label className="checkout-label">EMAIL ADDRESS</label>
-                    <input
-                      name="email"
-                      type="email"
-                      placeholder="email@example.com"
-                      required
-                      className="checkout-input"
-                    />
-                  </div>
-                </div>
-
                 {/* Shipping Address */}
                 <h2
-                  className="text-[36px] leading-[1.3] font-normal pt-8"
+                  className="text-[36px] leading-[1.3] font-normal"
                   style={{ fontFamily: "'Playfair Display', serif", color: "#1c1c19" }}
                 >
                   Shipping Address
@@ -382,125 +341,160 @@ const CheckoutForm: FC = () => {
 
             {/* ── Right Column: Order Summary (42%) ── */}
             <div className="md:w-[42%]">
-              <div className="md:sticky md:top-28 space-y-8 bg-[#f7f3ee] rounded-lg p-8 border border-[#c0c9c2]">
-                <h3
-                  className="text-[20px] leading-[1.4] font-medium"
-                  style={{ fontFamily: "'Playfair Display', serif", color: "#1c1c19" }}
-                >
-                  Order Summary
-                </h3>
+              <div className="md:sticky md:top-28 space-y-8">
+                {/* Order Summary Card */}
+                <div className="bg-[#f7f3ee] rounded-lg p-8 border border-[#c0c9c2] space-y-8">
+                  <h3
+                    className="text-[20px] leading-[1.4] font-medium"
+                    style={{ fontFamily: "'Playfair Display', serif", color: "#1c1c19" }}
+                  >
+                    Order Summary
+                  </h3>
 
-                {/* Line Items */}
-                <div className="space-y-6">
-                  {items.length === 0 ? (
-                    <p
-                      className="text-[15px] font-light text-[#707973]"
-                      style={{ fontFamily: "'Hanken Grotesk', sans-serif" }}
-                    >
-                      Your cart is empty.
-                    </p>
-                  ) : (
-                    items.map((item) => (
-                      <div key={item.id} className="flex gap-4 items-start">
-                        {/* Thumbnail */}
-                        <div className="relative w-20 h-20 bg-white border border-[#c0c9c2] rounded-lg overflow-hidden shrink-0">
-                          {item.product?.image_url ? (
-                            <img
-                              src={item.product.image_url}
-                              alt={item.product?.name || "Product"}
-                              className="w-full h-full object-cover"
-                            />
-                          ) : (
-                            <div className="w-full h-full bg-[#ece7e2] flex items-center justify-center">
-                              <span className="text-[#707973] text-xs">No img</span>
-                            </div>
-                          )}
-                          <span className="absolute -top-1 -right-1 bg-[#5e5e5c] text-white text-[10px] w-5 h-5 flex items-center justify-center rounded-full font-bold">
-                            {item.quantity}
-                          </span>
-                        </div>
-
-                        {/* Info */}
-                        <div className="flex-grow">
-                          <p
-                            className="text-[15px] font-semibold text-[#1c1c19] break-words"
-                            style={{ fontFamily: "'Hanken Grotesk', sans-serif" }}
-                          >
-                            {item.product?.name || "Product"}
-                          </p>
-                          {item.attributes && item.attributes.length > 0 && (
-                            <p
-                              className="text-[11px] tracking-[2px] uppercase text-[#5e5e5c] mt-0.5"
-                              style={{ fontFamily: "'Hanken Grotesk', sans-serif" }}
-                            >
-                              {item.attributes.map((a: any) => a.value).join(" / ")}
-                            </p>
-                          )}
-                        </div>
-
-                        {/* Price */}
-                        <span
-                          className="text-[15px] font-semibold text-[#1c1c19] shrink-0"
-                          style={{ fontFamily: "'Hanken Grotesk', sans-serif" }}
-                        >
-                          Rs. {((item.product?.price || 0) * item.quantity).toLocaleString()}
-                        </span>
-                      </div>
-                    ))
-                  )}
-                </div>
-
-                {/* Totals */}
-                <div className="space-y-3 pt-4 border-t border-[#c0c9c2]">
-                  <div className="flex justify-between text-[#5e5e5c]">
-                    <span
-                      className="text-[15px] font-light"
-                      style={{ fontFamily: "'Hanken Grotesk', sans-serif" }}
-                    >
-                      Subtotal
-                    </span>
-                    <span
-                      className="text-[15px] font-light"
-                      style={{ fontFamily: "'Hanken Grotesk', sans-serif" }}
-                    >
-                      Rs. {cartTotal.toLocaleString()}
-                    </span>
-                  </div>
-                  <div className="flex justify-between text-[#5e5e5c]">
-                    <span
-                      className="text-[15px] font-light"
-                      style={{ fontFamily: "'Hanken Grotesk', sans-serif" }}
-                    >
-                      Shipping
-                    </span>
-                    <span
-                      className="text-[15px] font-light"
-                      style={{ fontFamily: "'Hanken Grotesk', sans-serif" }}
-                    >
-                      {items.length === 0 ? "—" : `Rs. ${shipping.toLocaleString()}`}
-                    </span>
-                  </div>
-
-                  <div className="flex justify-between items-baseline pt-4 border-t border-[#c0c9c2]">
-                    <span
-                      className="text-[20px] leading-[1.4] font-medium"
-                      style={{ fontFamily: "'Playfair Display', serif", color: "#1c1c19" }}
-                    >
-                      Total
-                    </span>
-                    <div className="text-right">
-                      <span
-                        className="text-[11px] text-[#5e5e5c] tracking-[2px] font-semibold uppercase mr-2"
+                  {/* Line Items */}
+                  <div className="space-y-6">
+                    {items.length === 0 ? (
+                      <p
+                        className="text-[15px] font-light text-[#707973]"
                         style={{ fontFamily: "'Hanken Grotesk', sans-serif" }}
                       >
-                        NPR
+                        Your cart is empty.
+                      </p>
+                    ) : (
+                      items.map((item) => (
+                        <div key={item.id} className="flex gap-4 items-start">
+                          {/* Thumbnail */}
+                          <div className="relative w-20 h-20 bg-white border border-[#c0c9c2] rounded-lg overflow-hidden shrink-0">
+                            {item.product?.image_url ? (
+                              <img
+                                src={item.product.image_url}
+                                alt={item.product?.name || "Product"}
+                                className="w-full h-full object-cover"
+                              />
+                            ) : (
+                              <div className="w-full h-full bg-[#ece7e2] flex items-center justify-center">
+                                <span className="text-[#707973] text-xs">No img</span>
+                              </div>
+                            )}
+                            <span className="absolute -top-1 -right-1 bg-[#5e5e5c] text-white text-[10px] w-5 h-5 flex items-center justify-center rounded-full font-bold">
+                              {item.quantity}
+                            </span>
+                          </div>
+
+                          {/* Info */}
+                          <div className="flex-grow">
+                            <p
+                              className="text-[15px] font-semibold text-[#1c1c19] break-words"
+                              style={{ fontFamily: "'Hanken Grotesk', sans-serif" }}
+                            >
+                              {item.product?.name || "Product"}
+                            </p>
+                            {item.attributes && item.attributes.length > 0 && (
+                              <p
+                                className="text-[11px] tracking-[2px] uppercase text-[#5e5e5c] mt-0.5"
+                                style={{ fontFamily: "'Hanken Grotesk', sans-serif" }}
+                              >
+                                {item.attributes.map((a: any) => a.value).join(" / ")}
+                              </p>
+                            )}
+                          </div>
+
+                          {/* Price */}
+                          <span
+                            className="text-[15px] font-semibold text-[#1c1c19] shrink-0"
+                            style={{ fontFamily: "'Hanken Grotesk', sans-serif" }}
+                          >
+                            Rs. {((item.product?.price || 0) * item.quantity).toLocaleString()}
+                          </span>
+                        </div>
+                      ))
+                    )}
+                  </div>
+
+                  {/* Totals */}
+                  <div className="space-y-3 pt-4 border-t border-[#c0c9c2]">
+                    <div className="flex justify-between text-[#5e5e5c]">
+                      <span
+                        className="text-[15px] font-light"
+                        style={{ fontFamily: "'Hanken Grotesk', sans-serif" }}
+                      >
+                        Subtotal
                       </span>
                       <span
-                        className="text-[32px] leading-[1.3] font-normal text-[#1c1c19]"
-                        style={{ fontFamily: "'Playfair Display', serif" }}
+                        className="text-[15px] font-light"
+                        style={{ fontFamily: "'Hanken Grotesk', sans-serif" }}
                       >
-                        {total.toLocaleString()}
+                        Rs. {cartTotal.toLocaleString()}
                       </span>
+                    </div>
+                    <div className="flex justify-between text-[#5e5e5c]">
+                      <span
+                        className="text-[15px] font-light"
+                        style={{ fontFamily: "'Hanken Grotesk', sans-serif" }}
+                      >
+                        Shipping
+                      </span>
+                      <span
+                        className="text-[15px] font-light"
+                        style={{ fontFamily: "'Hanken Grotesk', sans-serif" }}
+                      >
+                        {items.length === 0 ? "—" : `Rs. ${shipping.toLocaleString()}`}
+                      </span>
+                    </div>
+
+                    <div className="flex justify-between items-baseline pt-4 border-t border-[#c0c9c2]">
+                      <span
+                        className="text-[20px] leading-[1.4] font-medium"
+                        style={{ fontFamily: "'Playfair Display', serif", color: "#1c1c19" }}
+                      >
+                        Total
+                      </span>
+                      <div className="text-right">
+                        <span
+                          className="text-[11px] text-[#5e5e5c] tracking-[2px] font-semibold uppercase mr-2"
+                          style={{ fontFamily: "'Hanken Grotesk', sans-serif" }}
+                        >
+                          NPR
+                        </span>
+                        <span
+                          className="text-[32px] leading-[1.3] font-normal text-[#1c1c19]"
+                          style={{ fontFamily: "'Playfair Display', serif" }}
+                        >
+                          {total.toLocaleString()}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Payment Method Card */}
+                <div className="bg-[#f7f3ee] rounded-lg p-8 border border-[#c0c9c2] space-y-6">
+                  <h3
+                    className="text-[20px] leading-[1.4] font-medium"
+                    style={{ fontFamily: "'Playfair Display', serif", color: "#1c1c19" }}
+                  >
+                    Payment
+                  </h3>
+
+                  <div className="space-y-4">
+                    <div className="p-6 rounded-lg border border-[#114734] bg-[#f1ede8] flex items-start gap-4">
+                      <div className="flex items-center h-5 mt-0.5">
+                        <input
+                          id="payment-bank"
+                          name="paymentMethod"
+                          type="radio"
+                          defaultChecked
+                          className="h-4.5 w-4.5 accent-[#114734] cursor-pointer"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <label htmlFor="payment-bank" className="font-semibold text-[15px] text-[#1c1c19] cursor-pointer block">
+                          Direct Bank Transfer
+                        </label>
+                        <p className="text-[13px] text-[#5e5e5c] font-light leading-relaxed">
+
+                          To complete your purchase, kindly transfer the payment to our bank account, quoting your Order ID or Name as the reference. Please note that dispatch will only occur once the payment has been confirmed and cleared.                        </p>
+                      </div>
                     </div>
                   </div>
                 </div>

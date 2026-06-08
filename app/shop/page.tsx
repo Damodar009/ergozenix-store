@@ -1,101 +1,10 @@
 "use client"
 
-import React, { useEffect, useState, useCallback, useRef } from "react"
+import React, { useEffect, useState, useCallback } from "react"
 import { ProductCard } from "@/components/shop/ProductCard"
 import { Pagination } from "@/components/shop/Pagination"
 import { ProductService } from "@/services/product-service"
 import type { ProductCard as ProductCardType } from "@/models/product"
-import { Category } from "@/components/shop/CategoryList"
-
-/* ─── Helper: Material Icon ─── */
-function MIcon({ name, size = 20, className = "" }: { name: string; size?: number; className?: string }) {
-  return (
-    <span className={`material-symbols-outlined ${className}`} style={{ fontSize: `${size}px` }}>
-      {name}
-    </span>
-  )
-}
-
-/* ─── Filter Dropdown Button ─── */
-function FilterDropdown({
-  label,
-  children,
-}: {
-  label: string
-  children: React.ReactNode
-}) {
-  const [open, setOpen] = useState(false)
-  const ref = useRef<HTMLDivElement>(null)
-
-  // Close on outside click
-  useEffect(() => {
-    function handleClick(e: MouseEvent) {
-      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false)
-    }
-    document.addEventListener("mousedown", handleClick)
-    return () => document.removeEventListener("mousedown", handleClick)
-  }, [])
-
-  return (
-    <div ref={ref} className="relative">
-      <button
-        onClick={() => setOpen(!open)}
-        className="flex items-center gap-2 px-4 py-2 cursor-pointer transition-colors border border-border bg-card text-foreground font-label-caps text-[11px] uppercase tracking-[2px] hover:bg-accent"
-      >
-        {label}
-        <MIcon name="keyboard_arrow_down" size={16} />
-      </button>
-      {open && (
-        <div
-          className="absolute top-full left-0 mt-1 z-50 min-w-[200px] shadow-lg bg-card border border-border rounded-[4px]"
-        >
-          {children}
-        </div>
-      )}
-    </div>
-  )
-}
-
-/* ─── Filter Option Item ─── */
-function FilterOption({
-  label,
-  active,
-  onClick,
-}: {
-  label: string
-  active?: boolean
-  onClick: () => void
-}) {
-  return (
-    <button
-      onClick={onClick}
-      className={`w-full text-left px-4 py-2.5 transition-colors cursor-pointer font-body-main text-[13px] ${active
-        ? "font-semibold text-primary bg-primary/10"
-        : "font-light text-foreground bg-transparent hover:bg-muted"
-        }`}
-    >
-      {label}
-    </button>
-  )
-}
-
-/* ─── Price Range Options ─── */
-const PRICE_RANGES = [
-  { label: "All Prices", min: 0, max: 150000 },
-  { label: "Under Rs 5,000", min: 0, max: 5000 },
-  { label: "Rs 5,000 – Rs 15,000", min: 5000, max: 15000 },
-  { label: "Rs 15,000 – Rs 50,000", min: 15000, max: 50000 },
-  { label: "Rs 50,000 – Rs 100,000", min: 50000, max: 100000 },
-  { label: "Over Rs 100,000", min: 100000, max: 150000 },
-]
-
-/* ─── Sort Options ─── */
-const SORT_OPTIONS = [
-  { label: "Newest", value: "newest" },
-  { label: "Price: Low to High", value: "price-asc" },
-  { label: "Price: High to Low", value: "price-desc" },
-  { label: "Name: A-Z", value: "name-asc" },
-]
 
 /* ═══════════════════════════════════════════════════════
    SHOP PAGE
@@ -103,64 +12,22 @@ const SORT_OPTIONS = [
 export default function ShopPage() {
   // Data State
   const [products, setProducts] = useState<ProductCardType[]>([])
-  const [categories, setCategories] = useState<{ id: number; name: string }[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [totalCount, setTotalCount] = useState(0)
-
-  // Filter State
-  const [selectedCategory, setSelectedCategory] = useState<number | null>(null)
-  const [selectedPriceRange, setSelectedPriceRange] = useState(0) // index into PRICE_RANGES
-  const [sortBy, setSortBy] = useState("newest")
-
-
 
   // Pagination State
   const [page, setPage] = useState(1)
   const [limit] = useState(9)
   const [totalPages, setTotalPages] = useState(1)
 
-  // Fetch Categories
-  useEffect(() => {
-    async function fetchCategories() {
-      try {
-        const cats = await ProductService.getAllCategories()
-        setCategories(cats.map(c => ({ id: c.id, name: c.name })))
-      } catch (err) {
-        console.error("Failed to load categories")
-      }
-    }
-    fetchCategories()
-  }, [])
-
   // Fetch Products
   const fetchProducts = useCallback(async () => {
     setLoading(true)
     setError(null)
     try {
-      // Parse sort option
-      let sortOption: { field: 'name' | 'base_price' | 'created_at' | 'updated_at'; ascending: boolean } | undefined
-
-      if (sortBy === "price-asc") {
-        sortOption = { field: "base_price", ascending: true }
-      } else if (sortBy === "price-desc") {
-        sortOption = { field: "base_price", ascending: false }
-      } else if (sortBy === "name-asc") {
-        sortOption = { field: "name", ascending: true }
-      } else {
-        sortOption = undefined // newest — default created_at desc
-      }
-
-      const priceRange = PRICE_RANGES[selectedPriceRange]
-
       const data = await ProductService.getProducts(
-        {
-          category_id: selectedCategory || undefined,
-          min_price: priceRange.min,
-          max_price: priceRange.max,
-          in_stock: undefined,
-        },
-        sortOption,
+        {},
+        undefined,
         limit,
         (page - 1) * limit,
       )
@@ -169,18 +36,16 @@ export default function ShopPage() {
       // Estimate total pages (if we get a full page, there might be more)
       if (data.length < limit) {
         setTotalPages(page)
-        setTotalCount((page - 1) * limit + data.length)
       } else {
         // At least one more page possible
         setTotalPages(page + 1)
-        setTotalCount(page * limit + 1) // approximate
       }
     } catch (err) {
       setError("Failed to load products. Please try again.")
     } finally {
       setLoading(false)
     }
-  }, [selectedCategory, selectedPriceRange, sortBy, page, limit])
+  }, [page, limit])
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -189,126 +54,23 @@ export default function ShopPage() {
     return () => clearTimeout(timer)
   }, [fetchProducts])
 
-  // Handlers
-  const handleCategoryChange = (id: number | null) => {
-    setSelectedCategory(id)
-    setPage(1)
-  }
-
-  const handlePriceChange = (index: number) => {
-    setSelectedPriceRange(index)
-    setPage(1)
-  }
-
-  const handleSortChange = (value: string) => {
-    setSortBy(value)
-    setPage(1)
-  }
-
-  // Derive category name for header
-  const selectedCatName = selectedCategory
-    ? categories.find(c => c.id === selectedCategory)?.name || "Products"
-    : "All Products"
-
   return (
     <main className="pb-[var(--ef-section-padding)] bg-background text-foreground font-body-main">
       {/* ─── Page Title Section ─── */}
-      {/* <section
-        className="py-[var(--ef-stack-lg)] px-8 md:px-12 lg:px-16"
-        style={{
-          borderBottom: "1px solid var(--ef-outline-variant)",
-          backgroundColor: "var(--ef-surface-container-lowest)",
-        }}
-      >
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-[var(--ef-stack-sm)]">
+      <section className="py-12 px-8 md:px-12 lg:px-16 border-b border-border bg-card">
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 max-w-7xl mx-auto">
           <div>
-            <span
-              className="block mb-2"
-              style={{
-                fontFamily: "var(--font-hanken-grotesk), 'Hanken Grotesk', sans-serif",
-                fontSize: "11px",
-                fontWeight: 600,
-                letterSpacing: "2px",
-                textTransform: "uppercase",
-                color: "var(--ef-secondary)",
-              }}
-            >
+            <span className="block mb-2 font-label-caps text-[11px] font-semibold tracking-[2px] uppercase text-muted-foreground">
               Collections
             </span>
-            <h1
-              style={{
-                fontFamily: "var(--font-playfair-display), 'Playfair Display', serif",
-                fontSize: "clamp(32px, 4vw, 40px)",
-                lineHeight: "1.2",
-                fontWeight: 400,
-                color: "var(--ef-on-surface)",
-              }}
-            >
-              {selectedCatName}
+            <h1 className="font-headline-section text-headline-section text-foreground">
+              All Products
             </h1>
           </div>
-          <div
-            style={{
-              fontFamily: "var(--font-hanken-grotesk), 'Hanken Grotesk', sans-serif",
-              fontSize: "15px",
-              lineHeight: "1.6",
-              fontWeight: 300,
-              color: "var(--ef-on-surface-variant)",
-            }}
-          >
-            {loading ? "Loading…" : `${products.length} products`}
+          <div className="font-body-main text-[15px] font-light text-muted-foreground">
+            {loading ? "Loading…" : `${products.length} product${products.length === 1 ? '' : 's'}`}
           </div>
         </div>
-      </section> */}
-
-      {/* ─── Filter Bar ─── */}
-      <section
-        className="sticky top-[64px] z-40 backdrop-blur-sm py-[var(--ef-stack-md)] px-8 md:px-12 lg:px-16 flex flex-wrap items-center justify-between gap-[var(--ef-stack-md)] mb-[var(--ef-stack-lg)] bg-background/95 border-b border-border"
-      >
-        <div className="flex flex-wrap items-center gap-[var(--ef-stack-md)]">
-          {/* Category Filter */}
-          <FilterDropdown label="Category">
-            <FilterOption
-              label="All Categories"
-              active={selectedCategory === null}
-              onClick={() => handleCategoryChange(null)}
-            />
-            {categories.map(cat => (
-              <FilterOption
-                key={cat.id}
-                label={cat.name}
-                active={selectedCategory === cat.id}
-                onClick={() => handleCategoryChange(cat.id)}
-              />
-            ))}
-          </FilterDropdown>
-
-          {/* Price Filter */}
-          <FilterDropdown label="Price">
-            {PRICE_RANGES.map((range, idx) => (
-              <FilterOption
-                key={idx}
-                label={range.label}
-                active={selectedPriceRange === idx}
-                onClick={() => handlePriceChange(idx)}
-              />
-            ))}
-          </FilterDropdown>
-
-          {/* Sort By */}
-          <FilterDropdown label="Sort By">
-            {SORT_OPTIONS.map(opt => (
-              <FilterOption
-                key={opt.value}
-                label={opt.label}
-                active={sortBy === opt.value}
-                onClick={() => handleSortChange(opt.value)}
-              />
-            ))}
-          </FilterDropdown>
-        </div>
-
-
       </section>
 
       {/* ─── Product Grid / List ─── */}
@@ -359,19 +121,11 @@ export default function ShopPage() {
           <p className="mb-2 font-headline-card text-[20px] font-medium text-foreground">
             No Products Found
           </p>
-          <p className="mb-4 font-body-main text-[15px] font-light text-muted-foreground">
-            Try adjusting your filters or price range.
-          </p>
           <button
-            onClick={() => {
-              setSelectedCategory(null)
-              setSelectedPriceRange(0)
-              setSortBy("newest")
-              setPage(1)
-            }}
+            onClick={fetchProducts}
             className="cursor-pointer hover:underline font-label-caps text-[11px] font-semibold tracking-[2px] uppercase text-primary bg-transparent border-none"
           >
-            Clear All Filters
+            Reload Products
           </button>
         </div>
       ) : (

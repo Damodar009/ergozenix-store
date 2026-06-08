@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
+import { OrderService } from "@/services/order-service";
 
 interface OrderItem {
   id: number;
@@ -25,61 +26,41 @@ interface OrderData {
 
 export default function OrderConfirmationPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
 
-  // Premium fake order data for visual design preview
-  const [order, setOrder] = useState<OrderData | null>({
-    orderNumber: "ERGO-8924-01",
-    customerName: "Jane Doe",
-    email: "jane.doe@example.com",
-    items: [
-      {
-        id: 1,
-        name: "ErgoForm™ Active Ergonomic Chair",
-        imageUrl: "https://images.unsplash.com/photo-1580481072645-022f9a6dbf27?q=80&w=200&auto=format&fit=crop",
-        price: 49500,
-        quantity: 1,
-        attributes: [
-          { name: "Frame", value: "Polished Aluminum" },
-          { name: "Mesh", value: "Slate Grey" },
-          { name: "Support", value: "Dynamic Lumbar Support" }
-        ]
-      },
-      {
-        id: 2,
-        name: "Premium Wool Felt Desk Mat",
-        imageUrl: "https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?q=80&w=200&auto=format&fit=crop",
-        price: 4500,
-        quantity: 2,
-        attributes: [
-          { name: "Size", value: "Medium (900x400mm)" },
-          { name: "Color", value: "Heather Charcoal" }
-        ]
-      }
-    ],
-    subtotal: 58500,
-    shipping: 1200,
-    total: 59700
-  });
+  const [order, setOrder] = useState<OrderData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const mainRef = useRef<HTMLElement>(null);
 
-  // Commented out during design review - will load actual checkout session data later
-  /*
   useEffect(() => {
-    try {
-      const raw = localStorage.getItem("last_order");
-      if (raw) {
-        setOrder(JSON.parse(raw));
+    async function loadOrder() {
+      const orderId = searchParams.get("orderId");
+
+      if (!orderId) {
+        setError("No order ID was found in the URL.");
+        setLoading(false);
+        return;
       }
-    } catch {
-      // ignore parse errors
+
+      try {
+        const data = await OrderService.getOrderDetails(orderId);
+        setOrder(data);
+      } catch (err: any) {
+        console.error("Error loading order:", err);
+        setError(err.message || "Failed to load order details.");
+      } finally {
+        setLoading(false);
+      }
     }
-  }, []);
-  */
+
+    loadOrder();
+  }, [searchParams]);
 
   // Fade-in animation on load
   useEffect(() => {
-    if (!mainRef.current) return;
+    if (!mainRef.current || !order) return;
     const children = Array.from(mainRef.current.children) as HTMLElement[];
     children.forEach((el, i) => {
       el.style.opacity = "0";
@@ -92,13 +73,57 @@ export default function OrderConfirmationPage() {
     });
   }, [order]);
 
+  if (loading) {
+    return (
+      <div
+        className="min-h-screen flex items-center justify-center bg-[#f7f3ee]"
+        style={{ fontFamily: "'Hanken Grotesk', sans-serif" }}
+      >
+        <div className="flex flex-col items-center gap-4">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#114734]"></div>
+          <p className="text-[15px] font-light text-[#5e5e5c]">Loading order details…</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error && !order) {
+    return (
+      <div
+        className="min-h-screen flex flex-col items-center justify-center bg-[#f7f3ee] text-center px-6"
+        style={{ fontFamily: "'Hanken Grotesk', sans-serif" }}
+      >
+        <p className="font-headline-card text-[20px] font-medium text-foreground mb-2">
+          Unable to Load Order
+        </p>
+        <p className="text-[15px] font-light text-[#5e5e5c] max-w-sm mb-8">
+          {error}
+        </p>
+        <Link
+          href="/"
+          className="bg-[#2c5f4a] text-[#ffffff] font-label-caps text-[11px] font-semibold tracking-[2px] px-8 py-4 rounded uppercase transition-colors hover:bg-[#114734]"
+        >
+          Go to Home
+        </Link>
+      </div>
+    );
+  }
+
   if (!order) {
     return (
       <div
-        className="min-h-screen flex items-center justify-center"
-        style={{ backgroundColor: "#f7f3ee", fontFamily: "'Hanken Grotesk', sans-serif" }}
+        className="min-h-screen flex flex-col items-center justify-center bg-[#f7f3ee] text-center px-6"
+        style={{ fontFamily: "'Hanken Grotesk', sans-serif" }}
       >
-        <p className="text-[15px] font-light text-[#5e5e5c]">Loading order details…</p>
+        <p className="font-headline-card text-[20px] font-medium text-foreground mb-2">
+          No Order Details Found
+        </p>
+        <Link
+          href="/"
+          className="bg-[#2c5f4a] text-[#ffffff] font-label-caps text-[11px] font-semibold tracking-[2px] px-8 py-4 rounded uppercase transition-colors hover:bg-[#114734]"
+        >
+          Go to Home
+        </Link>
       </div>
     );
   }
@@ -356,7 +381,7 @@ export default function OrderConfirmationPage() {
                       color: "#1c1c19",
                     }}
                   >
-                    {order.shipping === 0 ? "Complimentary" : `Rs. ${order.shipping.toLocaleString()}`}
+                    Rs. {order.shipping.toLocaleString()}
                   </span>
                 </div>
 
@@ -423,7 +448,6 @@ export default function OrderConfirmationPage() {
 
             <button
               onClick={() => {
-                localStorage.removeItem("last_order");
                 router.push("/");
               }}
               className="active:scale-95 transition-all duration-300"

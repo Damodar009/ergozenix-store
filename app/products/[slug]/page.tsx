@@ -86,6 +86,7 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
   const [selectedColor, setSelectedColor] = useState(0)
   const [selectedSize, setSelectedSize] = useState(0)
   const { addToCart } = useCart()
+  const [addingToCart, setAddingToCart] = useState(false)
   const reviewsSectionRef = useRef<HTMLElement>(null)
 
   // Review Form & List States
@@ -584,11 +585,28 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
 
               {/* Add to Cart Button */}
               <Button
-                className="w-full"
+                className="w-full flex items-center justify-center gap-2"
                 size="ef"
-                onClick={() => addToCart(product.id, quantity, [])}
+                disabled={addingToCart}
+                onClick={async () => {
+                  setAddingToCart(true)
+                  try {
+                    await addToCart(product.id, quantity, [])
+                  } catch (e) {
+                    console.error(e)
+                  } finally {
+                    setAddingToCart(false)
+                  }
+                }}
               >
-                Add to Cart
+                {addingToCart ? (
+                  <>
+                    <span className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary-foreground mr-1"></span>
+                    Adding...
+                  </>
+                ) : (
+                  "Add to Cart"
+                )}
               </Button>
 
               {/* Save to Wishlist Button */}

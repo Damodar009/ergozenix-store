@@ -97,7 +97,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       );
 
       // Optionally refresh cart list
-      // await loadCart();
+      await loadCart();
 
       toast({
         title: "Added to cart",
