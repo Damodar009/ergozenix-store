@@ -196,7 +196,7 @@ export default function AddProductPage() {
       const mediaType: "image" | "video" = file.type.startsWith("video/") ? "video" : "image"
       newItems.push({ url: fileUrl, type: mediaType })
     }
-
+    console.log("Uploaded media: ", newItems)
     if (newItems.length > 0) setUploadedMedia(prev => [...prev, ...newItems])
     setUploading(false)
     if (fileInputRef.current) fileInputRef.current.value = ''

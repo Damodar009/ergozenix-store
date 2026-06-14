@@ -1,11 +1,12 @@
 "use client"
 
 import { Button } from "@/components/ui/button"
-import { ShoppingCart } from "lucide-react"
+import { ShoppingCart, Heart } from "lucide-react"
 import { StarRating } from "@/components/home/StarRating"
 import { QuantitySelector } from "./QuantitySelector"
 import { useState } from "react"
 import { useCart } from "@/context/cart-context"
+import { useWishlist } from "@/context/wishlist-context"
 
 export type ProductSpec = {
   label: string
@@ -36,9 +37,8 @@ export function ProductDetails({
 }) {
   const [quantity, setQuantity] = useState(1)
   const { addToCart } = useCart()
-
-
-
+  const { isWishlisted, toggleWishlist } = useWishlist()
+  const isSaved = isWishlisted(productId)
 
   const formatPrice = (p: number) => `Rs. ${p.toLocaleString()}`
   const hasSale = salePrice && basePrice && salePrice < basePrice
@@ -88,9 +88,15 @@ export function ProductDetails({
             <ShoppingCart className="mr-2 h-5 w-5" />
             Add to Cart
           </Button>
+          <Button
+            variant="outline"
+            className="h-12 w-12 px-0 rounded-md border-gray-300 hover:bg-gray-100 dark:border-gray-700 dark:hover:bg-gray-800 shrink-0 cursor-pointer"
+            onClick={() => toggleWishlist(productId, title)}
+          >
+            <Heart className={`h-5 w-5 ${isSaved ? "fill-red-500 stroke-red-500" : "text-gray-500"}`} />
+          </Button>
         </div>
       </div>
     </div>
   )
 }
-

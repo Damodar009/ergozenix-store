@@ -12,6 +12,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { useCart } from "@/context/cart-context"
+import { useWishlist } from "@/context/wishlist-context"
 import {
   Accordion,
   AccordionContent,
@@ -26,11 +27,13 @@ function MIcon({
   filled = false,
   className = "",
   size,
+  style,
 }: {
   name: string
   filled?: boolean
   className?: string
   size?: number
+  style?: React.CSSProperties
 }) {
   return (
     <span
@@ -40,6 +43,7 @@ function MIcon({
           ? "'FILL' 1, 'wght' 300, 'GRAD' 0, 'opsz' 24"
           : undefined,
         fontSize: size ? `${size}px` : undefined,
+        ...style,
       }}
     >
       {name}
@@ -86,6 +90,7 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
   const [selectedColor, setSelectedColor] = useState(0)
   const [selectedSize, setSelectedSize] = useState(0)
   const { addToCart } = useCart()
+  const { isWishlisted, toggleWishlist } = useWishlist()
   const [addingToCart, setAddingToCart] = useState(false)
   const reviewsSectionRef = useRef<HTMLElement>(null)
 
@@ -612,11 +617,18 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
               {/* Save to Wishlist Button */}
               <Button
                 variant="outline"
-                className="w-full font-label-caps tracking-[3px]"
+                className="w-full font-label-caps tracking-[3px] cursor-pointer"
                 size="ef"
+                onClick={() => toggleWishlist(product.id, product.name)}
               >
-                <MIcon name="favorite" size={18} className="mr-2" />
-                Save to Wishlist
+                <MIcon
+                  name="favorite"
+                  size={18}
+                  className="mr-2"
+                  filled={isWishlisted(product.id)}
+                  style={{ color: isWishlisted(product.id) ? "red" : undefined }}
+                />
+                {isWishlisted(product.id) ? "Saved to Wishlist" : "Save to Wishlist"}
               </Button>
             </div>
 

@@ -1,5 +1,5 @@
 import { supabase } from '@/services/supabase'
-import { CartItem } from './cart-service'
+import { CartItem, CartService } from './cart-service'
 
 export interface CheckoutFormData {
     fullName: string
@@ -112,6 +112,16 @@ export class OrderService {
             }
         }
 
+        // 5. Mark cart as completed and clear items
+        if (sessionId) {
+            try {
+                await CartService.clearCart(sessionId, userId || undefined)
+            } catch (cartErr) {
+                // Non-fatal: order is already placed, log and continue
+                console.warn('Could not clear cart after order placement:', cartErr)
+            }
+        }
+
         return orderData
     }
 
@@ -184,5 +194,185 @@ export class OrderService {
             shipping: order.delivery_charge,
             total: order.total_amount
         }
+    }
+
+    /**
+     * Get all orders for admin view (newest first), joined with customer info
+     */
+    static async getAllOrders() {
+        const { data: orders, error } = await supabase
+            .from('orders')
+            .select('*')
+            .order('placed_at', { ascending: false })
+
+        if (error) {
+            console.error('Error fetching all orders:', error)
+            throw new Error(`Failed to fetch orders: ${error.message}`)
+        }
+
+        if (!orders || orders.length === 0) return []
+
+        // Fetch customer info and item counts in parallel for each order
+        const enriched = await Promise.all(
+            orders.map(async (order) => {
+                // Customer info via session_id
+                let customerInfo: any = null
+                if (order.session_id) {
+                    const { data: customer } = await supabase
+                        .from('customer_info')
+                        .select('full_name, email, phone_number, province, district, city, street_address, landmark, notes')
+                        .eq('session_id', order.session_id)
+                        .order('created_at', { ascending: false })
+                        .limit(1)
+                        .maybeSingle()
+                    customerInfo = customer
+                }
+
+                // Item count
+                const { count } = await supabase
+                    .from('order_items')
+                    .select('id', { count: 'exact', head: true })
+                    .eq('order_id', order.id)
+
+                // Order items with images
+                const { data: items } = await supabase
+                    .from('order_items')
+                    .select('id, product_name, product_image, quantity, price')
+                    .eq('order_id', order.id)
+
+                return {
+                    id: order.id,
+                    orderNumber: `EZ-${order.id}`,
+                    status: order.order_status as string,
+                    createdAt: order.placed_at as string,
+                    subtotal: order.subtotal as number,
+                    shipping: order.delivery_charge as number,
+                    total: order.total_amount as number,
+                    itemCount: count ?? 0,
+                    items: (items || []).map((it: any) => ({
+                        id: it.id,
+                        name: it.product_name,
+                        imageUrl: it.product_image || null,
+                        quantity: it.quantity,
+                        price: it.price,
+                    })),
+                    customer: customerInfo ? {
+                        name: customerInfo.full_name,
+                        email: customerInfo.email,
+                        phone: customerInfo.phone_number,
+                        address: [
+                            customerInfo.street_address,
+                            customerInfo.city,
+                            customerInfo.district,
+                            customerInfo.province,
+                        ].filter(Boolean).join(', '),
+                        landmark: customerInfo.landmark,
+                        notes: customerInfo.notes,
+                    } : null,
+                }
+            })
+        )
+
+        return enriched
+    }
+
+    /**
+     * Update the status of a single order
+     */
+    static async updateOrderStatus(orderId: number, status: string) {
+        const { error } = await supabase
+            .from('orders')
+            .update({ order_status: status, updated_at: new Date().toISOString() })
+            .eq('id', orderId)
+
+        if (error) {
+            console.error('Error updating order status:', error)
+            throw new Error(`Failed to update status: ${error.message}`)
+        }
+    }
+
+    /**
+     * Get all orders for a given session ID (customer-facing order tracking)
+     */
+    static async getOrdersBySessionId(sessionId: string) {
+        const { data: orders, error } = await supabase
+            .from('orders')
+            .select('*')
+            .eq('session_id', sessionId)
+            .order('placed_at', { ascending: false })
+
+        if (error) {
+            console.error('Error fetching orders by session:', error)
+            throw new Error(`Failed to fetch orders: ${error.message}`)
+        }
+
+        if (!orders || orders.length === 0) return []
+
+        // Get customer info once (most recent for this session)
+        const { data: customerInfo } = await supabase
+            .from('customer_info')
+            .select('full_name, email, phone_number, province, district, city, street_address, landmark, notes')
+            .eq('session_id', sessionId)
+            .order('created_at', { ascending: false })
+            .limit(1)
+            .maybeSingle()
+
+        const enriched = await Promise.all(
+            orders.map(async (order) => {
+                // Fetch order items
+                const { data: items } = await supabase
+                    .from('order_items')
+                    .select('id, product_name, product_image, quantity, price')
+                    .eq('order_id', order.id)
+
+                // Fetch attributes for each item
+                const itemsWithAttrs = await Promise.all(
+                    (items || []).map(async (item: any) => {
+                        const { data: attrs } = await supabase
+                            .from('order_item_attributes')
+                            .select('attribute_name, attribute_value')
+                            .eq('order_item_id', item.id)
+
+                        return {
+                            id: item.id,
+                            name: item.product_name,
+                            imageUrl: item.product_image || null,
+                            quantity: item.quantity,
+                            price: item.price,
+                            attributes: (attrs || []).map((a: any) => ({
+                                name: a.attribute_name,
+                                value: a.attribute_value,
+                            })),
+                        }
+                    })
+                )
+
+                return {
+                    id: order.id,
+                    orderNumber: `EZ-${order.id}`,
+                    status: order.order_status as string,
+                    placedAt: order.placed_at as string,
+                    subtotal: order.subtotal as number,
+                    shipping: order.delivery_charge as number,
+                    total: order.total_amount as number,
+                    items: itemsWithAttrs,
+                    customer: customerInfo ? {
+                        name: customerInfo.full_name,
+                        email: customerInfo.email,
+                        phone: customerInfo.phone_number,
+                        address: [
+                            customerInfo.street_address,
+                            customerInfo.city,
+                            customerInfo.district,
+                            customerInfo.province,
+                        ].filter(Boolean).join(', '),
+                        landmark: customerInfo.landmark,
+                        notes: customerInfo.notes,
+                    } : null,
+                }
+            })
+        )
+
+        return enriched
     }
 }

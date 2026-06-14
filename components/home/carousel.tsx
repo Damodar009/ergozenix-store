@@ -133,7 +133,7 @@ export function Carousel() {
                         key={``}
                         className="animate-in fade-in slide-in-from-bottom-4 duration-700 delay-200"
                     >
-                        <Link href="#collection">
+                        <Link href="/shop">
                             <Button size="lg" className="bg-white text-foreground hover:bg-white/90">
                                 Shop Now
                                 <ChevronRight className="ml-2 h-4 w-4" />

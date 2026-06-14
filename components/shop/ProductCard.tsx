@@ -2,6 +2,7 @@
 
 import Link from "next/link"
 import { useCart } from "@/context/cart-context"
+import { useWishlist } from "@/context/wishlist-context"
 
 export type ProductItem = {
   id: number | string
@@ -74,6 +75,10 @@ function StarRating({ rating = 0, count = 0 }: { rating?: number; count?: number
 
 export function ProductCard({ product }: { product: ProductItem }) {
   const { addToCart } = useCart()
+  const { isWishlisted, toggleWishlist } = useWishlist()
+
+  const productId = typeof product.id === "string" ? parseInt(product.id, 10) : product.id
+  const isSaved = isWishlisted(productId)
 
   // Price Logic
   const hasSale = product.salePrice && product.salePrice < (product.basePrice || 0)
@@ -82,31 +87,49 @@ export function ProductCard({ product }: { product: ProductItem }) {
 
   return (
     <div
-      className="ef-product-card group overflow-hidden transition-all duration-300 bg-card border border-border rounded-[6px] max-w-[320px] hover:border-primary"
+      className="ef-product-card group overflow-hidden transition-all duration-300 bg-card border border-border rounded-[6px] max-w-[320px] hover:border-primary relative"
     >
       {/* Image */}
-      <Link href={`/products/${product.slug || product.id}`} className="block">
-        <div className="relative aspect-square overflow-hidden bg-accent">
+      <div className="relative aspect-square overflow-hidden bg-accent">
+        <Link href={`/products/${product.slug || product.id}`} className="block w-full h-full">
           <img
             alt={product.alt}
             className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
             src={product.imageUrl}
           />
-          {/* Hover Add-to-Cart Overlay */}
-          <div className="ef-add-to-cart absolute inset-x-0 bottom-0 py-2.5 text-center backdrop-blur-md bg-white/80">
-            <button
-              onClick={(e) => {
-                e.preventDefault()
-                e.stopPropagation()
-                addToCart(product.id, 1, [])
-              }}
-              className="cursor-pointer hover:underline font-label-caps text-[10px] tracking-[2px] uppercase text-primary bg-transparent border-none"
-            >
-              Add to Cart — {formatPrice(displayPrice)}
-            </button>
-          </div>
+        </Link>
+
+        {/* Heart Icon Button */}
+        <button
+          onClick={(e) => {
+            e.preventDefault()
+            e.stopPropagation()
+            toggleWishlist(productId, product.name)
+          }}
+          className="absolute top-2.5 right-2.5 z-10 p-2 rounded-full bg-white/90 hover:bg-white text-muted-foreground hover:text-primary transition-all shadow-sm flex items-center justify-center border border-border/50 cursor-pointer"
+        >
+          <span
+            className="material-symbols-outlined text-[18px]"
+            style={{ fontVariationSettings: isSaved ? "'FILL' 1" : "'FILL' 0" }}
+          >
+            favorite
+          </span>
+        </button>
+
+        {/* Hover Add-to-Cart Overlay */}
+        <div className="ef-add-to-cart absolute inset-x-0 bottom-0 py-2.5 text-center backdrop-blur-md bg-white/80">
+          <button
+            onClick={(e) => {
+              e.preventDefault()
+              e.stopPropagation()
+              addToCart(product.id, 1, [])
+            }}
+            className="cursor-pointer hover:underline font-label-caps text-[10px] tracking-[2px] uppercase text-primary bg-transparent border-none"
+          >
+            Add to Cart — {formatPrice(displayPrice)}
+          </button>
         </div>
-      </Link>
+      </div>
 
       {/* Card Info */}
       <div className="p-3">

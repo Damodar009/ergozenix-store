@@ -73,13 +73,13 @@ export default function Home() {
               Redefining the relationship between human physiology and physical space through quiet, purposeful design.
             </p>
             <div className="flex gap-[var(--ef-stack-md)] mt-[var(--ef-stack-lg)]">
-              <Button size="ef">Shop Now</Button>
+              <Link href="/shop"><Button size="ef">Shop Now</Button></Link>
               <Button variant="outline" size="ef">Learn More</Button>
             </div>
           </div>
           <div className="w-full mt-24 px-[var(--ef-container-padding-x)] max-w-[var(--ef-container-max)]">
             <div className="aspect-[21/9] w-full bg-muted overflow-hidden rounded-[6px]">
-              <img alt="Minimalist Ergoform Desk" className="w-full h-full object-cover grayscale-[20%] hover:scale-105 transition-transform duration-1000" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCphfEOcaoQtafKckxjbd9QpKwG4LBR35d8sYgGie9yy_BdORxH1F3E-m6Z0YYrIiiwR77bcXwMMyjXewVzuqmwRjAIVhu-t56Kaw4LvqXFcWFsgGwsGBpAAiZbPmuaCQfAPLYFU_W_Z4e21GTyjSSUpBoRPZ9KCTr_lHSONoyXPvHnUIy3CDwe3eir8B1qfJzvWIu6Xt6apvUEp-e-380lIXVSJxWjk9I8utaom0s5Tg_SXKxaIVE0jGAqooK1tRWO8wNAeiWEQdLY" />
+              <img alt="Minimalist Ergoform Desk" className="w-full h-full object-cover grayscale-[20%] hover:scale-105 transition-transform duration-1000" src="https://tdwhzskyljlypfffrghe.supabase.co/storage/v1/object/public/products/horizental-1781379103725.jpg" />
             </div>
           </div>
         </header>
@@ -90,21 +90,8 @@ export default function Home() {
             <Link className="group block" href="/shop">
               <Card className="border-0 shadow-none bg-transparent">
                 <CardContent className="p-0">
-                  <div className="aspect-square bg-secondary rounded-[6px] overflow-hidden mb-4 border border-border relative">
-                    <img alt="Chairs Category" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAZxCqliJUYtBk9S5choLbDIP5izxZk5VIzfp82mwmE1LJIfrm2xnKzvVjF_oTxYhUrjAbCG7DIz4ADGz_wEMfmLIADAN5btQEiA8DwlYIn3lXPQDJB1tACYn8Ws3XrQSFLFcCgKHd40HCvs4Bsl-UcOiamyHf8Ifzmix1NwP4J-ictBQJ_XWfE2XzrAEJ5k8ZGJSk_rQsRQzjwXe3bTs9aKvhZxbb2awGTrsy9dIeP_7tlBlXfwzeowvTAVAN5u0MukjA2CNw6aIWj" />
-                    <div className="absolute top-3 right-3 z-10">
-                      <Badge className="font-label-caps text-[9px] uppercase tracking-wider bg-background/90 text-foreground border border-border hover:bg-background/90">Coming Soon</Badge>
-                    </div>
-                  </div>
-                  <span className="font-label-caps text-label-caps text-foreground tracking-widest block text-center">CHAIRS</span>
-                </CardContent>
-              </Card>
-            </Link>
-            <Link className="group block" href="/shop">
-              <Card className="border-0 shadow-none bg-transparent">
-                <CardContent className="p-0">
                   <div className="aspect-square bg-secondary rounded-[6px] overflow-hidden mb-4 border border-border">
-                    <img alt="Desks Category" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" src="https://lh3.googleusercontent.com/aida-public/AB6AXuByQLjUpGmnL6iw7fz1SwStwjav6-LreAvr1JoheHQvK1uB8uxeVwm8ze9GeEcCYbnqp8idyf6sr9L_Awd64sUC3s5Q1qqwg-KC2Pi8bg_uoBfBB05Y0aVKJX8siJF-E6HjedmBs5F7YwDbiH-vcwpLxwmCH4E6VWwCZfgU7u-6tMyPnuuag7Ml-tV-IXr5yyiRNrGc4zjOB1NWkcrkOZC8RPQk5LZJLTdZgshQsAc3A4jYqSC7FLmv6DmABrz30ZacT4xIz1bfNItO" />
+                    <img alt="Desks Category" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" src="https://tdwhzskyljlypfffrghe.supabase.co/storage/v1/object/public/products/desk-photo-1781421885235.mp4" />
                   </div>
                   <span className="font-label-caps text-label-caps text-foreground tracking-widest block text-center">DESKS</span>
                 </CardContent>
@@ -114,7 +101,21 @@ export default function Home() {
               <Card className="border-0 shadow-none bg-transparent">
                 <CardContent className="p-0">
                   <div className="aspect-square bg-secondary rounded-[6px] overflow-hidden mb-4 border border-border relative">
-                    <img alt="Monitor Arms Category" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBxhaY88vBzOLtR878hr9OUTNqNfd7MV6H_P17sbvCZkx9QgQZPkJIOmGLWE9lV8A7NRwELTqfkyIEprYIKUn7YOpaRsgaS17WjVePVsJw_XsaxsWq6c8XiVsW3Kgb9SYHpa7jRF3AOlJHRqOvQANd2hLqd7Moi2J5KJurzKu6UICXM-fEpdmLt53PAlAD4sH2BM0N5x8yTlaNoUcffFLuPhgUWnUN6pilN8157JfNfTcRUYGPue6Nx81Qgs8J9krCVIh6j3evy-GX1" />
+                    <img alt="Chairs Category" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" src="https://tdwhzskyljlypfffrghe.supabase.co/storage/v1/object/public/products/chair-picture-1781357710445.jfif" />
+                    <div className="absolute top-3 right-3 z-10">
+                      <Badge className="font-label-caps text-[9px] uppercase tracking-wider bg-background/90 text-foreground border border-border hover:bg-background/90">Coming Soon</Badge>
+                    </div>
+                  </div>
+                  <span className="font-label-caps text-label-caps text-foreground tracking-widest block text-center">CHAIRS</span>
+                </CardContent>
+              </Card>
+            </Link>
+
+            <Link className="group block" href="/shop">
+              <Card className="border-0 shadow-none bg-transparent">
+                <CardContent className="p-0">
+                  <div className="aspect-square bg-secondary rounded-[6px] overflow-hidden mb-4 border border-border relative">
+                    <img alt="Monitor Arms Category" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" src="https://tdwhzskyljlypfffrghe.supabase.co/storage/v1/object/public/products/monitor-arm-1781357868795.jfif" />
                     <div className="absolute top-3 right-3 z-10">
                       <Badge className="font-label-caps text-[9px] uppercase tracking-wider bg-background/90 text-foreground border border-border hover:bg-background/90">Coming Soon</Badge>
                     </div>
@@ -127,7 +128,7 @@ export default function Home() {
               <Card className="border-0 shadow-none bg-transparent">
                 <CardContent className="p-0">
                   <div className="aspect-square bg-secondary rounded-[6px] overflow-hidden mb-4 border border-border relative">
-                    <img alt="Accessories Category" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCxK7ftBBYfYGvvtKWRiwlw45IbSv7NNuJs5nL9DbXCuHcTVq2Gk9CX86A5NcoLO87n0oWLLGQMXOlXkZqA2XufTyoPvFX8xUXDoM0cVGbbdFU_cUUQg3KHBQGfT2FwxTysBQ6GnIO3Cnl07jhgyVRDX4a0_L7ze9vb8Ppz8Or9Y92MgUlRdlkjw2x6VddH32GmDeGjkt3_3mmgk6uz6xKunASRSd6n_PvL80J-JSul_zeu2haGwt5vz_jmVMreFd0iRjB7RuOViQXS" />
+                    <img alt="Accessories Category" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" src="https://tdwhzskyljlypfffrghe.supabase.co/storage/v1/object/public/products/accessories-1781358271344.jfif" />
                     <div className="absolute top-3 right-3 z-10">
                       <Badge className="font-label-caps text-[9px] uppercase tracking-wider bg-background/90 text-foreground border border-border hover:bg-background/90">Coming Soon</Badge>
                     </div>

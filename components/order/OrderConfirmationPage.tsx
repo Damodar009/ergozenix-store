@@ -201,18 +201,7 @@ export default function OrderConfirmationPage() {
           >
             Your order{" "}
             <span style={{ fontWeight: 500, color: "#1c1c19" }}>#{order.orderNumber}</span>{" "}
-            has been placed. A confirmation has been sent to{" "}
-            <span
-              style={{
-                color: "#1c1c19",
-                textDecoration: "underline",
-                textUnderlineOffset: "4px",
-                textDecorationColor: "#c0c9c2",
-              }}
-            >
-              {order.email}
-            </span>
-            .
+            has been placed.
           </p>
 
           {/* ── Order Summary Card ── */}

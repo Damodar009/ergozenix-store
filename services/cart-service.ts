@@ -230,11 +230,27 @@ export class CartService {
   static async clearCart(sessionId: string, userId?: string) {
     const cart = await this.getCart(sessionId, userId)
     if (cart) {
-      const { error } = await supabase
+      // Delete all cart items
+      const { error: itemsError } = await supabase
         .from('cart_items')
         .delete()
         .eq('cart_id', cart.id)
-      if (error) throw error
+      if (itemsError) throw itemsError
+
+      // Mark the cart as completed
+      const { error: cartError } = await supabase
+        .from('carts')
+        .update({ status: 'completed', updated_at: new Date().toISOString() })
+        .eq('id', cart.id)
+      if (cartError) throw cartError
     }
+  }
+
+  /**
+   * Get cart ID for a session (used when creating an order)
+   */
+  static async getCartId(sessionId: string, userId?: string): Promise<number | null> {
+    const cart = await this.getCart(sessionId, userId)
+    return cart?.id ?? null
   }
 }

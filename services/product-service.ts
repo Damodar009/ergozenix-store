@@ -75,7 +75,7 @@ export class ProductService {
             total: (stats.total || 0) + review.rating,
           })
         })
-        
+
         // Calculate averages
         reviewStats.forEach((stats, productId) => {
           reviewStats.set(productId, {
@@ -573,7 +573,7 @@ export class ProductService {
           .from('products')
           .delete()
           .eq('id', createdProductId)
-        
+
         if (rollbackError) {
           console.error('Rollback deletion failed:', rollbackError)
         } else {
@@ -590,7 +590,7 @@ export class ProductService {
   static async getActiveEditorsPick(): Promise<{ editorsPick: any, product: ProductWithDetails } | null> {
     try {
       const { data: pick, error } = await supabase
-        .from('editors_picks')
+        .from('editors_pick')
         .select(`
           *,
           products:product_id (
@@ -662,13 +662,13 @@ export class ProductService {
     try {
       if (data.is_active !== false) {
         await supabase
-          .from('editors_picks')
+          .from('editors_pick')
           .update({ is_active: false })
           .neq('product_id', data.product_id)
       }
 
       const { data: upsertedPick, error } = await supabase
-        .from('editors_picks')
+        .from('editors_pick')
         .upsert({
           product_id: data.product_id,
           custom_title: data.custom_title || null,

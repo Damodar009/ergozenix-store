@@ -7,6 +7,7 @@ import { ThemeProvider } from "@/providers/theme-provider"
 import "./globals.css"
 import { Header } from "@/components/header"
 import { CartProvider } from "@/context/cart-context"
+import { WishlistProvider } from "@/context/wishlist-context"
 import DeviceSessionTracker from "@/components/DeviceSessionTracker"
 
 const _geist = Geist({ subsets: ["latin"] })
@@ -97,10 +98,12 @@ export default function RootLayout({
       <body className={`font-sans antialiased ${playfairDisplay.variable} ${hankenGrotesk.variable}`}>
         <ThemeProvider>
           <CartProvider>
-            <DeviceSessionTracker />
-            <Header />
-            {children}
-            <Footer />
+            <WishlistProvider>
+              <DeviceSessionTracker />
+              <Header />
+              {children}
+              <Footer />
+            </WishlistProvider>
           </CartProvider>
         </ThemeProvider>
       </body>
