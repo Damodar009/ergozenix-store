@@ -63,12 +63,8 @@ interface AttributeRow {
   value: string
 }
 
-interface VariantRow {
-  id: string // unique row client ID
-  variant_sku: string
-  variant_price: number | ""
-  variant_stock: number | ""
-}
+// VariantRow has been replaced by tabletops and sizes arrays
+
 
 export default function AddProductPage() {
   const router = useRouter()
@@ -87,7 +83,24 @@ export default function AddProductPage() {
   const [uploadedMedia, setUploadedMedia] = useState<{ url: string; type: "image" | "video" }[]>([])
   const [draggedImageIdx, setDraggedImageIdx] = useState<number | null>(null)
   const [attributes, setAttributes] = useState<AttributeRow[]>([])
-  const [variants, setVariants] = useState<VariantRow[]>([])
+  // Tabletops: list of color/material options + their uploaded image URLs
+  const [tabletops, setTabletops] = useState<{ id: string; name: string; url: string }[]>([
+    { id: "1", name: "Oak", url: "" },
+    { id: "2", name: "Walnut", url: "" }
+  ])
+
+  // Sizes: list of sizes + their prices and stocks
+  const [sizes, setSizes] = useState<{ id: string; name: string; price: number | ""; stock: number | "" }[]>([
+    { id: "1", name: "120x60 cm", price: "", stock: "" },
+    { id: "2", name: "140x70 cm", price: "", stock: "" },
+    { id: "3", name: "160x80 cm", price: "", stock: "" }
+  ])
+
+  // Custom length input state
+  const [customLengthInput, setCustomLengthInput] = useState<string>("")
+
+  // Available color options selection states
+  const [selectedFrameColors, setSelectedFrameColors] = useState<string[]>(["Black", "White"])
 
   // UI state managers
   const [uploading, setUploading] = useState(false)
@@ -95,6 +108,8 @@ export default function AddProductPage() {
   const [validationErrors, setValidationErrors] = useState<string[]>([])
 
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const [uploadingVariantId, setUploadingVariantId] = useState<string | null>(null)
+  const variantFileInputRef = useRef<HTMLInputElement>(null)
 
   // Setup form using React Hook Form
   const {
@@ -202,6 +217,51 @@ export default function AddProductPage() {
     if (fileInputRef.current) fileInputRef.current.value = ''
   }
 
+  // Handle variant image upload
+  const handleVariantImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files
+    if (!files || files.length === 0 || !uploadingVariantId) return
+
+    const file = files[0]
+    setUploading(true)
+
+    try {
+      const nameWithoutExt = file.name.replace(/\.[^/.]+$/, "").replace(/[^a-zA-Z0-9]/g, "-").toLowerCase()
+      const ext = file.type.startsWith("image/") ? (file.name.includes('.') ? "." + file.name.split('.').pop() : ".jpg") : (file.name.includes('.') ? "." + file.name.split('.').pop() : ".mp4")
+      const uniqueFilename = `variant-${nameWithoutExt}-${Date.now()}${ext}`
+
+      const { data: uploadData, error: uploadError } = await supabase.storage
+        .from('products')
+        .upload(uniqueFilename, file, { contentType: file.type })
+
+      if (uploadError) {
+        console.error('Supabase upload error:', uploadError)
+        toast({
+          title: 'Upload Error',
+          description: uploadError.message || `Could not upload "${file.name}"`,
+          variant: 'destructive',
+        })
+        return
+      }
+
+      const { data: publicData } = supabase.storage.from('products').getPublicUrl(uniqueFilename)
+      const fileUrl = publicData?.publicUrl ?? ''
+
+      handleUpdateTabletop(uploadingVariantId, "url", fileUrl)
+    } catch (err: any) {
+      console.error(err)
+      toast({
+        title: "Upload Failed",
+        description: err.message || "An error occurred during file upload.",
+        variant: "destructive"
+      })
+    } finally {
+      setUploading(false)
+      setUploadingVariantId(null)
+      if (variantFileInputRef.current) variantFileInputRef.current.value = ''
+    }
+  }
+
   // Remove media item
   const handleRemoveMedia = (indexToRemove: number) => {
     setUploadedMedia(prev => prev.filter((_, idx) => idx !== indexToRemove))
@@ -270,25 +330,40 @@ export default function AddProductPage() {
     setAttributes(prev => prev.filter(row => row.id !== id))
   }
 
-  // Add Dynamic Variant Row
-  const handleAddVariant = () => {
-    setVariants(prev => [
-      ...prev,
-      { id: Math.random().toString(), variant_sku: "", variant_price: "", variant_stock: "" }
-    ])
+  // Tabletops option management
+  const handleAddTabletop = () => {
+    setTabletops(prev => [...prev, { id: Math.random().toString(), name: "", url: "" }])
   }
 
-  // Update Dynamic Variant Row Data
-  const handleUpdateVariant = (id: string, field: keyof VariantRow, value: any) => {
-    setVariants(prev => prev.map(row => {
-      if (row.id !== id) return row
-      return { ...row, [field]: value }
-    }))
+  const handleUpdateTabletop = (id: string, field: "name" | "url", value: string) => {
+    setTabletops(prev => prev.map(t => t.id === id ? { ...t, [field]: value } : t))
   }
 
-  // Remove Dynamic Variant Row
-  const handleRemoveVariant = (id: string) => {
-    setVariants(prev => prev.filter(row => row.id !== id))
+  const handleRemoveTabletop = (id: string) => {
+    setTabletops(prev => prev.filter(t => t.id !== id))
+  }
+
+  // Sizes option management
+  const handleAddSize = (name: string) => {
+    if (!name.trim()) return
+    // Ensure size name doesn't exist
+    if (sizes.some(s => s.name.toLowerCase() === name.trim().toLowerCase())) {
+      toast({
+        title: "Duplicate Size",
+        description: `Size "${name}" already exists.`,
+        variant: "destructive"
+      })
+      return
+    }
+    setSizes(prev => [...prev, { id: Math.random().toString(), name: name.trim(), price: "", stock: "" }])
+  }
+
+  const handleUpdateSize = (id: string, field: "price" | "stock", value: any) => {
+    setSizes(prev => prev.map(s => s.id === id ? { ...s, [field]: value } : s))
+  }
+
+  const handleRemoveSize = (id: string) => {
+    setSizes(prev => prev.filter(s => s.id !== id))
   }
 
   // Perform full cross-tab verification
@@ -313,36 +388,39 @@ export default function AddProductPage() {
     })
 
     // 3. Dynamic Variants validation
-    const variantSKUs = new Set<string>()
-    variants.forEach((v, idx) => {
-      const label = `Variants Tab: Row ${idx + 1}`
+    if (selectedFrameColors.length === 0) {
+      errorsList.push("Variants Tab: Select at least one frame color.")
+    }
 
-      if (!v.variant_sku.trim()) {
-        errorsList.push(`${label} is missing its SKU.`)
-      } else {
-        const cleanSKU = v.variant_sku.trim().toLowerCase()
-        // Check uniqueness within variants
-        if (variantSKUs.has(cleanSKU)) {
-          errorsList.push(`${label} has a duplicate SKU "${v.variant_sku}". SKUs must be unique.`)
+    if (tabletops.length === 0) {
+      errorsList.push("Variants Tab: Add at least one tabletop color option.")
+    } else {
+      tabletops.forEach((top, idx) => {
+        const label = `Variants Tab: Tabletop Row ${idx + 1}`
+        if (!top.name.trim()) {
+          errorsList.push(`${label} has no name specified.`)
         }
-        variantSKUs.add(cleanSKU)
-
-        // Check uniqueness against parent SKU
-        if (productSKU && cleanSKU === productSKU.trim().toLowerCase()) {
-          errorsList.push(`${label} SKU matches the parent product SKU. Variant SKUs must be distinct from the parent product SKU.`)
+        if (!top.url.trim()) {
+          errorsList.push(`${label} is missing the tabletop image upload.`)
         }
-      }
+      })
+    }
 
-      const price = Number(v.variant_price)
-      if (v.variant_price === "" || isNaN(price) || price < 0) {
-        errorsList.push(`${label} price must be a valid number greater than or equal to 0.`)
-      }
-
-      const stock = Number(v.variant_stock)
-      if (v.variant_stock === "" || isNaN(stock) || stock < 0 || !Number.isInteger(stock)) {
-        errorsList.push(`${label} stock must be a valid integer greater than or equal to 0.`)
-      }
-    })
+    if (sizes.length === 0) {
+      errorsList.push("Variants Tab: Add at least one size/length option.")
+    } else {
+      sizes.forEach((size, idx) => {
+        const label = `Variants Tab: Size Row ${idx + 1} (${size.name})`
+        const price = Number(size.price)
+        if (size.price === "" || isNaN(price) || price < 0) {
+          errorsList.push(`${label} price must be a valid number greater than or equal to 0.`)
+        }
+        const stock = Number(size.stock)
+        if (size.stock === "" || isNaN(stock) || stock < 0 || !Number.isInteger(stock)) {
+          errorsList.push(`${label} stock must be a valid integer greater than or equal to 0.`)
+        }
+      })
+    }
 
     setValidationErrors(errorsList)
     return errorsList.length === 0
@@ -385,12 +463,37 @@ export default function AddProductPage() {
         }
       })
 
-      // 3. Prepare variants block
-      const variantsPayload = variants.map(row => ({
-        variant_sku: row.variant_sku.trim(),
-        variant_price: Number(row.variant_price),
-        variant_stock: Number(row.variant_stock)
-      }))
+      // Auto-append selected frame and tabletop colors under the Colors attribute (ID 8)
+      const selectedColorsList = [...selectedFrameColors, ...tabletops.map(t => t.name)].filter(Boolean)
+      if (selectedColorsList.length > 0) {
+        const existingColorIdx = attributesPayload.findIndex(a => a.attribute_id === 8)
+        if (existingColorIdx !== -1) {
+          attributesPayload[existingColorIdx].value_text = selectedColorsList.join(", ")
+        } else {
+          attributesPayload.push({
+            attribute_id: 8,
+            value_text: selectedColorsList.join(", "),
+            value_number: undefined
+          })
+        }
+      }
+
+      // 3. Prepare variants block: generate combinations
+      const variantsPayload = []
+      for (const frame of selectedFrameColors) {
+        for (const top of tabletops) {
+          for (const size of sizes) {
+            const parentSkuPart = (productSKU || productName || "PRODUCT").trim().toUpperCase().replace(/\s+/g, '-');
+            const compositeSku = `${parentSkuPart} | ${frame.trim()} | ${top.name.trim()} | ${size.name.trim()}`
+            variantsPayload.push({
+              variant_sku: compositeSku,
+              variant_price: Number(size.price),
+              variant_stock: Number(size.stock),
+              variant_url: top.url || null
+            })
+          }
+        }
+      }
 
       // 4. Save to supabase with client rollback sequence
       const createdProduct = await ProductService.createProduct({
@@ -866,89 +969,212 @@ export default function AddProductPage() {
             {/* ==================== TAB 4: VARIANTS ==================== */}
             {activeTab === "variants" && (
               <div className="space-y-6">
-                <div className="flex justify-between items-start">
-                  <div>
-                    <h3 className="text-sm font-bold uppercase text-foreground mb-1">Product Variants Matrix</h3>
-                    <p className="text-xs text-muted-foreground">Add SKU variants for this parent product. SKU must be completely unique.</p>
-                  </div>
-                  <Button
-                    type="button"
-                    onClick={handleAddVariant}
-                    className="rounded-none border border-primary text-primary hover:bg-primary/5 bg-transparent h-9 px-4 text-xs font-bold uppercase shrink-0"
-                  >
-                    <Plus className="h-3 w-3 mr-1.5" /> Add Variant
-                  </Button>
+                <div>
+                  <h3 className="text-sm font-bold uppercase text-foreground mb-1">Product Variants Matrix</h3>
+                  <p className="text-xs text-muted-foreground font-medium">Define frame colors, tabletops (with uploadable images), and sizes/lengths. The system automatically generates all combinations.</p>
                 </div>
 
-                {variants.length === 0 ? (
-                  <div className="border border-border bg-background/25 py-8 text-center text-xs text-muted-foreground uppercase font-semibold">
-                    No variants mapped yet. Click &quot;Add Variant&quot; to configure.
+                <input
+                  type="file"
+                  accept="image/*"
+                  ref={variantFileInputRef}
+                  onChange={handleVariantImageUpload}
+                  className="hidden"
+                />
+
+                {/* 1. Frame Colors Selection */}
+                <div className="border border-border p-4 bg-muted/20 space-y-3">
+                  <label className="text-xs font-bold uppercase text-foreground/80 flex justify-between">
+                    <span>1. Available Frame Colors</span>
+                  </label>
+                  <div className="flex gap-6">
+                    {["Black", "White"].map((color) => (
+                      <label key={color} className="flex items-center gap-2 text-xs font-semibold cursor-pointer select-none">
+                        <input
+                          type="checkbox"
+                          checked={selectedFrameColors.includes(color)}
+                          onChange={(e) => {
+                            if (e.target.checked) {
+                              setSelectedFrameColors(prev => [...prev, color])
+                            } else {
+                              setSelectedFrameColors(prev => prev.filter(c => c !== color))
+                            }
+                          }}
+                          className="rounded-none border border-input h-4 w-4 bg-background focus:ring-0 cursor-pointer"
+                        />
+                        <span>{color}</span>
+                      </label>
+                    ))}
                   </div>
-                ) : (
-                  <div className="border border-border overflow-x-auto">
-                    <table className="w-full text-left border-collapse text-xs">
-                      <thead>
-                        <tr className="bg-muted border-b border-border uppercase font-bold text-foreground">
-                          <th className="p-3 w-2/5">Variant SKU *</th>
-                          <th className="p-3 w-1/4">Price (NPR) *</th>
-                          <th className="p-3 w-1/4">Stock *</th>
-                          <th className="p-3 w-16 text-center">Action</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {variants.map((row, idx) => (
-                          <tr key={row.id} className="border-b border-border last:border-b-0 hover:bg-muted/10">
+                </div>
 
-                            {/* Variant SKU */}
-                            <td className="p-2">
-                              <Input
-                                type="text"
-                                placeholder="e.g. EZ-SD-205-BLACK"
-                                value={row.variant_sku}
-                                onChange={(e) => handleUpdateVariant(row.id, "variant_sku", e.target.value)}
-                                className="h-10 rounded-none border border-input bg-background/50 shadow-none focus-visible:ring-0 focus-visible:border-primary text-xs"
-                              />
-                            </td>
+                {/* 2. Tabletop Options with Uploadable Image */}
+                <div className="border border-border p-4 bg-muted/20 space-y-4">
+                  <div className="flex justify-between items-center border-b border-border/40 pb-2">
+                    <label className="text-xs font-bold uppercase text-foreground/80">2. Tabletop Options (Upload Image per Option)</label>
+                    <Button
+                      type="button"
+                      onClick={handleAddTabletop}
+                      className="rounded-none border border-primary text-primary hover:bg-primary/5 bg-transparent h-8 px-3 text-[10px] font-bold uppercase"
+                    >
+                      <Plus className="h-3 w-3 mr-1" /> Add Tabletop Option
+                    </Button>
+                  </div>
 
-                            {/* Variant Price */}
-                            <td className="p-2">
-                              <Input
-                                type="number"
-                                placeholder="0"
-                                value={row.variant_price}
-                                onChange={(e) => handleUpdateVariant(row.id, "variant_price", e.target.value === "" ? "" : Number(e.target.value))}
-                                className="h-10 rounded-none border border-input bg-background/50 shadow-none focus-visible:ring-0 focus-visible:border-primary text-xs"
-                              />
-                            </td>
+                  {tabletops.length === 0 ? (
+                    <div className="text-center py-4 border border-dashed border-border/80 text-xs text-muted-foreground font-semibold uppercase">
+                      No tabletop options configured. Add at least one tabletop.
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {tabletops.map((top, idx) => (
+                        <div key={top.id} className="border border-border p-3 bg-card flex items-center justify-between gap-4">
+                          <div className="flex-1 space-y-2">
+                            <label className="text-[10px] font-bold text-muted-foreground uppercase">Option Name</label>
+                            <Input
+                              type="text"
+                              placeholder="e.g. Oak, Walnut"
+                              value={top.name}
+                              onChange={(e) => handleUpdateTabletop(top.id, "name", e.target.value)}
+                              className="h-8 rounded-none border border-input bg-background/50 text-xs shadow-none"
+                            />
+                          </div>
 
-                            {/* Variant Stock */}
-                            <td className="p-2">
-                              <Input
-                                type="number"
-                                placeholder="0"
-                                value={row.variant_stock}
-                                onChange={(e) => handleUpdateVariant(row.id, "variant_stock", e.target.value === "" ? "" : Number(e.target.value))}
-                                className="h-10 rounded-none border border-input bg-background/50 shadow-none focus-visible:ring-0 focus-visible:border-primary text-xs"
-                              />
-                            </td>
-
-                            {/* Remove Row */}
-                            <td className="p-2 text-center">
-                              <button
+                          <div className="flex items-center gap-2 pt-4">
+                            {top.url ? (
+                              <div className="relative w-12 h-12 border border-border shrink-0 group">
+                                {/* eslint-disable-next-line @next/next/no-img-element */}
+                                <img
+                                  src={top.url}
+                                  alt={top.name || "Tabletop Option"}
+                                  className="w-full h-full object-cover"
+                                />
+                                <button
+                                  type="button"
+                                  onClick={() => handleUpdateTabletop(top.id, "url", "")}
+                                  className="absolute -top-1 -right-1 bg-destructive text-destructive-foreground rounded-full w-4 h-4 flex items-center justify-center text-[10px] hover:bg-destructive font-bold"
+                                >
+                                  &times;
+                                </button>
+                              </div>
+                            ) : (
+                              <Button
                                 type="button"
-                                onClick={() => handleRemoveVariant(row.id)}
-                                className="h-9 w-9 bg-destructive/10 text-destructive hover:bg-destructive hover:text-destructive-foreground flex items-center justify-center rounded-none transition-colors mx-auto"
+                                variant="outline"
+                                onClick={() => {
+                                  setUploadingVariantId(top.id);
+                                  variantFileInputRef.current?.click();
+                                }}
+                                className="h-8 rounded-none border border-primary text-primary hover:bg-primary/5 bg-transparent text-[10px] font-bold uppercase px-3 animate-pulse"
+                                disabled={uploading}
                               >
-                                <Trash2 className="h-3.5 w-3.5" />
-                              </button>
-                            </td>
+                                {uploading && uploadingVariantId === top.id ? (
+                                  <Loader2 className="h-3 w-3 animate-spin mr-1" />
+                                ) : (
+                                  <Upload className="h-3 w-3 mr-1" />
+                                )}
+                                Upload
+                              </Button>
+                            )}
 
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
+                            <button
+                              type="button"
+                              onClick={() => handleRemoveTabletop(top.id)}
+                              className="h-8 w-8 bg-destructive/10 text-destructive hover:bg-destructive hover:text-destructive-foreground flex items-center justify-center rounded-none transition-colors"
+                            >
+                              <Trash2 className="h-3.5 w-3.5" />
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* 3. Sizes Section (defining price/stock per size, custom lengths dynamically) */}
+                <div className="border border-border p-4 bg-muted/20 space-y-4">
+                  <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 border-b border-border/40 pb-2">
+                    <label className="text-xs font-bold uppercase text-foreground/80">3. Sizes & Pricing/Stock Configuration</label>
+                    <div className="flex items-center gap-2">
+                      <Input
+                        type="text"
+                        placeholder="Length (e.g. 180 or 180x80 cm)"
+                        value={customLengthInput}
+                        onChange={(e) => setCustomLengthInput(e.target.value)}
+                        className="h-8 w-56 rounded-none border border-input bg-background/50 text-xs shadow-none"
+                      />
+                      <Button
+                        type="button"
+                        onClick={() => {
+                          const sizeName = customLengthInput.trim();
+                          if (!sizeName) return;
+                          // If it is just a number, format it as "[length]x80 cm"
+                          const formattedName = /^\d+$/.test(sizeName) ? `${sizeName}x80 cm` : sizeName;
+                          handleAddSize(formattedName);
+                          setCustomLengthInput("");
+                        }}
+                        className="rounded-none bg-primary text-primary-foreground hover:bg-primary/90 h-8 px-3 text-[10px] font-bold uppercase"
+                      >
+                        Add Size
+                      </Button>
+                    </div>
                   </div>
-                )}
+
+                  {sizes.length === 0 ? (
+                    <div className="text-center py-4 border border-dashed border-border/80 text-xs text-muted-foreground font-semibold uppercase">
+                      No sizes configured. Add at least one size.
+                    </div>
+                  ) : (
+                    <div className="border border-border overflow-x-auto bg-card">
+                      <table className="w-full text-left border-collapse text-xs">
+                        <thead>
+                          <tr className="bg-muted border-b border-border uppercase font-bold text-foreground">
+                            <th className="p-3 w-1/3">Size Option</th>
+                            <th className="p-3 w-1/4">Price (NPR) *</th>
+                            <th className="p-3 w-1/4">Stock (Quantity) *</th>
+                            <th className="p-3 w-12 text-center font-normal text-muted-foreground">Action</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {sizes.map((row) => (
+                            <tr key={row.id} className="border-b border-border last:border-b-0 hover:bg-muted/5">
+                              <td className="p-3 font-semibold uppercase text-foreground/90">
+                                {row.name}
+                              </td>
+                              <td className="p-2">
+                                <Input
+                                  type="number"
+                                  placeholder="0"
+                                  value={row.price}
+                                  onChange={(e) => handleUpdateSize(row.id, "price", e.target.value === "" ? "" : Number(e.target.value))}
+                                  className="h-8 rounded-none border border-input bg-background/50 text-xs shadow-none"
+                                />
+                              </td>
+                              <td className="p-2">
+                                <Input
+                                  type="number"
+                                  placeholder="0"
+                                  value={row.stock}
+                                  onChange={(e) => handleUpdateSize(row.id, "stock", e.target.value === "" ? "" : Number(e.target.value))}
+                                  className="h-8 rounded-none border border-input bg-background/50 text-xs shadow-none"
+                                />
+                              </td>
+                              <td className="p-2 text-center">
+                                <button
+                                  type="button"
+                                  onClick={() => handleRemoveSize(row.id)}
+                                  className="h-8 w-8 bg-destructive/10 text-destructive hover:bg-destructive hover:text-destructive-foreground flex items-center justify-center rounded-none transition-colors mx-auto"
+                                >
+                                  <Trash2 className="h-3.5 w-3.5" />
+                                </button>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+                </div>
               </div>
             )}
 

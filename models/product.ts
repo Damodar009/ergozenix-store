@@ -39,6 +39,7 @@ export interface ProductVariant {
   variant_sku: string | null
   variant_price: number | null
   variant_stock: number
+  variant_url?: string | null
   created_at: string
   updated_at: string
   deleted_at: string | null

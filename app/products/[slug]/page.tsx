@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState, useRef, use } from "react"
+import { useEffect, useState, useRef, use, useMemo } from "react"
 import Link from "next/link"
 import { ArrowLeft } from "lucide-react"
 import { ProductService } from "@/services/product-service"
@@ -87,9 +87,114 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
   const [mainImage, setMainImage] = useState<string>("")
   const [activeThumbIdx, setActiveThumbIdx] = useState(0)
   const [quantity, setQuantity] = useState(1)
-  const [selectedColor, setSelectedColor] = useState(0)
-  const [selectedSize, setSelectedSize] = useState(0)
   const { addToCart } = useCart()
+
+  // Dynamic variant extraction & states
+  const parsedVariants = useMemo(() => {
+    if (!product || !product.variants) return []
+    return product.variants.map((v: any) => {
+      const parts = (v.variant_sku || "").split("|").map((s: string) => s.trim())
+      if (parts.length >= 4) {
+        return {
+          id: v.id,
+          sku: parts[0] || v.variant_sku || "",
+          frameColor: parts[1] || "",
+          topColor: parts[2] || "",
+          topSize: parts[3] || "",
+          price: v.variant_price ?? product.base_price,
+          stock: v.variant_stock ?? 0,
+          variant_url: v.variant_url || null,
+        }
+      }
+      return {
+        id: v.id,
+        sku: parts[0] || v.variant_sku || "",
+        frameColor: "",
+        topColor: "",
+        topSize: parts[1] || "",
+        price: v.variant_price ?? product.base_price,
+        stock: v.variant_stock ?? 0,
+        variant_url: v.variant_url || null,
+      }
+    })
+  }, [product])
+
+  const colorsAttributeValue = useMemo(() => {
+    if (!product || !product.attributes) return []
+    const colorsAttr = product.attributes.find(
+      (a) => a.attribute_id === 8 || a.attribute?.slug === "colors" || a.attribute?.name.toLowerCase() === "colors"
+    )
+    if (!colorsAttr || !colorsAttr.value_text) return []
+    return colorsAttr.value_text.split(",").map((s) => s.trim().toLowerCase())
+  }, [product])
+
+  const uniqueFrames = useMemo(() => {
+    const fromVariants = Array.from(new Set(parsedVariants.map(pv => pv.frameColor).filter(Boolean)))
+    if (fromVariants.length > 0) {
+      return fromVariants.filter(frame => ["black", "white"].includes(frame.toLowerCase()))
+    }
+    
+    if (colorsAttributeValue.length > 0) {
+      const allowed = ["black", "white"]
+      const filtered = colorsAttributeValue.filter(c => allowed.includes(c))
+      if (filtered.length > 0) {
+        return filtered.map(c => c.charAt(0).toUpperCase() + c.slice(1))
+      }
+    }
+
+    return ["Black", "White"]
+  }, [parsedVariants, colorsAttributeValue])
+
+  const uniqueTops = useMemo(() => {
+    const fromVariants = Array.from(new Set(parsedVariants.map(pv => pv.topColor).filter(Boolean)))
+    if (fromVariants.length > 0) {
+      return fromVariants
+    }
+
+    if (colorsAttributeValue.length > 0) {
+      return colorsAttributeValue.map(c => c.charAt(0).toUpperCase() + c.slice(1))
+    }
+
+    return ["Oak", "Walnut", "Black", "White"]
+  }, [parsedVariants, colorsAttributeValue])
+
+  const uniqueSizes = useMemo(() => {
+    return Array.from(new Set(parsedVariants.map(pv => pv.topSize).filter(Boolean)))
+  }, [parsedVariants])
+
+  // Active user selections
+  const [selectedFrame, setSelectedFrame] = useState<string>("")
+  const [selectedTop, setSelectedTop] = useState<string>("")
+  const [selectedSizeOption, setSelectedSizeOption] = useState<string>("")
+
+  // Set default selections once variants are loaded
+  useEffect(() => {
+    if (parsedVariants.length > 0) {
+      if (uniqueFrames.length > 0) setSelectedFrame(uniqueFrames[0])
+      if (uniqueTops.length > 0) setSelectedTop(uniqueTops[0])
+      if (uniqueSizes.length > 0) setSelectedSizeOption(uniqueSizes[0])
+    }
+  }, [parsedVariants, uniqueFrames, uniqueTops, uniqueSizes])
+
+  // Resolve matching variant
+  const activeVariant = useMemo(() => {
+    if (parsedVariants.length === 0) return null
+    return parsedVariants.find(
+      (v) =>
+        (!selectedFrame || !v.frameColor || v.frameColor.toLowerCase() === selectedFrame.toLowerCase()) &&
+        (!selectedTop || !v.topColor || v.topColor.toLowerCase() === selectedTop.toLowerCase()) &&
+        (!selectedSizeOption || v.topSize.toLowerCase() === selectedSizeOption.toLowerCase())
+    ) || null
+  }, [parsedVariants, selectedFrame, selectedTop, selectedSizeOption])
+
+  // Update main image when a variant with a custom tabletop image is selected
+  useEffect(() => {
+    if (activeVariant && activeVariant.variant_url) {
+      setMainImage(activeVariant.variant_url)
+    }
+  }, [activeVariant])
+
+  const isOutOfStock = activeVariant ? activeVariant.stock <= 0 : (product?.stock_quantity ?? 0) <= 0
   const { isWishlisted, toggleWishlist } = useWishlist()
   const [addingToCart, setAddingToCart] = useState(false)
   const reviewsSectionRef = useRef<HTMLElement>(null)
@@ -355,15 +460,7 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
     value: attr.value_text || (attr.value_number != null ? String(attr.value_number) : "—"),
   })) || []
 
-  // Variant sizes (if available)
-  const variants = product.variants || []
-
-  // Color swatches (from the reference design - using static colors as placeholder)
-  const colorSwatches = [
-    { hex: "#114734", name: "Forest Green" },
-    { hex: "#403e3a", name: "Charcoal" },
-    { hex: "#e4e2df", name: "Natural" },
-  ]
+  // No static/mock variables needed anymore
 
   return (
     <div
@@ -494,7 +591,9 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
               </div>
 
               <p className="font-headline-section text-[20px] leading-[1.4] font-medium text-secondary">
-                {product.sale_price && product.sale_price < product.base_price ? (
+                {activeVariant ? (
+                  <span>Rs. {activeVariant.price.toLocaleString()}</span>
+                ) : product.sale_price && product.sale_price < product.base_price ? (
                   <>
                     <span>Rs. {product.sale_price.toLocaleString()}</span>
                     <span className="ml-3 line-through text-muted-foreground text-[16px]">
@@ -505,67 +604,70 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
                   <span>Rs. {product.base_price.toLocaleString()}</span>
                 )}
               </p>
+              {activeVariant && (
+                <span className="font-body-main text-[13px] text-muted-foreground">
+                  SKU: {activeVariant.sku}
+                </span>
+              )}
             </div>
 
-            {/* Color Selector */}
-            <div className="flex flex-col gap-[var(--ef-stack-sm)]">
-              <span className="font-label-caps text-label-caps text-muted-foreground">
-                Selected Color: {colorSwatches[selectedColor]?.name}
-              </span>
-              <div className="flex gap-[var(--ef-stack-sm)]">
-                {colorSwatches.map((swatch, idx) => (
-                  <button
-                    key={swatch.hex}
-                    className="w-8 h-8 rounded-full transition-all"
-                    style={{
-                      backgroundColor: swatch.hex,
-                      border: idx === selectedColor
-                        ? "2px solid hsl(var(--primary))"
-                        : "1px solid hsl(var(--border))",
-                      boxShadow: idx === selectedColor
-                        ? "0 0 0 2px hsl(var(--background)), 0 0 0 4px transparent"
-                        : undefined,
-                    }}
-                    onClick={() => setSelectedColor(idx)}
-                  />
-                ))}
+            {/* Dynamic Variant Selectors */}
+            {uniqueFrames.length > 0 && (
+              <div className="flex flex-col gap-[var(--ef-stack-sm)]">
+                <span className="font-label-caps text-label-caps text-muted-foreground">
+                  Selected Frame Color: {selectedFrame}
+                </span>
+                <div className="flex gap-[var(--ef-stack-sm)]">
+                  {uniqueFrames.map((frame) => (
+                    <button
+                      key={frame}
+                      className={`px-4 py-2 border rounded transition-all font-label-caps text-[12px] font-semibold tracking-[1px] uppercase ${selectedFrame === frame ? "bg-primary text-primary-foreground border-primary" : "bg-transparent text-foreground border-border cursor-pointer hover:border-foreground"}`}
+                      onClick={() => setSelectedFrame(frame)}
+                    >
+                      {frame}
+                    </button>
+                  ))}
+                </div>
               </div>
-            </div>
+            )}
 
-            {/* Size / Variant Selector */}
-            <div className="flex flex-col gap-[var(--ef-stack-sm)]">
-              <span className="font-label-caps text-label-caps text-muted-foreground">
-                Frame Size
-              </span>
-              <div className="flex gap-[var(--ef-stack-sm)]">
-                {variants.length > 0 ? (
-                  variants.map((variant, idx) => (
+            {uniqueTops.length > 0 && (
+              <div className="flex flex-col gap-[var(--ef-stack-sm)]">
+                <span className="font-label-caps text-label-caps text-muted-foreground">
+                  Selected Tabletop Color: {selectedTop}
+                </span>
+                <div className="flex gap-[var(--ef-stack-sm)] flex-wrap">
+                  {uniqueTops.map((top) => (
                     <button
-                      key={variant.id}
-                      className={`px-6 py-2 transition-all font-label-caps text-[12px] font-semibold tracking-[2px] rounded ${idx === selectedSize ? "bg-primary text-primary-foreground border-primary" : "bg-transparent text-foreground border-border border"}`}
-                      onClick={() => setSelectedSize(idx)}
+                      key={top}
+                      className={`px-4 py-2 border rounded transition-all font-label-caps text-[12px] font-semibold tracking-[1px] uppercase ${selectedTop === top ? "bg-primary text-primary-foreground border-primary" : "bg-transparent text-foreground border-border cursor-pointer hover:border-foreground"}`}
+                      onClick={() => setSelectedTop(top)}
                     >
-                      {variant.variant_sku || `Variant ${idx + 1}`}
+                      {top}
                     </button>
-                  ))
-                ) : (
-                  <>
-                    <button
-                      className={`px-6 py-2 transition-all font-label-caps text-[12px] font-semibold tracking-[2px] rounded ${selectedSize === 0 ? "bg-primary text-primary-foreground border-primary" : "bg-transparent text-foreground border-border border"}`}
-                      onClick={() => setSelectedSize(0)}
-                    >
-                      STANDARD
-                    </button>
-                    <button
-                      className={`px-6 py-2 transition-all font-label-caps text-[12px] font-semibold tracking-[2px] rounded ${selectedSize === 1 ? "bg-primary text-primary-foreground border-primary" : "bg-transparent text-foreground border-border border"}`}
-                      onClick={() => setSelectedSize(1)}
-                    >
-                      EXTENDED
-                    </button>
-                  </>
-                )}
+                  ))}
+                </div>
               </div>
-            </div>
+            )}
+
+            {uniqueSizes.length > 0 && (
+              <div className="flex flex-col gap-[var(--ef-stack-sm)]">
+                <span className="font-label-caps text-label-caps text-muted-foreground">
+                  Selected Tabletop Size: {selectedSizeOption}
+                </span>
+                <div className="flex gap-[var(--ef-stack-sm)] flex-wrap">
+                  {uniqueSizes.map((size) => (
+                    <button
+                      key={size}
+                      className={`px-4 py-2 border rounded transition-all font-label-caps text-[12px] font-semibold tracking-[1px] uppercase ${selectedSizeOption === size ? "bg-primary text-primary-foreground border-primary" : "bg-transparent text-foreground border-border cursor-pointer hover:border-foreground"}`}
+                      onClick={() => setSelectedSizeOption(size)}
+                    >
+                      {size}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {/* Quantity and Actions */}
             <div className="flex flex-col pt-4 gap-[var(--ef-stack-md)]">
@@ -588,15 +690,31 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
                 </button>
               </div>
 
+              {/* Active Variant Stock Message */}
+              {activeVariant && (
+                <p className="text-xs text-muted-foreground mb-1 text-center font-medium">
+                  {activeVariant.stock > 0 ? (
+                    <span className="text-green-600">In Stock: {activeVariant.stock} units available</span>
+                  ) : (
+                    <span className="text-red-500 font-bold">Temporarily Out of Stock</span>
+                  )}
+                </p>
+              )}
+
               {/* Add to Cart Button */}
               <Button
                 className="w-full flex items-center justify-center gap-2"
                 size="ef"
-                disabled={addingToCart}
+                disabled={addingToCart || isOutOfStock}
                 onClick={async () => {
                   setAddingToCart(true)
                   try {
-                    await addToCart(product.id, quantity, [])
+                    const attributes = []
+                    if (selectedFrame) attributes.push({ name: "Frame Color", value: selectedFrame })
+                    if (selectedTop) attributes.push({ name: "Tabletop Color", value: selectedTop })
+                    if (selectedSizeOption) attributes.push({ name: "Tabletop Size", value: selectedSizeOption })
+
+                    await addToCart(product.id, quantity, attributes)
                   } catch (e) {
                     console.error(e)
                   } finally {
@@ -609,6 +727,8 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
                     <span className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary-foreground mr-1"></span>
                     Adding...
                   </>
+                ) : isOutOfStock ? (
+                  "Out of Stock"
                 ) : (
                   "Add to Cart"
                 )}

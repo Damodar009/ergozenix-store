@@ -469,7 +469,7 @@ export class ProductService {
     category_id?: number | null
     images?: { image_url: string; is_primary: boolean; sort_order: number }[]
     attributes?: { attribute_id: number; value_text?: string; value_number?: number }[]
-    variants?: { variant_sku: string; variant_price: number; variant_stock: number }[]
+    variants?: { variant_sku: string; variant_price: number; variant_stock: number; variant_url?: string | null }[]
   }): Promise<Product> {
     let createdProductId: number | null = null
     try {
@@ -553,6 +553,7 @@ export class ProductService {
           variant_sku: v.variant_sku,
           variant_price: Number(v.variant_price) || 0,
           variant_stock: Number(v.variant_stock) || 0,
+          variant_url: v.variant_url || null,
         }))
 
         const { error: variantError } = await supabase

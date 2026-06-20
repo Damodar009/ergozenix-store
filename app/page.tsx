@@ -77,8 +77,8 @@ export default function Home() {
               <Button variant="outline" size="ef">Learn More</Button>
             </div>
           </div>
-          <div className="w-full mt-24 px-[var(--ef-container-padding-x)] max-w-[var(--ef-container-max)]">
-            <div className="aspect-[21/9] w-full bg-muted overflow-hidden rounded-[6px]">
+          <div className="w-full mt-24 md:px-[var(--ef-container-padding-x)] px-0 max-w-[var(--ef-container-max)]">
+            <div className="md:aspect-[21/9] aspect-[4/3] w-full bg-muted overflow-hidden md:rounded-[6px] rounded-none">
               <img alt="Minimalist Ergoform Desk" className="w-full h-full object-cover grayscale-[20%] hover:scale-105 transition-transform duration-1000" src="https://tdwhzskyljlypfffrghe.supabase.co/storage/v1/object/public/products/horizental-1781379103725.jpg" />
             </div>
           </div>

@@ -152,7 +152,31 @@ export class CartService {
 
 
     if (!product) throw new Error('Product not found')
-    const price = product.base_price
+    let price = product.base_price
+
+    // Look up variant price if size attribute matches a variant SKU
+    if (attributes.length > 0) {
+      const { data: dbVariants } = await supabase
+        .from('product_variants')
+        .select('variant_sku, variant_price')
+        .eq('product_id', productId)
+
+      if (dbVariants && dbVariants.length > 0) {
+        const sizeAttr = attributes.find(
+          (a) => a.name.toLowerCase() === 'tabletop size' || a.name.toLowerCase() === 'size'
+        )
+        if (sizeAttr) {
+          const selectedSize = sizeAttr.value.toLowerCase().trim()
+          const matchingVariant = dbVariants.find((v) => {
+            const parts = (v.variant_sku || "").split("|").map((s: string) => s.trim().toLowerCase())
+            return parts.includes(selectedSize)
+          })
+          if (matchingVariant && matchingVariant.variant_price !== null && matchingVariant.variant_price !== undefined) {
+            price = matchingVariant.variant_price
+          }
+        }
+      }
+    }
 
     // // 3. Check for existing item
     let existingItem
