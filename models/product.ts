@@ -43,7 +43,30 @@ export interface ProductVariant {
   created_at: string
   updated_at: string
   deleted_at: string | null
+  product_variant_option_values?: { option_value_id: number }[]
 }
+
+export interface ProductOption {
+  id: number
+  product_id: number
+  name: string
+  position: number
+  created_at: string
+  updated_at: string
+  values?: ProductOptionValue[]
+}
+
+export interface ProductOptionValue {
+  id: number
+  option_id: number
+  value: string
+  image_url: string | null
+  price_offset: number
+  stock_override: number | null
+  created_at: string
+  updated_at: string
+}
+
 
 export interface ProductAttribute {
   id: number
@@ -108,6 +131,7 @@ export interface ProductWithDetails extends Product {
   brand?: Brand | null
   category?: Category | null
   images?: ProductImage[]
+  options?: ProductOption[]
   variants?: ProductVariant[]
   attributes?: (ProductAttributeValue & { attribute?: ProductAttribute })[]
   reviews?: ProductReview[]

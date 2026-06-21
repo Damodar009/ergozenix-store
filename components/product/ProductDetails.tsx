@@ -15,6 +15,8 @@ export type ProductSpec = {
 
 
 
+const isHtml = (str: string) => /<[a-z][\s\S]*>/i.test(str)
+
 export function ProductDetails({
   title,
   rating,
@@ -69,9 +71,16 @@ export function ProductDetails({
         <p className="text-4xl font-black text-[#111718] dark:text-white mb-6 tracking-tight">{price}</p>
       )}
 
-      <p className="text-gray-600 dark:text-gray-400 text-base leading-relaxed mb-8">
-        {description}
-      </p>
+      {isHtml(description) ? (
+        <div
+          className="text-gray-600 dark:text-gray-400 text-base leading-relaxed mb-8 space-y-4"
+          dangerouslySetInnerHTML={{ __html: description }}
+        />
+      ) : (
+        <p className="text-gray-600 dark:text-gray-400 text-base leading-relaxed mb-8">
+          {description}
+        </p>
+      )}
 
       <div className="flex flex-col gap-4 mb-10">
         <div className="flex gap-4">

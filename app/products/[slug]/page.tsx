@@ -89,103 +89,75 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
   const [quantity, setQuantity] = useState(1)
   const { addToCart } = useCart()
 
-  // Dynamic variant extraction & states
-  const parsedVariants = useMemo(() => {
-    if (!product || !product.variants) return []
-    return product.variants.map((v: any) => {
-      const parts = (v.variant_sku || "").split("|").map((s: string) => s.trim())
-      if (parts.length >= 4) {
-        return {
-          id: v.id,
-          sku: parts[0] || v.variant_sku || "",
-          frameColor: parts[1] || "",
-          topColor: parts[2] || "",
-          topSize: parts[3] || "",
-          price: v.variant_price ?? product.base_price,
-          stock: v.variant_stock ?? 0,
-          variant_url: v.variant_url || null,
-        }
-      }
-      return {
-        id: v.id,
-        sku: parts[0] || v.variant_sku || "",
-        frameColor: "",
-        topColor: "",
-        topSize: parts[1] || "",
-        price: v.variant_price ?? product.base_price,
-        stock: v.variant_stock ?? 0,
-        variant_url: v.variant_url || null,
-      }
-    })
-  }, [product])
+  // Dynamic variant selection states
+  const [selectedOptions, setSelectedOptions] = useState<Record<string, string>>({})
 
-  const colorsAttributeValue = useMemo(() => {
-    if (!product || !product.attributes) return []
-    const colorsAttr = product.attributes.find(
-      (a) => a.attribute_id === 8 || a.attribute?.slug === "colors" || a.attribute?.name.toLowerCase() === "colors"
-    )
-    if (!colorsAttr || !colorsAttr.value_text) return []
-    return colorsAttr.value_text.split(",").map((s) => s.trim().toLowerCase())
-  }, [product])
-
-  const uniqueFrames = useMemo(() => {
-    const fromVariants = Array.from(new Set(parsedVariants.map(pv => pv.frameColor).filter(Boolean)))
-    if (fromVariants.length > 0) {
-      return fromVariants.filter(frame => ["black", "white"].includes(frame.toLowerCase()))
-    }
-    
-    if (colorsAttributeValue.length > 0) {
-      const allowed = ["black", "white"]
-      const filtered = colorsAttributeValue.filter(c => allowed.includes(c))
-      if (filtered.length > 0) {
-        return filtered.map(c => c.charAt(0).toUpperCase() + c.slice(1))
-      }
-    }
-
-    return ["Black", "White"]
-  }, [parsedVariants, colorsAttributeValue])
-
-  const uniqueTops = useMemo(() => {
-    const fromVariants = Array.from(new Set(parsedVariants.map(pv => pv.topColor).filter(Boolean)))
-    if (fromVariants.length > 0) {
-      return fromVariants
-    }
-
-    if (colorsAttributeValue.length > 0) {
-      return colorsAttributeValue.map(c => c.charAt(0).toUpperCase() + c.slice(1))
-    }
-
-    return ["Oak", "Walnut", "Black", "White"]
-  }, [parsedVariants, colorsAttributeValue])
-
-  const uniqueSizes = useMemo(() => {
-    return Array.from(new Set(parsedVariants.map(pv => pv.topSize).filter(Boolean)))
-  }, [parsedVariants])
-
-  // Active user selections
-  const [selectedFrame, setSelectedFrame] = useState<string>("")
-  const [selectedTop, setSelectedTop] = useState<string>("")
-  const [selectedSizeOption, setSelectedSizeOption] = useState<string>("")
-
-  // Set default selections once variants are loaded
+  // Set default selections once product options are loaded (highest-priced variant selected by default)
   useEffect(() => {
-    if (parsedVariants.length > 0) {
-      if (uniqueFrames.length > 0) setSelectedFrame(uniqueFrames[0])
-      if (uniqueTops.length > 0) setSelectedTop(uniqueTops[0])
-      if (uniqueSizes.length > 0) setSelectedSizeOption(uniqueSizes[0])
-    }
-  }, [parsedVariants, uniqueFrames, uniqueTops, uniqueSizes])
+    if (product && product.options && product.options.length > 0) {
+      const initialSelections: Record<string, string> = {}
 
-  // Resolve matching variant
+      // 1. Find the variant with the highest price
+      let highestVariant: any = null
+      if (product.variants && product.variants.length > 0) {
+        highestVariant = [...product.variants].reduce((highest, current) => {
+          const hp = highest.variant_price ?? 0
+          const cp = current.variant_price ?? 0
+          return cp > hp ? current : highest
+        }, product.variants[0])
+      }
+
+      // 2. Map its selected option values to defaults
+      if (highestVariant && highestVariant.product_variant_option_values) {
+        const valIds = highestVariant.product_variant_option_values.map((x: any) => x.option_value_id)
+        product.options.forEach((opt) => {
+          const matchingVal = opt.values?.find(val => valIds.includes(val.id))
+          if (matchingVal) {
+            initialSelections[opt.name] = matchingVal.value
+          } else if (opt.values && opt.values.length > 0) {
+            initialSelections[opt.name] = opt.values[0].value
+          }
+        })
+      } else {
+        // Fallback to first values if no variants exist
+        product.options.forEach((opt) => {
+          if (opt.values && opt.values.length > 0) {
+            initialSelections[opt.name] = opt.values[0].value
+          }
+        })
+      }
+
+      setSelectedOptions(initialSelections)
+    }
+  }, [product])
+
+  // Resolve matching variant (if multiple match, select the highest priced one)
   const activeVariant = useMemo(() => {
-    if (parsedVariants.length === 0) return null
-    return parsedVariants.find(
-      (v) =>
-        (!selectedFrame || !v.frameColor || v.frameColor.toLowerCase() === selectedFrame.toLowerCase()) &&
-        (!selectedTop || !v.topColor || v.topColor.toLowerCase() === selectedTop.toLowerCase()) &&
-        (!selectedSizeOption || v.topSize.toLowerCase() === selectedSizeOption.toLowerCase())
-    ) || null
-  }, [parsedVariants, selectedFrame, selectedTop, selectedSizeOption])
+    if (!product || !product.variants || product.variants.length === 0) return null
+
+    const matched = product.variants.filter((v) => {
+      // Every option group on the product must match one of the values associated with this variant
+      return product.options?.every((opt) => {
+        const selectedVal = selectedOptions[opt.name]
+        if (!selectedVal) return true
+
+        const matchingVal = opt.values?.find(val => val.value === selectedVal)
+        if (!matchingVal) return false
+
+        const variantValueIds = v.product_variant_option_values?.map((x: any) => x.option_value_id) || []
+        return variantValueIds.includes(matchingVal.id)
+      })
+    })
+
+    if (matched.length === 0) return null
+
+    // Return the matched variant that has the highest price
+    return matched.reduce((highest, current) => {
+      const hp = highest.variant_price ?? 0
+      const cp = current.variant_price ?? 0
+      return cp > hp ? current : highest
+    }, matched[0])
+  }, [product, selectedOptions])
 
   // Update main image when a variant with a custom tabletop image is selected
   useEffect(() => {
@@ -194,7 +166,7 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
     }
   }, [activeVariant])
 
-  const isOutOfStock = activeVariant ? activeVariant.stock <= 0 : (product?.stock_quantity ?? 0) <= 0
+  const isOutOfStock = activeVariant ? (activeVariant.variant_stock ?? 0) <= 0 : (product?.stock_quantity ?? 0) <= 0
   const { isWishlisted, toggleWishlist } = useWishlist()
   const [addingToCart, setAddingToCart] = useState(false)
   const reviewsSectionRef = useRef<HTMLElement>(null)
@@ -592,7 +564,7 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
 
               <p className="font-headline-section text-[20px] leading-[1.4] font-medium text-secondary">
                 {activeVariant ? (
-                  <span>Rs. {activeVariant.price.toLocaleString()}</span>
+                  <span>Rs. {(activeVariant.variant_price ?? product.base_price).toLocaleString()}</span>
                 ) : product.sale_price && product.sale_price < product.base_price ? (
                   <>
                     <span>Rs. {product.sale_price.toLocaleString()}</span>
@@ -606,68 +578,30 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
               </p>
               {activeVariant && (
                 <span className="font-body-main text-[13px] text-muted-foreground">
-                  SKU: {activeVariant.sku}
+                  SKU: {activeVariant.variant_sku}
                 </span>
               )}
             </div>
 
             {/* Dynamic Variant Selectors */}
-            {uniqueFrames.length > 0 && (
-              <div className="flex flex-col gap-[var(--ef-stack-sm)]">
+            {product.options?.map((option) => (
+              <div key={option.id} className="flex flex-col gap-[var(--ef-stack-sm)]">
                 <span className="font-label-caps text-label-caps text-muted-foreground">
-                  Selected Frame Color: {selectedFrame}
-                </span>
-                <div className="flex gap-[var(--ef-stack-sm)]">
-                  {uniqueFrames.map((frame) => (
-                    <button
-                      key={frame}
-                      className={`px-4 py-2 border rounded transition-all font-label-caps text-[12px] font-semibold tracking-[1px] uppercase ${selectedFrame === frame ? "bg-primary text-primary-foreground border-primary" : "bg-transparent text-foreground border-border cursor-pointer hover:border-foreground"}`}
-                      onClick={() => setSelectedFrame(frame)}
-                    >
-                      {frame}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {uniqueTops.length > 0 && (
-              <div className="flex flex-col gap-[var(--ef-stack-sm)]">
-                <span className="font-label-caps text-label-caps text-muted-foreground">
-                  Selected Tabletop Color: {selectedTop}
+                  Selected {option.name}: {selectedOptions[option.name]}
                 </span>
                 <div className="flex gap-[var(--ef-stack-sm)] flex-wrap">
-                  {uniqueTops.map((top) => (
+                  {option.values?.map((val) => (
                     <button
-                      key={top}
-                      className={`px-4 py-2 border rounded transition-all font-label-caps text-[12px] font-semibold tracking-[1px] uppercase ${selectedTop === top ? "bg-primary text-primary-foreground border-primary" : "bg-transparent text-foreground border-border cursor-pointer hover:border-foreground"}`}
-                      onClick={() => setSelectedTop(top)}
+                      key={val.id}
+                      className={`px-4 py-2 border rounded transition-all font-label-caps text-[12px] font-semibold tracking-[1px] uppercase ${selectedOptions[option.name] === val.value ? "bg-primary text-primary-foreground border-primary" : "bg-transparent text-foreground border-border cursor-pointer hover:border-foreground"}`}
+                      onClick={() => setSelectedOptions(prev => ({ ...prev, [option.name]: val.value }))}
                     >
-                      {top}
+                      {val.value}
                     </button>
                   ))}
                 </div>
               </div>
-            )}
-
-            {uniqueSizes.length > 0 && (
-              <div className="flex flex-col gap-[var(--ef-stack-sm)]">
-                <span className="font-label-caps text-label-caps text-muted-foreground">
-                  Selected Tabletop Size: {selectedSizeOption}
-                </span>
-                <div className="flex gap-[var(--ef-stack-sm)] flex-wrap">
-                  {uniqueSizes.map((size) => (
-                    <button
-                      key={size}
-                      className={`px-4 py-2 border rounded transition-all font-label-caps text-[12px] font-semibold tracking-[1px] uppercase ${selectedSizeOption === size ? "bg-primary text-primary-foreground border-primary" : "bg-transparent text-foreground border-border cursor-pointer hover:border-foreground"}`}
-                      onClick={() => setSelectedSizeOption(size)}
-                    >
-                      {size}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
+            ))}
 
             {/* Quantity and Actions */}
             <div className="flex flex-col pt-4 gap-[var(--ef-stack-md)]">
@@ -693,8 +627,8 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
               {/* Active Variant Stock Message */}
               {activeVariant && (
                 <p className="text-xs text-muted-foreground mb-1 text-center font-medium">
-                  {activeVariant.stock > 0 ? (
-                    <span className="text-green-600">In Stock: {activeVariant.stock} units available</span>
+                  {activeVariant.variant_stock > 0 ? (
+                    <span className="text-green-600">In Stock: {activeVariant.variant_stock} units available</span>
                   ) : (
                     <span className="text-red-500 font-bold">Temporarily Out of Stock</span>
                   )}
@@ -709,10 +643,10 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
                 onClick={async () => {
                   setAddingToCart(true)
                   try {
-                    const attributes = []
-                    if (selectedFrame) attributes.push({ name: "Frame Color", value: selectedFrame })
-                    if (selectedTop) attributes.push({ name: "Tabletop Color", value: selectedTop })
-                    if (selectedSizeOption) attributes.push({ name: "Tabletop Size", value: selectedSizeOption })
+                    const attributes = Object.entries(selectedOptions).map(([name, value]) => ({
+                      name,
+                      value
+                    }))
 
                     await addToCart(product.id, quantity, attributes)
                   } catch (e) {

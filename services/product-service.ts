@@ -126,7 +126,14 @@ export class ProductService {
           brands:brand_id (*),
           categories:category_id (*),
           product_images (*),
-          product_variants (*),
+          product_variants (
+            *,
+            product_variant_option_values (option_value_id)
+          ),
+          product_options (
+            *,
+            product_option_values (*)
+          ),
           product_reviews (*)
         `)
         .eq('id', id)
@@ -150,6 +157,10 @@ export class ProductService {
         brand: product.brands,
         category: product.categories,
         images: product.product_images?.filter((img: ProductImage) => !img.deleted_at) || [],
+        options: (product.product_options || []).map((o: any) => ({
+          ...o,
+          values: (o.product_option_values || []).sort((a: any, b: any) => a.id - b.id)
+        })).sort((a: any, b: any) => a.position - b.position),
         variants: product.product_variants || [],
         reviews: validReviews,
         average_rating,
@@ -173,7 +184,14 @@ export class ProductService {
           brands:brand_id (*),
           categories:category_id (*),
           product_images (*),
-          product_variants (*),
+          product_variants (
+            *,
+            product_variant_option_values (option_value_id)
+          ),
+          product_options (
+            *,
+            product_option_values (*)
+          ),
           product_reviews (*)
         `)
         .eq('slug', slug)
@@ -211,6 +229,10 @@ export class ProductService {
         brand: product.brands,
         category: product.categories,
         images: product.product_images?.filter((img: ProductImage) => !img.deleted_at) || [],
+        options: (product.product_options || []).map((o: any) => ({
+          ...o,
+          values: (o.product_option_values || []).sort((a: any, b: any) => a.id - b.id)
+        })).sort((a: any, b: any) => a.position - b.position),
         variants: product.product_variants || [],
         attributes: attributeValues?.map(av => ({
           ...av,
@@ -469,7 +491,23 @@ export class ProductService {
     category_id?: number | null
     images?: { image_url: string; is_primary: boolean; sort_order: number }[]
     attributes?: { attribute_id: number; value_text?: string; value_number?: number }[]
-    variants?: { variant_sku: string; variant_price: number; variant_stock: number; variant_url?: string | null }[]
+    options?: {
+      name: string
+      position: number
+      values: {
+        value: string
+        image_url: string | null
+        price_offset: number
+        stock_override: number | null
+      }[]
+    }[]
+    variants?: {
+      variant_sku: string
+      variant_price: number
+      variant_stock: number
+      variant_url?: string | null
+      combinationValues: { optionName: string; valueName: string }[]
+    }[]
   }): Promise<Product> {
     let createdProductId: number | null = null
     try {
@@ -546,6 +584,70 @@ export class ProductService {
         }
       }
 
+      // Insert product options and values if provided
+      const optionMap = new Map<string, number>()
+      const valueMap = new Map<string, number>()
+
+      if (data.options && data.options.length > 0) {
+        const optionInserts = data.options.map((opt) => ({
+          product_id: createdProductId,
+          name: opt.name,
+          position: opt.position,
+        }))
+
+        const { data: insertedOptions, error: optionError } = await supabase
+          .from('product_options')
+          .insert(optionInserts)
+          .select()
+
+        if (optionError) {
+          console.error('Error inserting product options:', optionError)
+          throw new Error(`Failed to save options: ${optionError.message}`)
+        }
+
+        if (insertedOptions && insertedOptions.length > 0) {
+          insertedOptions.forEach((o: any) => {
+            optionMap.set(o.name, o.id)
+          })
+
+          const valueInserts: any[] = []
+          data.options.forEach((opt) => {
+            const dbOptionId = optionMap.get(opt.name)
+            if (dbOptionId === undefined) return
+            opt.values.forEach((v) => {
+              valueInserts.push({
+                option_id: dbOptionId,
+                value: v.value,
+                image_url: v.image_url || null,
+                price_offset: Number(v.price_offset) || 0,
+                stock_override: v.stock_override !== undefined && v.stock_override !== null ? Number(v.stock_override) : null,
+              })
+            })
+          })
+
+          if (valueInserts.length > 0) {
+            const { data: insertedValues, error: valueError } = await supabase
+              .from('product_option_values')
+              .insert(valueInserts)
+              .select()
+
+            if (valueError) {
+              console.error('Error inserting product option values:', valueError)
+              throw new Error(`Failed to save option values: ${valueError.message}`)
+            }
+
+            if (insertedValues && insertedValues.length > 0) {
+              insertedValues.forEach((v: any) => {
+                const optName = data.options?.find(o => optionMap.get(o.name) === v.option_id)?.name
+                if (optName) {
+                  valueMap.set(`${optName}|${v.value}`, v.id)
+                }
+              })
+            }
+          }
+        }
+      }
+
       // Insert variants if provided
       if (data.variants && data.variants.length > 0) {
         const variantInserts = data.variants.map((v) => ({
@@ -556,13 +658,43 @@ export class ProductService {
           variant_url: v.variant_url || null,
         }))
 
-        const { error: variantError } = await supabase
+        const { data: insertedVariants, error: variantError } = await supabase
           .from('product_variants')
           .insert(variantInserts)
+          .select()
 
         if (variantError) {
           console.error('Error inserting product variants:', variantError)
           throw new Error(`Failed to save variants: ${variantError.message}`)
+        }
+
+        if (insertedVariants && insertedVariants.length > 0) {
+          const junctionInserts: any[] = []
+          data.variants.forEach((v) => {
+            const dbVariant = insertedVariants.find((dv: any) => dv.variant_sku === v.variant_sku)
+            if (!dbVariant) return
+
+            v.combinationValues?.forEach((comb) => {
+              const valId = valueMap.get(`${comb.optionName}|${comb.valueName}`)
+              if (valId !== undefined) {
+                junctionInserts.push({
+                  variant_id: dbVariant.id,
+                  option_value_id: valId,
+                })
+              }
+            })
+          })
+
+          if (junctionInserts.length > 0) {
+            const { error: junctionError } = await supabase
+              .from('product_variant_option_values')
+              .insert(junctionInserts)
+
+            if (junctionError) {
+              console.error('Error inserting variant option values junction mapping:', junctionError)
+              throw new Error(`Failed to save variant mappings: ${junctionError.message}`)
+            }
+          }
         }
       }
 
@@ -599,7 +731,14 @@ export class ProductService {
             brands:brand_id (*),
             categories:category_id (*),
             product_images (*),
-            product_variants (*),
+            product_variants (
+              *,
+              product_variant_option_values (option_value_id)
+            ),
+            product_options (
+              *,
+              product_option_values (*)
+            ),
             product_reviews (*)
           )
         `)
@@ -628,6 +767,10 @@ export class ProductService {
         brand: product.brands,
         category: product.categories,
         images: product.product_images?.filter((img: any) => !img.deleted_at) || [],
+        options: (product.product_options || []).map((o: any) => ({
+          ...o,
+          values: (o.product_option_values || []).sort((a: any, b: any) => a.id - b.id)
+        })).sort((a: any, b: any) => a.position - b.position),
         variants: product.product_variants || [],
         reviews: validReviews,
         average_rating,
@@ -694,6 +837,142 @@ export class ProductService {
     } catch (error) {
       console.error('Error in saveEditorsPick:', error)
       throw error
+    }
+  }
+
+  /**
+   * Get top best-selling products based on completed orders in the last 6 months.
+   */
+  static async getBestsellers(limit: number = 4): Promise<ProductCard[]> {
+    try {
+      const sixMonthsAgo = new Date()
+      sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6)
+      const sixMonthsAgoStr = sixMonthsAgo.toISOString()
+
+      // 1. Fetch completed orders from the last 6 months
+      const { data: orders, error: ordersError } = await supabase
+        .from('orders')
+        .select('id')
+        .eq('order_status', 'COMPLETED')
+        .gte('placed_at', sixMonthsAgoStr)
+
+      if (ordersError) {
+        console.error('Error fetching bestsellers orders:', ordersError)
+        throw ordersError
+      }
+
+      const salesMap = new Map<number, number>()
+
+      if (orders && orders.length > 0) {
+        const orderIds = orders.map(o => o.id)
+
+        // 2. Fetch order items for these completed orders
+        const { data: orderItems, error: itemsError } = await supabase
+          .from('order_items')
+          .select('product_id, quantity')
+          .in('order_id', orderIds)
+
+        if (itemsError) {
+          console.error('Error fetching bestsellers items:', itemsError)
+          throw itemsError
+        }
+
+        if (orderItems) {
+          orderItems.forEach((item: any) => {
+            const qty = Number(item.quantity) || 0
+            const pid = Number(item.product_id)
+            if (!isNaN(pid)) {
+              salesMap.set(pid, (salesMap.get(pid) || 0) + qty)
+            }
+          })
+        }
+      }
+
+      // Sort product IDs by quantity sold descending
+      const sortedProductIds = Array.from(salesMap.entries())
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, limit)
+        .map(entry => entry[0])
+
+      // 3. Fetch products details for top product IDs
+      let productsData: any[] = []
+      if (sortedProductIds.length > 0) {
+        const { data: products, error: productsError } = await supabase
+          .from('products')
+          .select(`
+            *,
+            brands:brand_id (name),
+            categories:category_id (name),
+            product_images (image_url, is_primary, sort_order)
+          `)
+          .in('id', sortedProductIds)
+          .is('deleted_at', null)
+          .eq('status', 'active')
+
+        if (productsError) {
+          console.error('Error fetching bestseller products:', productsError)
+          throw productsError
+        }
+
+        if (products) {
+          // Keep sales rank order
+          productsData = sortedProductIds
+            .map(id => products.find(p => p.id === id))
+            .filter(Boolean) as any[]
+        }
+      }
+
+      // 4. Fallback if not enough products found (fill up to limit with active products)
+      if (productsData.length < limit) {
+        const needed = limit - productsData.length
+        const excludeIds = productsData.map(p => p.id)
+        
+        let query = supabase
+          .from('products')
+          .select(`
+            *,
+            brands:brand_id (name),
+            categories:category_id (name),
+            product_images (image_url, is_primary, sort_order)
+          `)
+          .is('deleted_at', null)
+          .eq('status', 'active')
+          .limit(needed)
+          
+        if (excludeIds.length > 0) {
+          query = query.not('id', 'in', `(${excludeIds.join(',')})`)
+        }
+
+        const { data: fallbackProducts } = await query
+        if (fallbackProducts) {
+          productsData = [...productsData, ...fallbackProducts]
+        }
+      }
+
+      // 5. Transform to ProductCard format
+      return productsData.map(product => {
+        const images = product.product_images || []
+        const primaryImage = images.find((img: any) => img.is_primary)
+        const firstImage = images.sort((a: any, b: any) => a.sort_order - b.sort_order)[0]
+
+        return {
+          id: product.id,
+          name: product.name,
+          slug: product.slug,
+          description: product.description,
+          base_price: product.base_price,
+          sale_price: product.sale_price,
+          stock_quantity: product.stock_quantity,
+          status: product.status,
+          primary_image: primaryImage?.image_url || firstImage?.image_url || null,
+          brand_name: product.brands?.name || null,
+          category_name: product.categories?.name || null,
+        } as ProductCard
+      })
+
+    } catch (error) {
+      console.error('Error in getBestsellers:', error)
+      return ProductService.getFeaturedProducts(limit)
     }
   }
 }

@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/componen
 import { Badge } from "@/components/ui/badge"
 import { subscribeToNewsletter } from "@/services/newsletter-service"
 import { ProductService } from "@/services/product-service"
-import type { ProductWithDetails } from "@/models/product"
+import type { ProductWithDetails, ProductCard } from "@/models/product"
 import { ValuePropCard } from "@/components/home/ValuePropCard"
 
 export default function Home() {
@@ -17,6 +17,8 @@ export default function Home() {
   const [message, setMessage] = useState("")
   const [editorsPick, setEditorsPick] = useState<any>(null)
   const [editorsPickProduct, setEditorsPickProduct] = useState<ProductWithDetails | null>(null)
+  const [bestsellers, setBestsellers] = useState<ProductCard[]>([])
+  const [loadingBestsellers, setLoadingBestsellers] = useState(true)
 
   useEffect(() => {
     async function fetchPick() {
@@ -30,7 +32,20 @@ export default function Home() {
         console.error("Failed to load active editor's pick:", err)
       }
     }
+
+    async function fetchBestsellers() {
+      try {
+        const data = await ProductService.getBestsellers(4)
+        setBestsellers(data || [])
+      } catch (err) {
+        console.error("Failed to load bestsellers:", err)
+      } finally {
+        setLoadingBestsellers(false)
+      }
+    }
+
     fetchPick()
+    fetchBestsellers()
   }, [])
 
   const handleSubscribe = async (e: React.FormEvent) => {
@@ -235,47 +250,50 @@ We deliver to your doorstep across Nepal — our team on hand to set you up, zer
             <h2 className="font-headline-section text-headline-section">Our bestsellers.</h2>
             <Link className="font-label-caps text-label-caps text-primary border-b border-primary pb-1 hover:opacity-80 transition-all" href="/shop">VIEW ALL PRODUCTS</Link>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-[var(--ef-gutter)]">
-            <Card className="group flex flex-col border-0 shadow-none bg-transparent rounded-none">
-              <CardContent className="p-0">
-                <div className="aspect-[3/4] bg-accent rounded-[6px] border border-border overflow-hidden mb-[var(--ef-stack-md)] relative">
-                  <img alt="Task Light" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBKP9xz1IzYyDEpITVxTHHp3fNDzLXzSJ_arXJjgdxp2V3pS0evh_7MuVyVTs0cEBxQR6_XDL8Dzj3dYDb0vuF6in0yGy_CKl1Z4VI2jcewtK4HRvCU1YxWqIwFf_to4f271K5K426s5zZTUe4LwtDpw2Aq99NGxFGMFZ2Fl82npJUmV97i6-zUBSBlmy_2LbiwMcz7oENo01s2o1AxdtpiUQwmwmqiLNQ47qcGEAFptgiiXTD8YGJaN9fLSztbWUOEvlODEi_zTuEA" />
-                  <div className="absolute top-4 left-4">
-                    <Badge className="font-label-caps text-[9px] uppercase hover:bg-primary">Top Rated</Badge>
-                  </div>
-                </div>
-                <CardTitle className="font-headline-card text-headline-card mb-1">Norden Task Light</CardTitle>
-                <p className="font-body-main text-muted-foreground">Rs 185</p>
-              </CardContent>
-            </Card>
-            <Card className="group flex flex-col border-0 shadow-none bg-transparent rounded-none">
-              <CardContent className="p-0">
-                <div className="aspect-[3/4] bg-accent rounded-[6px] border border-border overflow-hidden mb-[var(--ef-stack-md)]">
-                  <img alt="Foundation Desk" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBjWgyGoHOFzMyvp1O26ktgFcsFsATVkgJgAr5KERnyLy1VN4dVUB4tClFoI-QvcOgvQ8EDsYqnxPokBCOiUMi-rYyxVT3pdNKJs_ZNzjWGgvpYFmZElfFE0m5BjyOENHTH81tZnXTIEcVjrzFwYQd-wOeXpTPTDieWD3LxPLvy3xyrCyMcXM7Ob_4J9eQxvmIR9TqUJByHoQWJh0QAS3yt6xOF1VVwiJyciz3EqzRlmUNtVMBo825ZcfwfjWjVFAJN6HL_4dOrBsqw" />
-                </div>
-                <CardTitle className="font-headline-card text-headline-card mb-1">Foundation Desk</CardTitle>
-                <p className="font-body-main text-muted-foreground">Rs 30,800</p>
-              </CardContent>
-            </Card>
-            <Card className="group flex flex-col border-0 shadow-none bg-transparent rounded-none">
-              <CardContent className="p-0">
-                <div className="aspect-[3/4] bg-accent rounded-[6px] border border-border overflow-hidden mb-[var(--ef-stack-md)]">
-                  <img alt="Keyboard Tray" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBHbPgF6hmIXDiZCDhXov26oS5Lhh2YQllKdfQeDFpGjCj0Zqv41VyUjP1lrHFXNVZiPBjql0Mp4OSyYMuOD6du-Go0YT6ZgO6Y7m9U1kzWAsiHsAJPd0C21dvjq0-is2ttk3-NKjAoVB_66cK1u8t7k-TfLrpmZnXOiogW4BLOcCl7LRnZ_hPdp7zCidw3Io2jyUETW3aFcZ24dSH2aom5_YdhrOJ5AG-aFVsqkHv8PItLTfqoLWkcrIrfFDhXfB9VB_hcxN8eEC1E" />
-                </div>
-                <CardTitle className="font-headline-card text-headline-card mb-1">Axis Keyboard Tray</CardTitle>
-                <p className="font-body-main text-muted-foreground">Rs 95</p>
-              </CardContent>
-            </Card>
-            <Card className="group flex flex-col border-0 shadow-none bg-transparent rounded-none">
-              <CardContent className="p-0">
-                <div className="aspect-[3/4] bg-accent rounded-[6px] border border-border overflow-hidden mb-[var(--ef-stack-md)]">
-                  <img alt="Felt Desk Mat" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBK4urfpqHm83IPwCEv5AHpdHb-hWLXh4P9Vpgx3hJMb9wa8XC9ORX4KezmeLUL1kZhksWzRSaS58jsZ3pP6c1JY75WWeIjWiHs6l7amRbV_sgP-b8BM_Yqy8b33LpI9hhIQrI2IhPpTr4hklYWiLFDMXtliIH4IxyCsMaJJ9aYC3fcdzuku2Kh6t4dNffac9xG3vUTI4lvAG-TVj0N5o2VZ_K3Q2tBxe3huIe_ae8GCq8OX9-zZdc3TF1uTqJtZwQaaKlBYZGCLLeG" />
-                </div>
-                <CardTitle className="font-headline-card text-headline-card mb-1">Linear Felt Mat</CardTitle>
-                <p className="font-body-main text-muted-foreground">Rs 65</p>
-              </CardContent>
-            </Card>
-          </div>
+          {loadingBestsellers ? (
+            <div className="text-center py-12 text-sm text-muted-foreground uppercase tracking-wider font-semibold">
+              Loading bestsellers...
+            </div>
+          ) : bestsellers.length === 0 ? (
+            <div className="text-center py-12 text-sm text-muted-foreground uppercase tracking-wider font-semibold">
+              No bestsellers found.
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-[var(--ef-gutter)]">
+              {bestsellers.map((product) => (
+                <Link key={product.id} href={`/products/${product.slug}`} className="group flex flex-col border-0 shadow-none bg-transparent rounded-none">
+                  <Card className="border-0 shadow-none bg-transparent rounded-none flex-1 flex flex-col">
+                    <CardContent className="p-0 flex-grow flex flex-col">
+                      <div className="aspect-[3/4] bg-accent rounded-[6px] border border-border overflow-hidden mb-[var(--ef-stack-md)] relative">
+                        {product.primary_image ? (
+                          <img
+                            alt={product.name}
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                            src={product.primary_image}
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center bg-muted/40">
+                            <span className="material-symbols-outlined text-4xl text-muted-foreground">image</span>
+                          </div>
+                        )}
+                      </div>
+                      <CardTitle className="font-headline-card text-headline-card mb-1">{product.name}</CardTitle>
+                      <p className="font-body-main text-muted-foreground">
+                        {product.sale_price && product.sale_price < product.base_price ? (
+                          <>
+                            <span className="text-foreground font-semibold">Rs. {product.sale_price.toLocaleString()}</span>
+                            <span className="line-through text-muted-foreground ml-2 text-xs">Rs. {product.base_price.toLocaleString()}</span>
+                          </>
+                        ) : (
+                          <span>Rs. {product.base_price.toLocaleString()}</span>
+                        )}
+                      </p>
+                    </CardContent>
+                  </Card>
+                </Link>
+              ))}
+            </div>
+          )}
         </section>
 
         {/* Newsletter */}

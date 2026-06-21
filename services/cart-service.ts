@@ -154,26 +154,40 @@ export class CartService {
     if (!product) throw new Error('Product not found')
     let price = product.base_price
 
-    // Look up variant price if size attribute matches a variant SKU
+    // Look up variant price if custom attributes are supplied
     if (attributes.length > 0) {
       const { data: dbVariants } = await supabase
         .from('product_variants')
-        .select('variant_sku, variant_price')
+        .select(`
+          id,
+          variant_price,
+          product_variant_option_values (
+            product_option_values (
+              value,
+              product_options (
+                name
+              )
+            )
+          )
+        `)
         .eq('product_id', productId)
 
       if (dbVariants && dbVariants.length > 0) {
-        const sizeAttr = attributes.find(
-          (a) => a.name.toLowerCase() === 'tabletop size' || a.name.toLowerCase() === 'size'
-        )
-        if (sizeAttr) {
-          const selectedSize = sizeAttr.value.toLowerCase().trim()
-          const matchingVariant = dbVariants.find((v) => {
-            const parts = (v.variant_sku || "").split("|").map((s: string) => s.trim().toLowerCase())
-            return parts.includes(selectedSize)
+        const matchingVariant = dbVariants.find((v: any) => {
+          // Verify that for all passed attributes, we have matching option values associated with this variant
+          return attributes.every((attr) => {
+            const variantValues = v.product_variant_option_values || []
+            return variantValues.some((vv: any) => {
+              const optVal = vv.product_option_values
+              return optVal && 
+                optVal.value.toLowerCase().trim() === attr.value.toLowerCase().trim() &&
+                optVal.product_options && 
+                optVal.product_options.name.toLowerCase().trim() === attr.name.toLowerCase().trim()
+            })
           })
-          if (matchingVariant && matchingVariant.variant_price !== null && matchingVariant.variant_price !== undefined) {
-            price = matchingVariant.variant_price
-          }
+        })
+        if (matchingVariant && matchingVariant.variant_price !== null && matchingVariant.variant_price !== undefined) {
+          price = Number(matchingVariant.variant_price)
         }
       }
     }

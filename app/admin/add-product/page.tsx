@@ -63,7 +63,19 @@ interface AttributeRow {
   value: string
 }
 
-// VariantRow has been replaced by tabletops and sizes arrays
+interface OptionValue {
+  id: string
+  name: string
+  image_url: string
+  price_offset: number | ""
+  stock: number | ""
+}
+
+interface OptionGroup {
+  id: string
+  name: string
+  values: OptionValue[]
+}
 
 
 export default function AddProductPage() {
@@ -83,23 +95,41 @@ export default function AddProductPage() {
   const [uploadedMedia, setUploadedMedia] = useState<{ url: string; type: "image" | "video" }[]>([])
   const [draggedImageIdx, setDraggedImageIdx] = useState<number | null>(null)
   const [attributes, setAttributes] = useState<AttributeRow[]>([])
-  // Tabletops: list of color/material options + their uploaded image URLs
-  const [tabletops, setTabletops] = useState<{ id: string; name: string; url: string }[]>([
-    { id: "1", name: "Oak", url: "" },
-    { id: "2", name: "Walnut", url: "" }
+  // Generic option groups for generating variants (pre-populated with frame, top color, size defaults)
+  const [optionGroups, setOptionGroups] = useState<OptionGroup[]>([
+    {
+      id: "g1",
+      name: "Frame Color",
+      values: [
+        { id: "v1_1", name: "Black", image_url: "", price_offset: "", stock: "" },
+        { id: "v1_2", name: "White", image_url: "", price_offset: "", stock: "" }
+      ]
+    },
+    {
+      id: "g2",
+      name: "Tabletop Color",
+      values: [
+        { id: "v2_1", name: "Oak", image_url: "", price_offset: "", stock: "" },
+        { id: "v2_2", name: "Walnut", image_url: "", price_offset: "", stock: "" }
+      ]
+    },
+    {
+      id: "g3",
+      name: "Tabletop Size",
+      values: [
+        { id: "v3_1", name: "120x60 cm", image_url: "", price_offset: 0, stock: "" },
+        { id: "v3_2", name: "140x70 cm", image_url: "", price_offset: 3000, stock: "" },
+        { id: "v3_3", name: "160x80 cm", image_url: "", price_offset: 6000, stock: "" }
+      ]
+    }
   ])
 
-  // Sizes: list of sizes + their prices and stocks
-  const [sizes, setSizes] = useState<{ id: string; name: string; price: number | ""; stock: number | "" }[]>([
-    { id: "1", name: "120x60 cm", price: "", stock: "" },
-    { id: "2", name: "140x70 cm", price: "", stock: "" },
-    { id: "3", name: "160x80 cm", price: "", stock: "" }
-  ])
+  // Custom length text input state per group
+  const [customValueInput, setCustomValueInput] = useState<{ [groupId: string]: string }>({})
 
-  // Custom length input state
-  const [customLengthInput, setCustomLengthInput] = useState<string>("")
-
-  // Available color options selection states
+  // Target uploading information
+  const [uploadingGroupId, setUploadingGroupId] = useState<string | null>(null)
+  const [uploadingValueId, setUploadingValueId] = useState<string | null>(null)
   const [selectedFrameColors, setSelectedFrameColors] = useState<string[]>(["Black", "White"])
 
   // UI state managers
@@ -108,7 +138,6 @@ export default function AddProductPage() {
   const [validationErrors, setValidationErrors] = useState<string[]>([])
 
   const fileInputRef = useRef<HTMLInputElement>(null)
-  const [uploadingVariantId, setUploadingVariantId] = useState<string | null>(null)
   const variantFileInputRef = useRef<HTMLInputElement>(null)
 
   // Setup form using React Hook Form
@@ -220,7 +249,7 @@ export default function AddProductPage() {
   // Handle variant image upload
   const handleVariantImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files
-    if (!files || files.length === 0 || !uploadingVariantId) return
+    if (!files || files.length === 0 || !uploadingGroupId || !uploadingValueId) return
 
     const file = files[0]
     setUploading(true)
@@ -247,7 +276,7 @@ export default function AddProductPage() {
       const { data: publicData } = supabase.storage.from('products').getPublicUrl(uniqueFilename)
       const fileUrl = publicData?.publicUrl ?? ''
 
-      handleUpdateTabletop(uploadingVariantId, "url", fileUrl)
+      handleUpdateOptionValue(uploadingGroupId, uploadingValueId, "image_url", fileUrl)
     } catch (err: any) {
       console.error(err)
       toast({
@@ -257,7 +286,8 @@ export default function AddProductPage() {
       })
     } finally {
       setUploading(false)
-      setUploadingVariantId(null)
+      setUploadingGroupId(null)
+      setUploadingValueId(null)
       if (variantFileInputRef.current) variantFileInputRef.current.value = ''
     }
   }
@@ -330,40 +360,79 @@ export default function AddProductPage() {
     setAttributes(prev => prev.filter(row => row.id !== id))
   }
 
-  // Tabletops option management
-  const handleAddTabletop = () => {
-    setTabletops(prev => [...prev, { id: Math.random().toString(), name: "", url: "" }])
+  // Option Group Actions
+  const handleAddOptionGroup = () => {
+    setOptionGroups(prev => [
+      ...prev,
+      {
+        id: Math.random().toString(),
+        name: "",
+        values: []
+      }
+    ])
   }
 
-  const handleUpdateTabletop = (id: string, field: "name" | "url", value: string) => {
-    setTabletops(prev => prev.map(t => t.id === id ? { ...t, [field]: value } : t))
+  const handleRemoveOptionGroup = (id: string) => {
+    setOptionGroups(prev => prev.filter(g => g.id !== id))
   }
 
-  const handleRemoveTabletop = (id: string) => {
-    setTabletops(prev => prev.filter(t => t.id !== id))
+  const handleUpdateOptionGroupName = (id: string, name: string) => {
+    setOptionGroups(prev => prev.map(g => g.id === id ? { ...g, name } : g))
   }
 
-  // Sizes option management
-  const handleAddSize = (name: string) => {
+  // Option Value Actions
+  const handleAddOptionValue = (groupId: string, name: string) => {
     if (!name.trim()) return
-    // Ensure size name doesn't exist
-    if (sizes.some(s => s.name.toLowerCase() === name.trim().toLowerCase())) {
-      toast({
-        title: "Duplicate Size",
-        description: `Size "${name}" already exists.`,
-        variant: "destructive"
-      })
-      return
-    }
-    setSizes(prev => [...prev, { id: Math.random().toString(), name: name.trim(), price: "", stock: "" }])
+    setOptionGroups(prev => prev.map(g => {
+      if (g.id !== groupId) return g
+      // Avoid duplicates
+      if (g.values.some(v => v.name.toLowerCase() === name.trim().toLowerCase())) {
+        toast({
+          title: "Duplicate Value",
+          description: `"${name}" already exists in option group "${g.name}".`,
+          variant: "destructive"
+        })
+        return g
+      }
+      return {
+        ...g,
+        values: [
+          ...g.values,
+          {
+            id: Math.random().toString(),
+            name: name.trim(),
+            image_url: "",
+            price_offset: "",
+            stock: ""
+          }
+        ]
+      }
+    }))
   }
 
-  const handleUpdateSize = (id: string, field: "price" | "stock", value: any) => {
-    setSizes(prev => prev.map(s => s.id === id ? { ...s, [field]: value } : s))
+  const handleUpdateOptionValue = (
+    groupId: string,
+    valueId: string,
+    field: keyof OptionValue,
+    val: any
+  ) => {
+    setOptionGroups(prev => prev.map(g => {
+      if (g.id !== groupId) return g
+      return {
+        ...g,
+        values: g.values.map(v => v.id === valueId ? { ...v, [field]: val } : v)
+      }
+    }))
   }
 
-  const handleRemoveSize = (id: string) => {
-    setSizes(prev => prev.filter(s => s.id !== id))
+  const handleRemoveOptionValue = (groupId: string, valueId: string) => {
+    setOptionGroups(prev => prev.map(g => {
+      if (g.id !== groupId) return g
+      return {
+        ...g,
+        values: g.values.filter(v => v.id !== valueId)
+      }
+    }))
   }
 
   // Perform full cross-tab verification
@@ -388,36 +457,38 @@ export default function AddProductPage() {
     })
 
     // 3. Dynamic Variants validation
-    if (selectedFrameColors.length === 0) {
-      errorsList.push("Variants Tab: Select at least one frame color.")
-    }
-
-    if (tabletops.length === 0) {
-      errorsList.push("Variants Tab: Add at least one tabletop color option.")
+    if (optionGroups.length === 0) {
+      errorsList.push("Variants Tab: Create at least one option group (e.g. Frame, Color, or Size).")
     } else {
-      tabletops.forEach((top, idx) => {
-        const label = `Variants Tab: Tabletop Row ${idx + 1}`
-        if (!top.name.trim()) {
-          errorsList.push(`${label} has no name specified.`)
+      optionGroups.forEach((group, gIdx) => {
+        const gLabel = `Variants Tab: Option Group ${gIdx + 1}`
+        if (!group.name.trim()) {
+          errorsList.push(`${gLabel} is missing a name.`)
         }
-        if (!top.url.trim()) {
-          errorsList.push(`${label} is missing the tabletop image upload.`)
-        }
-      })
-    }
 
-    if (sizes.length === 0) {
-      errorsList.push("Variants Tab: Add at least one size/length option.")
-    } else {
-      sizes.forEach((size, idx) => {
-        const label = `Variants Tab: Size Row ${idx + 1} (${size.name})`
-        const price = Number(size.price)
-        if (size.price === "" || isNaN(price) || price < 0) {
-          errorsList.push(`${label} price must be a valid number greater than or equal to 0.`)
-        }
-        const stock = Number(size.stock)
-        if (size.stock === "" || isNaN(stock) || stock < 0 || !Number.isInteger(stock)) {
-          errorsList.push(`${label} stock must be a valid integer greater than or equal to 0.`)
+        if (group.values.length === 0) {
+          errorsList.push(`${gLabel} ("${group.name || `Group ${gIdx + 1}`}") must have at least one option value.`)
+        } else {
+          group.values.forEach((val, vIdx) => {
+            const vLabel = `Variants Tab: Group "${group.name || `Group ${gIdx + 1}`}" - Row ${vIdx + 1}`
+            if (!val.name.trim()) {
+              errorsList.push(`${vLabel} is missing a name/value.`)
+            }
+
+            if (val.price_offset !== "") {
+              const price = Number(val.price_offset)
+              if (isNaN(price)) {
+                errorsList.push(`${vLabel} price offset must be a valid number.`)
+              }
+            }
+
+            if (val.stock !== "") {
+              const stock = Number(val.stock)
+              if (isNaN(stock) || stock < 0 || !Number.isInteger(stock)) {
+                errorsList.push(`${vLabel} stock must be a valid integer greater than or equal to 0.`)
+              }
+            }
+          })
         }
       })
     }
@@ -463,8 +534,14 @@ export default function AddProductPage() {
         }
       })
 
-      // Auto-append selected frame and tabletop colors under the Colors attribute (ID 8)
-      const selectedColorsList = [...selectedFrameColors, ...tabletops.map(t => t.name)].filter(Boolean)
+      // Auto-append selected frame/tabletop/swatch colors under the Colors attribute (ID 8)
+      // Look through all option groups that represent color or tabletop color
+      const colorGroups = optionGroups.filter(g => {
+        const nameLower = g.name.toLowerCase()
+        return nameLower.includes("color") || nameLower.includes("tabletop") || nameLower.includes("upholstery")
+      })
+      const selectedColorsList = colorGroups.flatMap(g => g.values.map(v => v.name.trim())).filter(Boolean)
+
       if (selectedColorsList.length > 0) {
         const existingColorIdx = attributesPayload.findIndex(a => a.attribute_id === 8)
         if (existingColorIdx !== -1) {
@@ -478,28 +555,72 @@ export default function AddProductPage() {
         }
       }
 
-      // 3. Prepare variants block: generate combinations
-      const variantsPayload = []
-      for (const frame of selectedFrameColors) {
-        for (const top of tabletops) {
-          for (const size of sizes) {
-            const parentSkuPart = (productSKU || productName || "PRODUCT").trim().toUpperCase().replace(/\s+/g, '-');
-            const compositeSku = `${parentSkuPart} | ${frame.trim()} | ${top.name.trim()} | ${size.name.trim()}`
-            variantsPayload.push({
-              variant_sku: compositeSku,
-              variant_price: Number(size.price),
-              variant_stock: Number(size.stock),
-              variant_url: top.url || null
-            })
-          }
-        }
+      // Helper to generate Cartesian product of option values
+      const generateCombinations = (groups: OptionGroup[]): OptionValue[][] => {
+        if (groups.length === 0) return []
+        const arrays = groups.map(g => g.values.filter(v => v.name.trim() !== ""))
+        if (arrays.some(arr => arr.length === 0)) return []
+
+        return arrays.reduce<OptionValue[][]>(
+          (acc, curr) => acc.flatMap(comb => curr.map(val => [...comb, val])),
+          [[]]
+        )
       }
 
-      // 4. Save to supabase with client rollback sequence
+      // 3. Prepare options block
+      const optionsPayload = optionGroups.map((group, index) => ({
+        name: group.name,
+        position: index,
+        values: group.values.map(v => ({
+          value: v.name,
+          image_url: v.image_url || null,
+          price_offset: Number(v.price_offset) || 0,
+          stock_override: v.stock !== "" && v.stock !== null ? Number(v.stock) : null
+        }))
+      }))
+
+      // 4. Prepare variants block: generate combinations dynamically
+      const combinations = generateCombinations(optionGroups)
+      const variantsPayload = combinations.map(combination => {
+        const parentSkuPart = (productSKU || productName || "PRODUCT").trim().toUpperCase().replace(/\s+/g, '-');
+        const optionNames = combination.map(v => v.name.trim());
+        const compositeSku = `${parentSkuPart} | ${optionNames.join(" | ")}`;
+
+        const basePrice = Number(basicValues.base_price) || 0;
+        const offsets = combination.reduce((sum, v) => sum + (Number(v.price_offset) || 0), 0);
+        const variantPrice = basePrice + offsets;
+
+        // Minimum of specified stocks, defaulting to base stock if none specified
+        const stocks = combination.map(v => v.stock).filter(s => s !== "" && s !== null && s !== undefined);
+        const variantStock = stocks.length > 0 ? Math.min(...stocks.map(Number)) : (Number(basicValues.stock_quantity) || 0);
+
+        // First image_url swatch found
+        const valWithImg = combination.find(v => v.image_url && v.image_url.trim() !== "");
+        const variantUrl = valWithImg?.image_url || null;
+
+        const combinationValues = combination.map(v => {
+          const parentGroup = optionGroups.find(g => g.values.some(val => val.id === v.id));
+          return {
+            optionName: parentGroup?.name || "",
+            valueName: v.name
+          };
+        });
+
+        return {
+          variant_sku: compositeSku,
+          variant_price: variantPrice,
+          variant_stock: variantStock,
+          variant_url: variantUrl,
+          combinationValues
+        }
+      })
+
+      // 5. Save to supabase with client rollback sequence
       const createdProduct = await ProductService.createProduct({
         ...basicValues,
         images: imagesPayload,
         attributes: attributesPayload,
+        options: optionsPayload,
         variants: variantsPayload
       })
 
@@ -968,10 +1089,19 @@ export default function AddProductPage() {
 
             {/* ==================== TAB 4: VARIANTS ==================== */}
             {activeTab === "variants" && (
-              <div className="space-y-6">
-                <div>
-                  <h3 className="text-sm font-bold uppercase text-foreground mb-1">Product Variants Matrix</h3>
-                  <p className="text-xs text-muted-foreground font-medium">Define frame colors, tabletops (with uploadable images), and sizes/lengths. The system automatically generates all combinations.</p>
+              <div className="space-y-8">
+                <div className="flex justify-between items-start border-b border-border pb-4">
+                  <div>
+                    <h3 className="text-sm font-bold uppercase text-foreground mb-1">Product Variants Matrix Builder</h3>
+                    <p className="text-xs text-muted-foreground">Define your custom option groups. The system will automatically compute the Cartesian combinations of all configurations.</p>
+                  </div>
+                  <Button
+                    type="button"
+                    onClick={handleAddOptionGroup}
+                    className="rounded-none bg-primary text-primary-foreground hover:bg-primary/90 h-9 px-4 text-xs font-bold uppercase"
+                  >
+                    <Plus className="h-3.5 w-3.5 mr-1.5" /> Add Option Group
+                  </Button>
                 </div>
 
                 <input
@@ -982,199 +1112,191 @@ export default function AddProductPage() {
                   className="hidden"
                 />
 
-                {/* 1. Frame Colors Selection */}
-                <div className="border border-border p-4 bg-muted/20 space-y-3">
-                  <label className="text-xs font-bold uppercase text-foreground/80 flex justify-between">
-                    <span>1. Available Frame Colors</span>
-                  </label>
-                  <div className="flex gap-6">
-                    {["Black", "White"].map((color) => (
-                      <label key={color} className="flex items-center gap-2 text-xs font-semibold cursor-pointer select-none">
-                        <input
-                          type="checkbox"
-                          checked={selectedFrameColors.includes(color)}
-                          onChange={(e) => {
-                            if (e.target.checked) {
-                              setSelectedFrameColors(prev => [...prev, color])
-                            } else {
-                              setSelectedFrameColors(prev => prev.filter(c => c !== color))
-                            }
-                          }}
-                          className="rounded-none border border-input h-4 w-4 bg-background focus:ring-0 cursor-pointer"
-                        />
-                        <span>{color}</span>
-                      </label>
-                    ))}
+                {optionGroups.length === 0 ? (
+                  <div className="border border-dashed border-border py-12 text-center text-xs text-muted-foreground uppercase font-semibold">
+                    No options configured. Click &quot;Add Option Group&quot; to build product variants.
                   </div>
-                </div>
+                ) : (
+                  <div className="space-y-8">
+                    {optionGroups.map((group, gIdx) => (
+                      <div key={group.id} className="border border-border bg-card p-6 rounded-none space-y-4">
 
-                {/* 2. Tabletop Options with Uploadable Image */}
-                <div className="border border-border p-4 bg-muted/20 space-y-4">
-                  <div className="flex justify-between items-center border-b border-border/40 pb-2">
-                    <label className="text-xs font-bold uppercase text-foreground/80">2. Tabletop Options (Upload Image per Option)</label>
-                    <Button
-                      type="button"
-                      onClick={handleAddTabletop}
-                      className="rounded-none border border-primary text-primary hover:bg-primary/5 bg-transparent h-8 px-3 text-[10px] font-bold uppercase"
-                    >
-                      <Plus className="h-3 w-3 mr-1" /> Add Tabletop Option
-                    </Button>
-                  </div>
-
-                  {tabletops.length === 0 ? (
-                    <div className="text-center py-4 border border-dashed border-border/80 text-xs text-muted-foreground font-semibold uppercase">
-                      No tabletop options configured. Add at least one tabletop.
-                    </div>
-                  ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {tabletops.map((top, idx) => (
-                        <div key={top.id} className="border border-border p-3 bg-card flex items-center justify-between gap-4">
-                          <div className="flex-1 space-y-2">
-                            <label className="text-[10px] font-bold text-muted-foreground uppercase">Option Name</label>
+                        {/* Header: Option Group Name input + Remove Button */}
+                        <div className="flex items-center justify-between gap-4 border-b border-border/40 pb-3">
+                          <div className="flex-1 max-w-md space-y-1">
+                            <label className="text-[10px] font-bold text-muted-foreground uppercase">Option Group Name *</label>
                             <Input
                               type="text"
-                              placeholder="e.g. Oak, Walnut"
-                              value={top.name}
-                              onChange={(e) => handleUpdateTabletop(top.id, "name", e.target.value)}
-                              className="h-8 rounded-none border border-input bg-background/50 text-xs shadow-none"
+                              placeholder="e.g. Frame Color, Tabletop Color, Size, Density"
+                              value={group.name}
+                              onChange={(e) => handleUpdateOptionGroupName(group.id, e.target.value)}
+                              className="h-9 rounded-none border border-input bg-background/50 text-xs font-bold uppercase tracking-wide shadow-none"
                             />
                           </div>
 
-                          <div className="flex items-center gap-2 pt-4">
-                            {top.url ? (
-                              <div className="relative w-12 h-12 border border-border shrink-0 group">
-                                {/* eslint-disable-next-line @next/next/no-img-element */}
-                                <img
-                                  src={top.url}
-                                  alt={top.name || "Tabletop Option"}
-                                  className="w-full h-full object-cover"
-                                />
-                                <button
-                                  type="button"
-                                  onClick={() => handleUpdateTabletop(top.id, "url", "")}
-                                  className="absolute -top-1 -right-1 bg-destructive text-destructive-foreground rounded-full w-4 h-4 flex items-center justify-center text-[10px] hover:bg-destructive font-bold"
-                                >
-                                  &times;
-                                </button>
-                              </div>
-                            ) : (
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveOptionGroup(group.id)}
+                            className="mt-5 h-9 px-3 bg-destructive/10 text-destructive hover:bg-destructive hover:text-destructive-foreground flex items-center gap-1.5 text-xs font-bold uppercase transition-colors"
+                          >
+                            <Trash2 className="h-4 w-4" /> Remove Group
+                          </button>
+                        </div>
+
+                        {/* Values Table */}
+                        <div className="space-y-3">
+                          <div className="flex justify-between items-center">
+                            <label className="text-[10px] font-bold text-muted-foreground uppercase">Configure Option Values</label>
+                            <div className="flex items-center gap-2">
+                              <Input
+                                type="text"
+                                placeholder="Add value (e.g. Black, Mesh, 120x60 cm)"
+                                id={`new-val-${group.id}`}
+                                onKeyDown={(e) => {
+                                  if (e.key === "Enter") {
+                                    e.preventDefault();
+                                    const inputEl = document.getElementById(`new-val-${group.id}`) as HTMLInputElement;
+                                    const val = inputEl?.value?.trim();
+                                    if (val) {
+                                      handleAddOptionValue(group.id, val);
+                                      inputEl.value = "";
+                                    }
+                                  }
+                                }}
+                                className="h-8 w-60 rounded-none border border-input text-xs shadow-none"
+                              />
                               <Button
                                 type="button"
-                                variant="outline"
                                 onClick={() => {
-                                  setUploadingVariantId(top.id);
-                                  variantFileInputRef.current?.click();
+                                  const inputEl = document.getElementById(`new-val-${group.id}`) as HTMLInputElement;
+                                  const val = inputEl?.value?.trim();
+                                  if (val) {
+                                    handleAddOptionValue(group.id, val);
+                                    inputEl.value = "";
+                                  }
                                 }}
-                                className="h-8 rounded-none border border-primary text-primary hover:bg-primary/5 bg-transparent text-[10px] font-bold uppercase px-3 animate-pulse"
-                                disabled={uploading}
+                                className="h-8 rounded-none px-3 text-[10px] font-bold uppercase"
                               >
-                                {uploading && uploadingVariantId === top.id ? (
-                                  <Loader2 className="h-3 w-3 animate-spin mr-1" />
-                                ) : (
-                                  <Upload className="h-3 w-3 mr-1" />
-                                )}
-                                Upload
+                                Add Option Value
                               </Button>
-                            )}
-
-                            <button
-                              type="button"
-                              onClick={() => handleRemoveTabletop(top.id)}
-                              className="h-8 w-8 bg-destructive/10 text-destructive hover:bg-destructive hover:text-destructive-foreground flex items-center justify-center rounded-none transition-colors"
-                            >
-                              <Trash2 className="h-3.5 w-3.5" />
-                            </button>
+                            </div>
                           </div>
+
+                          {group.values.length === 0 ? (
+                            <div className="text-center py-6 border border-dashed border-border/60 text-xs text-muted-foreground uppercase font-semibold">
+                              No values added yet. Type a value name above and click &quot;Add Option Value&quot;.
+                            </div>
+                          ) : (
+                            <div className="border border-border overflow-x-auto">
+                              <table className="w-full text-left border-collapse text-xs">
+                                <thead>
+                                  <tr className="bg-muted border-b border-border uppercase font-bold text-foreground">
+                                    <th className="p-3 w-1/3">Option Value / Name *</th>
+                                    <th className="p-3 w-1/5">Price Offset (NPR)</th>
+                                    <th className="p-3 w-1/5">Stock Override</th>
+                                    <th className="p-3 w-1/4">Swatch / Image Preview</th>
+                                    <th className="p-3 w-12 text-center">Delete</th>
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                  {group.values.map((val) => (
+                                    <tr key={val.id} className="border-b border-border last:border-b-0 hover:bg-muted/5">
+                                      {/* Value Name */}
+                                      <td className="p-2">
+                                        <Input
+                                          type="text"
+                                          value={val.name}
+                                          onChange={(e) => handleUpdateOptionValue(group.id, val.id, "name", e.target.value)}
+                                          className="h-8 rounded-none border border-input bg-background/50 text-xs shadow-none"
+                                        />
+                                      </td>
+
+                                      {/* Price Offset */}
+                                      <td className="p-2">
+                                        <Input
+                                          type="number"
+                                          placeholder="e.g. +3000 or -500"
+                                          value={val.price_offset}
+                                          onChange={(e) => handleUpdateOptionValue(group.id, val.id, "price_offset", e.target.value === "" ? "" : Number(e.target.value))}
+                                          className="h-8 rounded-none border border-input bg-background/50 text-xs shadow-none"
+                                        />
+                                      </td>
+
+                                      {/* Stock Override */}
+                                      <td className="p-2">
+                                        <Input
+                                          type="number"
+                                          placeholder="Base stock used if empty"
+                                          value={val.stock}
+                                          onChange={(e) => handleUpdateOptionValue(group.id, val.id, "stock", e.target.value === "" ? "" : Number(e.target.value))}
+                                          className="h-8 rounded-none border border-input bg-background/50 text-xs shadow-none"
+                                        />
+                                      </td>
+
+                                      {/* Image swatch */}
+                                      <td className="p-2">
+                                        <div className="flex items-center gap-2">
+                                          {val.image_url ? (
+                                            <div className="relative w-10 h-10 border border-border group shrink-0">
+                                              {/* eslint-disable-next-line @next/next/no-img-element */}
+                                              <img
+                                                src={val.image_url}
+                                                alt={val.name}
+                                                className="w-full h-full object-cover"
+                                              />
+                                              <button
+                                                type="button"
+                                                onClick={() => handleUpdateOptionValue(group.id, val.id, "image_url", "")}
+                                                className="absolute -top-1 -right-1 bg-destructive text-destructive-foreground rounded-full w-4 h-4 flex items-center justify-center text-[10px] hover:bg-destructive font-bold"
+                                              >
+                                                &times;
+                                              </button>
+                                            </div>
+                                          ) : (
+                                            <Button
+                                              type="button"
+                                              variant="outline"
+                                              onClick={() => {
+                                                setUploadingGroupId(group.id);
+                                                setUploadingValueId(val.id);
+                                                variantFileInputRef.current?.click();
+                                              }}
+                                              className="h-8 rounded-none border border-primary text-primary hover:bg-primary/5 bg-transparent text-[10px] font-bold uppercase py-1 px-2"
+                                              disabled={uploading}
+                                            >
+                                              {uploading && uploadingGroupId === group.id && uploadingValueId === val.id ? (
+                                                <Loader2 className="h-3 w-3 animate-spin mr-1" />
+                                              ) : (
+                                                <Upload className="h-3 w-3 mr-1" />
+                                              )}
+                                              Upload Swatch
+                                            </Button>
+                                          )}
+                                        </div>
+                                      </td>
+
+                                      {/* Remove row */}
+                                      <td className="p-2 text-center">
+                                        <button
+                                          type="button"
+                                          onClick={() => handleRemoveOptionValue(group.id, val.id)}
+                                          className="h-8 w-8 bg-destructive/10 text-destructive hover:bg-destructive hover:text-destructive-foreground flex items-center justify-center rounded-none transition-colors mx-auto"
+                                        >
+                                          <Trash2 className="h-3.5 w-3.5" />
+                                        </button>
+                                      </td>
+                                    </tr>
+                                  ))}
+                                </tbody>
+                              </table>
+                            </div>
+                          )}
                         </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
 
-                {/* 3. Sizes Section (defining price/stock per size, custom lengths dynamically) */}
-                <div className="border border-border p-4 bg-muted/20 space-y-4">
-                  <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 border-b border-border/40 pb-2">
-                    <label className="text-xs font-bold uppercase text-foreground/80">3. Sizes & Pricing/Stock Configuration</label>
-                    <div className="flex items-center gap-2">
-                      <Input
-                        type="text"
-                        placeholder="Length (e.g. 180 or 180x80 cm)"
-                        value={customLengthInput}
-                        onChange={(e) => setCustomLengthInput(e.target.value)}
-                        className="h-8 w-56 rounded-none border border-input bg-background/50 text-xs shadow-none"
-                      />
-                      <Button
-                        type="button"
-                        onClick={() => {
-                          const sizeName = customLengthInput.trim();
-                          if (!sizeName) return;
-                          // If it is just a number, format it as "[length]x80 cm"
-                          const formattedName = /^\d+$/.test(sizeName) ? `${sizeName}x80 cm` : sizeName;
-                          handleAddSize(formattedName);
-                          setCustomLengthInput("");
-                        }}
-                        className="rounded-none bg-primary text-primary-foreground hover:bg-primary/90 h-8 px-3 text-[10px] font-bold uppercase"
-                      >
-                        Add Size
-                      </Button>
-                    </div>
+                      </div>
+                    ))}
                   </div>
-
-                  {sizes.length === 0 ? (
-                    <div className="text-center py-4 border border-dashed border-border/80 text-xs text-muted-foreground font-semibold uppercase">
-                      No sizes configured. Add at least one size.
-                    </div>
-                  ) : (
-                    <div className="border border-border overflow-x-auto bg-card">
-                      <table className="w-full text-left border-collapse text-xs">
-                        <thead>
-                          <tr className="bg-muted border-b border-border uppercase font-bold text-foreground">
-                            <th className="p-3 w-1/3">Size Option</th>
-                            <th className="p-3 w-1/4">Price (NPR) *</th>
-                            <th className="p-3 w-1/4">Stock (Quantity) *</th>
-                            <th className="p-3 w-12 text-center font-normal text-muted-foreground">Action</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {sizes.map((row) => (
-                            <tr key={row.id} className="border-b border-border last:border-b-0 hover:bg-muted/5">
-                              <td className="p-3 font-semibold uppercase text-foreground/90">
-                                {row.name}
-                              </td>
-                              <td className="p-2">
-                                <Input
-                                  type="number"
-                                  placeholder="0"
-                                  value={row.price}
-                                  onChange={(e) => handleUpdateSize(row.id, "price", e.target.value === "" ? "" : Number(e.target.value))}
-                                  className="h-8 rounded-none border border-input bg-background/50 text-xs shadow-none"
-                                />
-                              </td>
-                              <td className="p-2">
-                                <Input
-                                  type="number"
-                                  placeholder="0"
-                                  value={row.stock}
-                                  onChange={(e) => handleUpdateSize(row.id, "stock", e.target.value === "" ? "" : Number(e.target.value))}
-                                  className="h-8 rounded-none border border-input bg-background/50 text-xs shadow-none"
-                                />
-                              </td>
-                              <td className="p-2 text-center">
-                                <button
-                                  type="button"
-                                  onClick={() => handleRemoveSize(row.id)}
-                                  className="h-8 w-8 bg-destructive/10 text-destructive hover:bg-destructive hover:text-destructive-foreground flex items-center justify-center rounded-none transition-colors mx-auto"
-                                >
-                                  <Trash2 className="h-3.5 w-3.5" />
-                                </button>
-                              </td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
-                  )}
-                </div>
+                )}
               </div>
             )}
 
