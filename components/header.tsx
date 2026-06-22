@@ -71,10 +71,7 @@ export function Header() {
               width={32}
               height={32}
               className="w-10 h-10 object-contain"
-              style={{
-                mixBlendMode: "var(--logo-blend-mode, multiply)" as any,
-                filter: "var(--logo-filter, none)" as any,
-              }}
+              style={{ mixBlendMode: "multiply" }}
             />
             <div
               className="font-semibold"
