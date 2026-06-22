@@ -155,6 +155,80 @@ export default function Home() {
           </div>
         </section>
 
+        {/* Product Grid */}
+        <section className="py-[var(--ef-section-padding)] px-[var(--ef-container-padding-x)] max-w-[var(--ef-container-max)] mx-auto">
+          <div className="flex justify-between items-end mb-12">
+            <h2 className="font-headline-section text-headline-section">Our bestsellers.</h2>
+            <Link className="font-label-caps text-label-caps text-primary border-b border-primary pb-1 hover:opacity-80 transition-all" href="/shop">VIEW ALL PRODUCTS</Link>
+          </div>
+          {loadingBestsellers ? (
+            <div className="text-center py-12 text-sm text-muted-foreground uppercase tracking-wider font-semibold">
+              Loading bestsellers...
+            </div>
+          ) : bestsellers.length === 0 ? (
+            <div className="text-center py-12 text-sm text-muted-foreground uppercase tracking-wider font-semibold">
+              No bestsellers found.
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-[var(--ef-gutter)]">
+              {bestsellers.map((product) => (
+                <Link key={product.id} href={`/products/${product.slug}`} className="group flex flex-col border-0 shadow-none bg-transparent rounded-none">
+                  <Card className="border-0 shadow-none bg-transparent rounded-none flex-1 flex flex-col">
+                    <CardContent className="p-0 flex-grow flex flex-col">
+                      <div className="aspect-[3/4] bg-accent rounded-[6px] border border-border overflow-hidden mb-[var(--ef-stack-md)] relative">
+                        {product.primary_image ? (
+                          <img
+                            alt={product.name}
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                            src={product.primary_image}
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center bg-muted/40">
+                            <span className="material-symbols-outlined text-4xl text-muted-foreground">image</span>
+                          </div>
+                        )}
+                      </div>
+                      <CardTitle className="font-headline-card text-headline-card mb-1">{product.name}</CardTitle>
+                      <p className="font-body-main text-muted-foreground">
+                        {product.sale_price && product.sale_price < product.base_price ? (
+                          <>
+                            <span className="text-foreground font-semibold">Rs. {product.sale_price.toLocaleString()}</span>
+                            <span className="line-through text-muted-foreground ml-2 text-xs">Rs. {product.base_price.toLocaleString()}</span>
+                          </>
+                        ) : (
+                          <span>Rs. {product.base_price.toLocaleString()}</span>
+                        )}
+                      </p>
+                    </CardContent>
+                  </Card>
+                </Link>
+              ))}
+            </div>
+          )}
+        </section>
+
+        {/* Value Props */}
+        <section className="py-[var(--ef-section-padding)] px-[var(--ef-container-padding-x)] max-w-[var(--ef-container-max)] mx-auto border-b border-border">
+          <div className="grid md:grid-cols-3 gap-12 text-center">
+            <ValuePropCard
+              icon="schedule"
+              title="DESIGNED FOR LONG HOURS"
+              description="Engineered for endurance — every angle, curve, and adjustment designed to keep you at your best, hour after hour."
+            />
+            <ValuePropCard
+              icon="shield"
+              title="BUILT TO LAST"
+              description="Premium-grade steel frames and an 18mm plywood surface — built to withstand the demands of daily use, year after year."
+            />
+            <ValuePropCard
+              icon="local_shipping"
+              title="DELIVERED ACROSS NEPAL"
+              description="
+We deliver to your doorstep across Nepal — our team on hand to set you up, zero hassle."
+            />
+          </div>
+        </section>
+
         {/* Featured Product */}
         <section className="py-[var(--ef-section-padding)] bg-accent">
           <div className="max-w-[var(--ef-container-max)] mx-auto px-[var(--ef-container-padding-x)]">
@@ -220,80 +294,6 @@ export default function Home() {
               </CardContent>
             </Card>
           </div>
-        </section>
-
-        {/* Value Props */}
-        <section className="py-[var(--ef-section-padding)] px-[var(--ef-container-padding-x)] max-w-[var(--ef-container-max)] mx-auto border-b border-border">
-          <div className="grid md:grid-cols-3 gap-12 text-center">
-            <ValuePropCard
-              icon="schedule"
-              title="DESIGNED FOR LONG HOURS"
-              description="Engineered for endurance — every angle, curve, and adjustment designed to keep you at your best, hour after hour."
-            />
-            <ValuePropCard
-              icon="shield"
-              title="BUILT TO LAST"
-              description="Premium-grade steel frames and an 18mm plywood surface — built to withstand the demands of daily use, year after year."
-            />
-            <ValuePropCard
-              icon="local_shipping"
-              title="DELIVERED ACROSS NEPAL"
-              description="
-We deliver to your doorstep across Nepal — our team on hand to set you up, zero hassle."
-            />
-          </div>
-        </section>
-
-        {/* Product Grid */}
-        <section className="py-[var(--ef-section-padding)] px-[var(--ef-container-padding-x)] max-w-[var(--ef-container-max)] mx-auto">
-          <div className="flex justify-between items-end mb-12">
-            <h2 className="font-headline-section text-headline-section">Our bestsellers.</h2>
-            <Link className="font-label-caps text-label-caps text-primary border-b border-primary pb-1 hover:opacity-80 transition-all" href="/shop">VIEW ALL PRODUCTS</Link>
-          </div>
-          {loadingBestsellers ? (
-            <div className="text-center py-12 text-sm text-muted-foreground uppercase tracking-wider font-semibold">
-              Loading bestsellers...
-            </div>
-          ) : bestsellers.length === 0 ? (
-            <div className="text-center py-12 text-sm text-muted-foreground uppercase tracking-wider font-semibold">
-              No bestsellers found.
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-[var(--ef-gutter)]">
-              {bestsellers.map((product) => (
-                <Link key={product.id} href={`/products/${product.slug}`} className="group flex flex-col border-0 shadow-none bg-transparent rounded-none">
-                  <Card className="border-0 shadow-none bg-transparent rounded-none flex-1 flex flex-col">
-                    <CardContent className="p-0 flex-grow flex flex-col">
-                      <div className="aspect-[3/4] bg-accent rounded-[6px] border border-border overflow-hidden mb-[var(--ef-stack-md)] relative">
-                        {product.primary_image ? (
-                          <img
-                            alt={product.name}
-                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                            src={product.primary_image}
-                          />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center bg-muted/40">
-                            <span className="material-symbols-outlined text-4xl text-muted-foreground">image</span>
-                          </div>
-                        )}
-                      </div>
-                      <CardTitle className="font-headline-card text-headline-card mb-1">{product.name}</CardTitle>
-                      <p className="font-body-main text-muted-foreground">
-                        {product.sale_price && product.sale_price < product.base_price ? (
-                          <>
-                            <span className="text-foreground font-semibold">Rs. {product.sale_price.toLocaleString()}</span>
-                            <span className="line-through text-muted-foreground ml-2 text-xs">Rs. {product.base_price.toLocaleString()}</span>
-                          </>
-                        ) : (
-                          <span>Rs. {product.base_price.toLocaleString()}</span>
-                        )}
-                      </p>
-                    </CardContent>
-                  </Card>
-                </Link>
-              ))}
-            </div>
-          )}
         </section>
 
         {/* Newsletter */}

@@ -37,6 +37,8 @@
   --sidebar-accent-foreground: #1c1c19;
   --sidebar-border: #c0c9c2;
   --sidebar-ring: #114734;
+  --logo-blend-mode: multiply;
+  --logo-filter: none;
 }
 
 .dark {
@@ -72,6 +74,8 @@
   --sidebar-accent-foreground: #f4f0eb;
   --sidebar-border: #707973;
   --sidebar-ring: #9cd2b8;
+  --logo-blend-mode: screen;
+  --logo-filter: invert(1);
 }
 
 @theme inline {

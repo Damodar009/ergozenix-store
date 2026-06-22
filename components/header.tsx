@@ -59,7 +59,7 @@ export function Header() {
   }
 
   return (
-    <header className="bg-[var(--ef-surface-container-lowest)] sticky top-0 z-50 border-b border-[var(--ef-outline-variant)]">
+    <header className="bg-card sticky top-0 z-50 border-b border-border">
       <div className="flex justify-between items-center h-[64px] w-full px-8 md:px-12 lg:px-16">
 
         {/* ── Left: Logo ── */}
@@ -71,7 +71,10 @@ export function Header() {
               width={32}
               height={32}
               className="w-10 h-10 object-contain"
-              style={{ mixBlendMode: "multiply" }}
+              style={{
+                mixBlendMode: "var(--logo-blend-mode, multiply)" as any,
+                filter: "var(--logo-filter, none)" as any,
+              }}
             />
             <div
               className="font-semibold"
