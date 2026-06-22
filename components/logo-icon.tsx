@@ -10,7 +10,14 @@ type LogoIconProps = {
 
 export function LogoIcon({ className }: LogoIconProps) {
   return (
-    <Image src="/placeholder-logo.svg" alt="ErgoZenix Store" width={24} height={24} className={cn("rounded", className)} />
+    <Image
+      src="/logo_v2.1.png"
+      alt="ErgoZenix Store"
+      width={24}
+      height={24}
+      className={cn("object-contain", className)}
+      style={{ mixBlendMode: "multiply" }}
+    />
   )
 }
 
