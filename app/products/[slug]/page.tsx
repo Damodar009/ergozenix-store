@@ -559,16 +559,16 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
                 )}
               </div>
 
-              <p className="font-headline-section text-[20px] leading-[1.4] font-medium text-secondary">
+              <p className="font-headline-section text-[22px] leading-[1.4] font-medium text-foreground">
                 {activeVariant ? (
                   <span>Rs. {(activeVariant.variant_price ?? product.base_price).toLocaleString()}</span>
                 ) : product.sale_price && product.sale_price < product.base_price ? (
-                  <>
-                    <span>Rs. {product.sale_price.toLocaleString()}</span>
-                    <span className="ml-3 line-through text-muted-foreground text-[16px]">
+                  <span className="flex items-center gap-3">
+                    <span className="text-destructive font-bold">Rs. {product.sale_price.toLocaleString()}</span>
+                    <span className="line-through text-muted-foreground text-[16px]">
                       Rs. {product.base_price.toLocaleString()}
                     </span>
-                  </>
+                  </span>
                 ) : (
                   <span>Rs. {product.base_price.toLocaleString()}</span>
                 )}
