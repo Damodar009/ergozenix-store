@@ -21,7 +21,7 @@ const DESK_FEATURES: Feature[] = [
     id: 1,
     title: "Premium 18mm Tabletop",
     description: "Double-refined premium plywood core with a sustainable wood veneer, built to handle heavy setups without any sag.",
-    image: "https://images.unsplash.com/photo-1533090161767-e6ffed986c88?auto=format&fit=crop&w=1200&q=80",
+    image: "https://tdwhzskyljlypfffrghe.supabase.co/storage/v1/object/public/products/plywood-1782213186849.jpg",
     icon: Layers,
     specs: [
       { label: "Core Material", value: "Double-Refined Plywood" },
@@ -34,7 +34,7 @@ const DESK_FEATURES: Feature[] = [
     id: 2,
     title: "Silent Dual Motors",
     description: "Whisper-quiet dual-motor lift system providing smooth height adjustments at 38mm/s with built-in anti-collision safety.",
-    image: "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&w=1200&q=80",
+    image: "https://tdwhzskyljlypfffrghe.supabase.co/storage/v1/object/public/products/desk-frame2-1782214472780.png",
     icon: Zap,
     specs: [
       { label: "Motor Count", value: "Dual Premium Motors" },
@@ -47,7 +47,7 @@ const DESK_FEATURES: Feature[] = [
     id: 3,
     title: "Smart Control Handset",
     description: "Programmable digital handset featuring 3 memory height presets and a real-time digital height display.",
-    image: "https://images.unsplash.com/photo-1555664424-778a1e5e1b48?auto=format&fit=crop&w=1200&q=80",
+    image: "https://tdwhzskyljlypfffrghe.supabase.co/storage/v1/object/public/products/controller-image-edited-1782216198817.png",
     icon: Cpu,
     specs: [
       { label: "Memory Presets", value: "3 Memory Presets" },
@@ -60,7 +60,7 @@ const DESK_FEATURES: Feature[] = [
     id: 4,
     title: "Heavy Steel Frame",
     description: "Industrial-grade powder-coated steel legs, engineered for maximum stability even at full height extension.",
-    image: "https://images.unsplash.com/photo-1504307651254-35680f356dfd?auto=format&fit=crop&w=1200&q=80",
+    image: "https://tdwhzskyljlypfffrghe.supabase.co/storage/v1/object/public/products/desk-frame2-1782214472780.png",
     icon: Shield,
     specs: [
       { label: "Frame Material", value: "Powder-Coated Steel" },
@@ -74,7 +74,7 @@ const DESK_FEATURES: Feature[] = [
 export function DeskAnatomy() {
   return (
     <section className="py-[var(--ef-section-padding)] bg-background">
-      
+
       {/* Section Header */}
       <div className="text-center max-w-2xl mx-auto px-[var(--ef-container-padding-x)] space-y-3 mb-16">
         <span className="font-label-caps text-label-caps text-primary tracking-[3px] block">
@@ -108,18 +108,16 @@ export function DeskAnatomy() {
 
               {/* Faded Editorial Overlay: Responsive Gradient */}
               <div
-                className={`absolute inset-0 bg-gradient-to-t from-black/95 via-black/85 to-black/40 z-10 transition-opacity duration-300 group-hover:via-black/90 ${
-                  isEven
-                    ? "md:bg-gradient-to-r md:from-black/95 md:via-black/80 md:to-black/30"
-                    : "md:bg-gradient-to-l md:from-black/95 md:via-black/80 md:to-black/30"
-                }`}
+                className={`absolute inset-0 bg-gradient-to-t from-black/95 via-black/85 to-black/40 z-10 transition-opacity duration-300 group-hover:via-black/90 ${isEven
+                  ? "md:bg-gradient-to-r md:from-black/95 md:via-black/80 md:to-black/30"
+                  : "md:bg-gradient-to-l md:from-black/95 md:via-black/80 md:to-black/30"
+                  }`}
               />
 
               {/* Centered Content Container */}
               <div
-                className={`relative z-20 w-full max-w-[var(--ef-container-max)] mx-auto px-[var(--ef-container-padding-x)] flex ${
-                  isEven ? "justify-start" : "md:justify-end justify-start"
-                }`}
+                className={`relative z-20 w-full max-w-[var(--ef-container-max)] mx-auto px-[var(--ef-container-padding-x)] flex ${isEven ? "justify-start" : "md:justify-end justify-start"
+                  }`}
               >
                 {/* Inner Text Block */}
                 <div className="w-full md:max-w-lg lg:max-w-xl text-left flex flex-col gap-5 text-white py-12 md:py-20">
