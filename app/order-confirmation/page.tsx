@@ -4,8 +4,8 @@ import { Suspense } from "react";
 export default function Page() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen flex items-center justify-center bg-[#f7f3ee]">
-        <p className="text-[15px] font-light text-[#5e5e5c]">Loading order confirmation…</p>
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <p className="text-[15px] font-light text-muted-foreground">Loading order confirmation…</p>
       </div>
     }>
       <OrderConfirmationPage />

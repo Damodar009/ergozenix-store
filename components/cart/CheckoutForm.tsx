@@ -95,7 +95,7 @@ const CheckoutForm: FC = () => {
           letter-spacing: 2px;
           font-weight: 600;
           text-transform: uppercase;
-          color: #5e5e5c;
+          color: var(--muted-foreground);
           display: block;
           margin-bottom: 8px;
         }
@@ -103,36 +103,36 @@ const CheckoutForm: FC = () => {
           width: 100%;
           background: transparent;
           border: none;
-          border-bottom: 1px solid #c0c9c2;
+          border-bottom: 1px solid var(--border);
           padding: 12px 0;
           font-family: 'Hanken Grotesk', sans-serif;
           font-size: 15px;
           font-weight: 300;
-          color: #1c1c19;
+          color: var(--foreground);
           outline: none;
           transition: border-color 0.2s;
         }
         .checkout-input:focus {
-          border-bottom-color: #114734;
+          border-bottom-color: var(--primary);
         }
         .checkout-input::placeholder {
-          color: #707973;
+          color: var(--muted-foreground);
         }
         .checkout-select-trigger {
           width: 100%;
           background: transparent !important;
           border: none !important;
-          border-bottom: 1px solid #c0c9c2 !important;
+          border-bottom: 1px solid var(--border) !important;
           border-radius: 0 !important;
           padding: 12px 0 !important;
           font-family: 'Hanken Grotesk', sans-serif !important;
           font-size: 15px !important;
           font-weight: 300 !important;
-          color: #1c1c19 !important;
+          color: var(--foreground) !important;
           box-shadow: none !important;
         }
         .checkout-select-trigger:focus {
-          border-bottom-color: #114734 !important;
+          border-bottom-color: var(--primary) !important;
           ring: none !important;
         }
         .no-scrollbar::-webkit-scrollbar { display: none; }
@@ -146,14 +146,13 @@ const CheckoutForm: FC = () => {
         {/* Progress Indicator */}
         <nav className="flex items-center gap-4 mb-12 overflow-x-auto no-scrollbar">
           <span
-            className="text-[11px] leading-[1] tracking-[2px] font-semibold uppercase"
-            style={{ color: "#114734" }}
+            className="text-[11px] leading-[1] tracking-[2px] font-semibold uppercase text-primary"
           >
             Information
           </span>
-          <ChevronRight className="w-3.5 h-3.5 text-[#c0c9c2] shrink-0" />
+          <ChevronRight className="w-3.5 h-3.5 text-border shrink-0" />
           <span
-            className="text-[11px] leading-[1] tracking-[2px] font-semibold uppercase text-[#5e5e5c]"
+            className="text-[11px] leading-[1] tracking-[2px] font-semibold uppercase text-muted-foreground"
           >
             Confirmation
           </span>
@@ -167,8 +166,8 @@ const CheckoutForm: FC = () => {
               <section className="space-y-8">
                 {/* Shipping Address */}
                 <h2
-                  className="text-[36px] leading-[1.3] font-normal"
-                  style={{ fontFamily: "'Playfair Display', serif", color: "#1c1c19" }}
+                  className="text-[36px] leading-[1.3] font-normal text-foreground"
+                  style={{ fontFamily: "'Playfair Display', serif" }}
                 >
                   Shipping Address
                 </h2>
@@ -202,15 +201,15 @@ const CheckoutForm: FC = () => {
                   <div className="md:col-span-1">
                     <label className="checkout-label">PROVINCE</label>
                     <Select onValueChange={handleProvinceChange} value={province} required>
-                      <SelectTrigger className="checkout-select-trigger w-full bg-transparent border-0 border-b border-[#c0c9c2] rounded-none shadow-none focus:ring-0 focus:border-b-[#114734] px-0 h-auto py-3 text-[15px] font-light text-[#1c1c19]">
+                      <SelectTrigger className="checkout-select-trigger w-full bg-transparent border-0 border-b border-border rounded-none shadow-none focus:ring-0 focus:border-b-primary px-0 h-auto py-3 text-[15px] font-light text-foreground">
                         <SelectValue placeholder="Select Province" />
                       </SelectTrigger>
-                      <SelectContent className="bg-[#fdf9f3] border border-[#c0c9c2]">
+                      <SelectContent className="bg-card border border-border">
                         {PROVINCES.map((p) => (
                           <SelectItem
                             key={p}
                             value={p}
-                            className="text-[14px] font-light text-[#1c1c19] focus:bg-[#f1ede8]"
+                            className="text-[14px] font-light text-foreground focus:bg-accent"
                             style={{ fontFamily: "'Hanken Grotesk', sans-serif" }}
                           >
                             {p}
@@ -229,16 +228,16 @@ const CheckoutForm: FC = () => {
                       disabled={!province}
                       required
                     >
-                      <SelectTrigger className="w-full bg-transparent border-0 border-b border-[#c0c9c2] rounded-none shadow-none focus:ring-0 px-0 h-auto py-3 text-[15px] font-light text-[#1c1c19] disabled:opacity-50">
+                      <SelectTrigger className="w-full bg-transparent border-0 border-b border-border rounded-none shadow-none focus:ring-0 px-0 h-auto py-3 text-[15px] font-light text-foreground disabled:opacity-50">
                         <SelectValue placeholder="Select District" />
                       </SelectTrigger>
-                      <SelectContent className="bg-[#fdf9f3] border border-[#c0c9c2]">
+                      <SelectContent className="bg-card border border-border">
                         {province &&
                           DISTRICTS[province as keyof typeof DISTRICTS]?.map((d) => (
                             <SelectItem
                               key={d}
                               value={d}
-                              className="text-[14px] font-light text-[#1c1c19] focus:bg-[#f1ede8]"
+                              className="text-[14px] font-light text-foreground focus:bg-accent"
                               style={{ fontFamily: "'Hanken Grotesk', sans-serif" }}
                             >
                               {d}
@@ -312,7 +311,7 @@ const CheckoutForm: FC = () => {
                 <button
                   type="button"
                   onClick={() => router.push("/")}
-                  className="flex items-center gap-2 text-[#5e5e5c] hover:text-[#1c1c19] transition-colors order-2 md:order-1"
+                  className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors order-2 md:order-1"
                   style={{ fontFamily: "'Hanken Grotesk', sans-serif" }}
                 >
                   <ChevronLeft className="w-4 h-4" />
@@ -324,7 +323,7 @@ const CheckoutForm: FC = () => {
                 <button
                   type="submit"
                   disabled={isSubmitting || items.length === 0}
-                  className="w-full md:w-auto bg-[#114734] text-white px-12 py-5 rounded-[4px] text-[11px] leading-[1] tracking-[2px] font-semibold uppercase hover:bg-[#2c5f4a] transition-all active:scale-[0.98] order-1 md:order-2 disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                  className="w-full md:w-auto bg-primary text-primary-foreground px-12 py-5 rounded-[4px] text-[11px] leading-[1] tracking-[2px] font-semibold uppercase hover:bg-primary/90 transition-all active:scale-[0.98] order-1 md:order-2 disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                   style={{ fontFamily: "'Hanken Grotesk', sans-serif" }}
                 >
                   {isSubmitting ? (
@@ -343,10 +342,10 @@ const CheckoutForm: FC = () => {
             <div className="md:w-[42%]">
               <div className="md:sticky md:top-28 space-y-8">
                 {/* Order Summary Card */}
-                <div className="bg-[#f7f3ee] rounded-lg p-8 border border-[#c0c9c2] space-y-8">
+                <div className="bg-accent rounded-lg p-8 border border-border space-y-8">
                   <h3
-                    className="text-[20px] leading-[1.4] font-medium"
-                    style={{ fontFamily: "'Playfair Display', serif", color: "#1c1c19" }}
+                    className="text-[20px] leading-[1.4] font-medium text-foreground"
+                    style={{ fontFamily: "'Playfair Display', serif" }}
                   >
                     Order Summary
                   </h3>
@@ -355,7 +354,7 @@ const CheckoutForm: FC = () => {
                   <div className="space-y-6">
                     {items.length === 0 ? (
                       <p
-                        className="text-[15px] font-light text-[#707973]"
+                        className="text-[15px] font-light text-muted-foreground"
                         style={{ fontFamily: "'Hanken Grotesk', sans-serif" }}
                       >
                         Your cart is empty.
@@ -364,7 +363,7 @@ const CheckoutForm: FC = () => {
                       items.map((item) => (
                         <div key={item.id} className="flex gap-4 items-start">
                           {/* Thumbnail */}
-                          <div className="relative w-20 h-20 bg-white border border-[#c0c9c2] rounded-lg overflow-hidden shrink-0">
+                          <div className="relative w-20 h-20 bg-card border border-border rounded-lg overflow-hidden shrink-0">
                             {item.product?.image_url ? (
                               <img
                                 src={item.product.image_url}
@@ -372,11 +371,11 @@ const CheckoutForm: FC = () => {
                                 className="w-full h-full object-cover"
                               />
                             ) : (
-                              <div className="w-full h-full bg-[#ece7e2] flex items-center justify-center">
-                                <span className="text-[#707973] text-xs">No img</span>
+                              <div className="w-full h-full bg-muted flex items-center justify-center">
+                                <span className="text-muted-foreground text-xs">No img</span>
                               </div>
                             )}
-                            <span className="absolute -top-1 -right-1 bg-[#5e5e5c] text-white text-[10px] w-5 h-5 flex items-center justify-center rounded-full font-bold">
+                            <span className="absolute -top-1 -right-1 bg-muted-foreground text-white text-[10px] w-5 h-5 flex items-center justify-center rounded-full font-bold">
                               {item.quantity}
                             </span>
                           </div>
@@ -384,14 +383,14 @@ const CheckoutForm: FC = () => {
                           {/* Info */}
                           <div className="flex-grow">
                             <p
-                              className="text-[15px] font-semibold text-[#1c1c19] break-words"
+                              className="text-[15px] font-semibold text-foreground break-words"
                               style={{ fontFamily: "'Hanken Grotesk', sans-serif" }}
                             >
                               {item.product?.name || "Product"}
                             </p>
                             {item.attributes && item.attributes.length > 0 && (
                               <p
-                                className="text-[11px] tracking-[2px] uppercase text-[#5e5e5c] mt-0.5"
+                                className="text-[11px] tracking-[2px] uppercase text-muted-foreground mt-0.5"
                                 style={{ fontFamily: "'Hanken Grotesk', sans-serif" }}
                               >
                                 {item.attributes.map((a: any) => a.value).join(" / ")}
@@ -401,7 +400,7 @@ const CheckoutForm: FC = () => {
 
                           {/* Price */}
                           <span
-                            className="text-[15px] font-semibold text-[#1c1c19] shrink-0"
+                            className="text-[15px] font-semibold text-foreground shrink-0"
                             style={{ fontFamily: "'Hanken Grotesk', sans-serif" }}
                           >
                             Rs. {((item.product?.price || 0) * item.quantity).toLocaleString()}
@@ -412,8 +411,8 @@ const CheckoutForm: FC = () => {
                   </div>
 
                   {/* Totals */}
-                  <div className="space-y-3 pt-4 border-t border-[#c0c9c2]">
-                    <div className="flex justify-between text-[#5e5e5c]">
+                  <div className="space-y-3 pt-4 border-t border-border">
+                    <div className="flex justify-between text-muted-foreground">
                       <span
                         className="text-[15px] font-light"
                         style={{ fontFamily: "'Hanken Grotesk', sans-serif" }}
@@ -427,7 +426,7 @@ const CheckoutForm: FC = () => {
                         Rs. {cartTotal.toLocaleString()}
                       </span>
                     </div>
-                    <div className="flex justify-between text-[#5e5e5c]">
+                    <div className="flex justify-between text-muted-foreground">
                       <span
                         className="text-[15px] font-light"
                         style={{ fontFamily: "'Hanken Grotesk', sans-serif" }}
@@ -442,22 +441,22 @@ const CheckoutForm: FC = () => {
                       </span>
                     </div>
 
-                    <div className="flex justify-between items-baseline pt-4 border-t border-[#c0c9c2]">
+                    <div className="flex justify-between items-baseline pt-4 border-t border-border">
                       <span
-                        className="text-[20px] leading-[1.4] font-medium"
-                        style={{ fontFamily: "'Playfair Display', serif", color: "#1c1c19" }}
+                        className="text-[20px] leading-[1.4] font-medium text-foreground"
+                        style={{ fontFamily: "'Playfair Display', serif" }}
                       >
                         Total
                       </span>
                       <div className="text-right">
                         <span
-                          className="text-[11px] text-[#5e5e5c] tracking-[2px] font-semibold uppercase mr-2"
+                          className="text-[11px] text-muted-foreground tracking-[2px] font-semibold uppercase mr-2"
                           style={{ fontFamily: "'Hanken Grotesk', sans-serif" }}
                         >
                           NPR
                         </span>
                         <span
-                          className="text-[32px] leading-[1.3] font-normal text-[#1c1c19]"
+                          className="text-[32px] leading-[1.3] font-normal text-foreground"
                           style={{ fontFamily: "'Playfair Display', serif" }}
                         >
                           {total.toLocaleString()}
@@ -468,30 +467,30 @@ const CheckoutForm: FC = () => {
                 </div>
 
                 {/* Payment Method Card */}
-                <div className="bg-[#f7f3ee] rounded-lg p-8 border border-[#c0c9c2] space-y-6">
+                <div className="bg-accent rounded-lg p-8 border border-border space-y-6">
                   <h3
-                    className="text-[20px] leading-[1.4] font-medium"
-                    style={{ fontFamily: "'Playfair Display', serif", color: "#1c1c19" }}
+                    className="text-[20px] leading-[1.4] font-medium text-foreground"
+                    style={{ fontFamily: "'Playfair Display', serif" }}
                   >
                     Payment
                   </h3>
 
                   <div className="space-y-4">
-                    <div className="p-6 rounded-lg border border-[#114734] bg-[#f1ede8] flex items-start gap-4">
+                    <div className="p-6 rounded-lg border border-primary bg-muted flex items-start gap-4">
                       <div className="flex items-center h-5 mt-0.5">
                         <input
                           id="payment-bank"
                           name="paymentMethod"
                           type="radio"
                           defaultChecked
-                          className="h-4.5 w-4.5 accent-[#114734] cursor-pointer"
+                          className="h-4.5 w-4.5 accent-primary cursor-pointer"
                         />
                       </div>
                       <div className="space-y-2">
-                        <label htmlFor="payment-bank" className="font-semibold text-[15px] text-[#1c1c19] cursor-pointer block">
+                        <label htmlFor="payment-bank" className="font-semibold text-[15px] text-foreground cursor-pointer block">
                           Direct Bank Transfer
                         </label>
-                        <p className="text-[13px] text-[#5e5e5c] font-light leading-relaxed">
+                        <p className="text-[13px] text-muted-foreground font-light leading-relaxed">
 
                           To complete your purchase, kindly transfer the payment to our bank account, quoting your Order ID or Name as the reference. Please note that dispatch will only occur once the payment has been confirmed and cleared.                        </p>
                       </div>

@@ -65,10 +65,10 @@ function StarRating({
   return (
     <div className={`flex ${className}`}>
       {Array.from({ length: fullStars }).map((_, i) => (
-        <MIcon key={`full-${i}`} name="star" filled className="text-[var(--ef-primary)]" />
+        <MIcon key={`full-${i}`} name="star" filled className="text-primary" />
       ))}
       {hasHalf && (
-        <MIcon name="star_half" filled className="text-[var(--ef-primary)]" />
+        <MIcon name="star_half" filled className="text-primary" />
       )}
     </div>
   )
@@ -380,13 +380,12 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
   /* ─── Loading State ─── */
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: "var(--ef-background)" }}>
+      <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="text-center">
           <div
-            className="animate-spin rounded-full h-12 w-12 border-b-2 mx-auto"
-            style={{ borderColor: "var(--ef-primary)" }}
+            className="animate-spin rounded-full h-12 w-12 border-b-2 mx-auto border-primary"
           />
-          <p className="mt-4" style={{ color: "var(--ef-on-surface-variant)", fontFamily: "var(--font-hanken-grotesk)" }}>
+          <p className="mt-4 text-muted-foreground" style={{ fontFamily: "var(--font-hanken-grotesk)" }}>
             Loading product...
           </p>
         </div>
@@ -397,11 +396,11 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
   /* ─── Not Found State ─── */
   if (!product) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ background: "var(--ef-background)" }}>
+      <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="text-center">
           <h1
-            className="text-2xl font-bold mb-4"
-            style={{ color: "var(--ef-on-surface)", fontFamily: "var(--font-playfair-display)" }}
+            className="text-2xl font-bold mb-4 text-foreground"
+            style={{ fontFamily: "var(--font-playfair-display)" }}
           >
             Product Not Found
           </h1>
@@ -436,10 +435,8 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
 
   return (
     <div
-      className="min-h-screen ef-scrollbar"
+      className="min-h-screen bg-background text-foreground ef-scrollbar"
       style={{
-        background: "var(--ef-background)",
-        color: "var(--ef-on-surface)",
         fontFamily: "var(--font-hanken-grotesk)",
       }}
     >
@@ -486,7 +483,7 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
                   <img
                     src={mainImage}
                     alt={product.name}
-                    className="w-full h-full object-cover mix-blend-multiply"
+                    className="w-full h-full object-cover mix-blend-multiply dark:mix-blend-normal"
                   />
                 )
               ) : (

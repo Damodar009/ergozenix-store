@@ -76,12 +76,12 @@ export default function OrderConfirmationPage() {
   if (loading) {
     return (
       <div
-        className="min-h-screen flex items-center justify-center bg-[#f7f3ee]"
+        className="min-h-screen flex items-center justify-center bg-background"
         style={{ fontFamily: "'Hanken Grotesk', sans-serif" }}
       >
         <div className="flex flex-col items-center gap-4">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#114734]"></div>
-          <p className="text-[15px] font-light text-[#5e5e5c]">Loading order details…</p>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+          <p className="text-[15px] font-light text-muted-foreground">Loading order details…</p>
         </div>
       </div>
     );
@@ -90,18 +90,18 @@ export default function OrderConfirmationPage() {
   if (error && !order) {
     return (
       <div
-        className="min-h-screen flex flex-col items-center justify-center bg-[#f7f3ee] text-center px-6"
+        className="min-h-screen flex flex-col items-center justify-center bg-background text-center px-6"
         style={{ fontFamily: "'Hanken Grotesk', sans-serif" }}
       >
         <p className="font-headline-card text-[20px] font-medium text-foreground mb-2">
           Unable to Load Order
         </p>
-        <p className="text-[15px] font-light text-[#5e5e5c] max-w-sm mb-8">
+        <p className="text-[15px] font-light text-muted-foreground max-w-sm mb-8">
           {error}
         </p>
         <Link
           href="/"
-          className="bg-[#2c5f4a] text-[#ffffff] font-label-caps text-[11px] font-semibold tracking-[2px] px-8 py-4 rounded uppercase transition-colors hover:bg-[#114734]"
+          className="bg-primary text-primary-foreground font-label-caps text-[11px] font-semibold tracking-[2px] px-8 py-4 rounded uppercase transition-colors hover:bg-primary/90"
         >
           Go to Home
         </Link>
@@ -112,7 +112,7 @@ export default function OrderConfirmationPage() {
   if (!order) {
     return (
       <div
-        className="min-h-screen flex flex-col items-center justify-center bg-[#f7f3ee] text-center px-6"
+        className="min-h-screen flex flex-col items-center justify-center bg-background text-center px-6"
         style={{ fontFamily: "'Hanken Grotesk', sans-serif" }}
       >
         <p className="font-headline-card text-[20px] font-medium text-foreground mb-2">
@@ -120,7 +120,7 @@ export default function OrderConfirmationPage() {
         </p>
         <Link
           href="/"
-          className="bg-[#2c5f4a] text-[#ffffff] font-label-caps text-[11px] font-semibold tracking-[2px] px-8 py-4 rounded uppercase transition-colors hover:bg-[#114734]"
+          className="bg-primary text-primary-foreground font-label-caps text-[11px] font-semibold tracking-[2px] px-8 py-4 rounded uppercase transition-colors hover:bg-primary/90"
         >
           Go to Home
         </Link>
@@ -148,8 +148,8 @@ export default function OrderConfirmationPage() {
 
       {/* Body background */}
       <div
-        className="min-h-screen"
-        style={{ backgroundColor: "#f7f3ee", color: "#1c1c19", fontFamily: "'Hanken Grotesk', sans-serif" }}
+        className="min-h-screen bg-background text-foreground"
+        style={{ fontFamily: "'Hanken Grotesk', sans-serif" }}
       >
         <main
           ref={mainRef}
@@ -158,18 +158,18 @@ export default function OrderConfirmationPage() {
         >
           {/* ── Success Indicator ── */}
           <div
-            className="w-14 h-14 rounded-full flex items-center justify-center mb-8 transition-transform duration-700 ease-out hover:scale-110"
-            style={{ border: "2px solid #2c5f4a" }}
+            className="w-14 h-14 rounded-full flex items-center justify-center mb-8 transition-transform duration-700 ease-out hover:scale-110 border-2 border-primary"
           >
             <svg
               width="32"
               height="32"
               viewBox="0 0 24 24"
               fill="none"
-              stroke="#2c5f4a"
+              stroke="currentColor"
               strokeWidth="1.5"
               strokeLinecap="round"
               strokeLinejoin="round"
+              className="text-primary"
             >
               <polyline points="20 6 9 17 4 12" />
             </svg>
@@ -177,53 +177,48 @@ export default function OrderConfirmationPage() {
 
           {/* ── Confirmation Header ── */}
           <h1
-            className="mb-4 italic font-normal"
+            className="mb-4 italic font-normal text-foreground"
             style={{
               fontFamily: "'Playfair Display', serif",
               fontSize: "36px",
               lineHeight: "1.3",
-              color: "#1c1c19",
             }}
           >
             Thank you, {firstName}.
           </h1>
 
           <p
-            className="mb-12"
+            className="mb-12 text-muted-foreground"
             style={{
               fontFamily: "'Hanken Grotesk', sans-serif",
               fontSize: "15px",
               lineHeight: "1.6",
               fontWeight: 300,
-              color: "#5e5e5c",
               maxWidth: "400px",
             }}
           >
             Your order{" "}
-            <span style={{ fontWeight: 500, color: "#1c1c19" }}>#{order.orderNumber}</span>{" "}
+            <span className="font-medium text-foreground">#{order.orderNumber}</span>{" "}
             has been placed.
           </p>
 
           {/* ── Order Summary Card ── */}
           <div
-            className="w-full mb-8 overflow-hidden"
+            className="w-full mb-8 overflow-hidden bg-card border border-border"
             style={{
-              backgroundColor: "#ffffff",
-              border: "1px solid #c0c9c2",
               borderRadius: "0.25rem",
             }}
           >
             <div className="p-8 text-left">
               {/* Card heading */}
               <h2
-                className="uppercase mb-4"
+                className="uppercase mb-4 text-muted-foreground"
                 style={{
                   fontFamily: "'Hanken Grotesk', sans-serif",
                   fontSize: "11px",
                   lineHeight: "1",
                   letterSpacing: "2px",
                   fontWeight: 600,
-                  color: "#404944",
                 }}
               >
                 Order Summary
@@ -235,7 +230,7 @@ export default function OrderConfirmationPage() {
                   <div
                     key={item.id}
                     className="flex items-center"
-                    style={{ gap: "16px", paddingTop: "8px", paddingBottom: "8px", borderBottom: "1px solid #f1ede8" }}
+                    style={{ gap: "16px", paddingTop: "8px", paddingBottom: "8px", borderBottom: "1px solid var(--border)" }}
                   >
                     {/* Thumbnail */}
                     <div
@@ -243,7 +238,7 @@ export default function OrderConfirmationPage() {
                       style={{
                         width: "64px",
                         height: "64px",
-                        backgroundColor: "#ece7e2",
+                        backgroundColor: "var(--muted)",
                         borderRadius: "0.125rem",
                       }}
                     >
@@ -256,7 +251,7 @@ export default function OrderConfirmationPage() {
                       ) : (
                         <div
                           className="w-full h-full flex items-center justify-center"
-                          style={{ color: "#707973", fontSize: "11px" }}
+                          style={{ color: "var(--muted-foreground)", fontSize: "11px" }}
                         >
                           No img
                         </div>
@@ -271,12 +266,12 @@ export default function OrderConfirmationPage() {
                           fontSize: "15px",
                           lineHeight: "1.6",
                           fontWeight: 400,
-                          color: "#1c1c19",
+                          color: "var(--foreground)",
                         }}
                       >
                         {item.name}
                         {item.quantity > 1 && (
-                          <span style={{ color: "#5e5e5c", fontWeight: 300 }}> × {item.quantity}</span>
+                          <span style={{ color: "var(--muted-foreground)", fontWeight: 300 }}> × {item.quantity}</span>
                         )}
                       </p>
                       {item.attributes && item.attributes.length > 0 && (
@@ -287,7 +282,7 @@ export default function OrderConfirmationPage() {
                             fontSize: "10px",
                             letterSpacing: "2px",
                             fontWeight: 600,
-                            color: "#404944",
+                            color: "var(--muted-foreground)",
                             marginTop: "2px",
                           }}
                         >
@@ -304,7 +299,7 @@ export default function OrderConfirmationPage() {
                           fontSize: "15px",
                           lineHeight: "1.6",
                           fontWeight: 300,
-                          color: "#1c1c19",
+                          color: "var(--foreground)",
                         }}
                       >
                         Rs. {(item.price * item.quantity).toLocaleString()}
@@ -317,7 +312,7 @@ export default function OrderConfirmationPage() {
               {/* Totals */}
               <div
                 style={{
-                  borderTop: "1px solid #c0c9c2",
+                  borderTop: "1px solid var(--border)",
                   paddingTop: "16px",
                   display: "flex",
                   flexDirection: "column",
@@ -331,7 +326,7 @@ export default function OrderConfirmationPage() {
                       fontSize: "15px",
                       lineHeight: "1.6",
                       fontWeight: 300,
-                      color: "#404944",
+                      color: "var(--muted-foreground)",
                     }}
                   >
                     Subtotal
@@ -342,7 +337,7 @@ export default function OrderConfirmationPage() {
                       fontSize: "15px",
                       lineHeight: "1.6",
                       fontWeight: 300,
-                      color: "#1c1c19",
+                      color: "var(--foreground)",
                     }}
                   >
                     Rs. {order.subtotal.toLocaleString()}
@@ -356,7 +351,7 @@ export default function OrderConfirmationPage() {
                       fontSize: "15px",
                       lineHeight: "1.6",
                       fontWeight: 300,
-                      color: "#404944",
+                      color: "var(--muted-foreground)",
                     }}
                   >
                     Shipping
@@ -367,7 +362,7 @@ export default function OrderConfirmationPage() {
                       fontSize: "15px",
                       lineHeight: "1.6",
                       fontWeight: 300,
-                      color: "#1c1c19",
+                      color: "var(--foreground)",
                     }}
                   >
                     Rs. {order.shipping.toLocaleString()}
@@ -379,14 +374,13 @@ export default function OrderConfirmationPage() {
                   style={{ paddingTop: "8px" }}
                 >
                   <span
-                    className="uppercase"
+                    className="uppercase text-foreground"
                     style={{
                       fontFamily: "'Hanken Grotesk', sans-serif",
                       fontSize: "11px",
                       lineHeight: "1",
                       letterSpacing: "2px",
                       fontWeight: 600,
-                      color: "#1c1c19",
                     }}
                   >
                     Total
@@ -397,7 +391,7 @@ export default function OrderConfirmationPage() {
                       fontSize: "18px",
                       lineHeight: "1.6",
                       fontWeight: 600,
-                      color: "#114734",
+                      color: "var(--primary)",
                     }}
                   >
                     Rs. {order.total.toLocaleString()}
@@ -414,23 +408,7 @@ export default function OrderConfirmationPage() {
           >
             <button
               onClick={() => router.push("/order-tracking")}
-              className="active:scale-95 transition-all duration-300"
-              style={{
-                backgroundColor: "#2c5f4a",
-                color: "#ffffff",
-                fontFamily: "'Hanken Grotesk', sans-serif",
-                fontSize: "11px",
-                lineHeight: "1",
-                letterSpacing: "2px",
-                fontWeight: 600,
-                padding: "16px 32px",
-                borderRadius: "0.25rem",
-                border: "none",
-                cursor: "pointer",
-                textTransform: "uppercase",
-              }}
-              onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#114734")}
-              onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "#2c5f4a")}
+              className="active:scale-95 transition-all duration-300 w-full sm:w-auto bg-primary text-primary-foreground font-label-caps text-[11px] font-semibold tracking-[2px] px-8 py-4 rounded uppercase hover:bg-primary/90 border border-transparent cursor-pointer"
             >
               Track Your Order
             </button>
@@ -439,23 +417,7 @@ export default function OrderConfirmationPage() {
               onClick={() => {
                 router.push("/");
               }}
-              className="active:scale-95 transition-all duration-300"
-              style={{
-                backgroundColor: "transparent",
-                color: "#1c1c19",
-                fontFamily: "'Hanken Grotesk', sans-serif",
-                fontSize: "11px",
-                lineHeight: "1",
-                letterSpacing: "2px",
-                fontWeight: 600,
-                padding: "16px 32px",
-                borderRadius: "0.25rem",
-                border: "1px solid #1c1c19",
-                cursor: "pointer",
-                textTransform: "uppercase",
-              }}
-              onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#ece7e2")}
-              onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "transparent")}
+              className="active:scale-95 transition-all duration-300 w-full sm:w-auto bg-transparent border border-foreground text-foreground font-label-caps text-[11px] font-semibold tracking-[2px] px-8 py-4 rounded uppercase hover:bg-muted cursor-pointer"
             >
               Continue Shopping
             </button>
@@ -464,27 +426,25 @@ export default function OrderConfirmationPage() {
           {/* ── Support Footer ── */}
           <footer
             className="w-full"
-            style={{ paddingTop: "32px", borderTop: "1px solid #c0c9c2" }}
+            style={{ paddingTop: "32px", borderTop: "1px solid var(--border)" }}
           >
             <p
+              className="text-muted-foreground"
               style={{
                 fontFamily: "'Hanken Grotesk', sans-serif",
                 fontSize: "13px",
                 lineHeight: "1.6",
                 fontWeight: 300,
-                color: "#404944",
               }}
             >
               Questions? Reach out to{" "}
               <a
                 href="mailto:ergozenix.store@gmail.com"
+                className="text-primary hover:underline transition-colors"
                 style={{
-                  color: "#114734",
                   textDecoration: "none",
                   textUnderlineOffset: "4px",
                 }}
-                onMouseEnter={(e) => (e.currentTarget.style.textDecoration = "underline")}
-                onMouseLeave={(e) => (e.currentTarget.style.textDecoration = "none")}
               >
                 ergozenix.store@gmail.com
               </a>

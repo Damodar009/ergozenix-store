@@ -10,29 +10,16 @@ import { subscribeToNewsletter } from "@/services/newsletter-service"
 import { ProductService } from "@/services/product-service"
 import type { ProductWithDetails, ProductCard } from "@/models/product"
 import { ValuePropCard } from "@/components/home/ValuePropCard"
+import { DeskAnatomy } from "@/components/home/DeskAnatomy"
 
 export default function Home() {
   const [email, setEmail] = useState("")
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle')
   const [message, setMessage] = useState("")
-  const [editorsPick, setEditorsPick] = useState<any>(null)
-  const [editorsPickProduct, setEditorsPickProduct] = useState<ProductWithDetails | null>(null)
   const [bestsellers, setBestsellers] = useState<ProductCard[]>([])
   const [loadingBestsellers, setLoadingBestsellers] = useState(true)
 
   useEffect(() => {
-    async function fetchPick() {
-      try {
-        const data = await ProductService.getActiveEditorsPick()
-        if (data) {
-          setEditorsPick(data.editorsPick)
-          setEditorsPickProduct(data.product)
-        }
-      } catch (err) {
-        console.error("Failed to load active editor's pick:", err)
-      }
-    }
-
     async function fetchBestsellers() {
       try {
         const data = await ProductService.getBestsellers(4)
@@ -44,7 +31,6 @@ export default function Home() {
       }
     }
 
-    fetchPick()
     fetchBestsellers()
   }, [])
 
@@ -92,8 +78,8 @@ export default function Home() {
               <Button variant="outline" size="ef">Learn More</Button>
             </div>
           </div>
-          <div className="w-full mt-24 md:px-[var(--ef-container-padding-x)] px-0 max-w-[var(--ef-container-max)]">
-            <div className="md:aspect-[21/9] aspect-[4/3] w-full bg-muted overflow-hidden md:rounded-[6px] rounded-none">
+          <div className="w-full mt-24">
+            <div className="md:aspect-[21/9] aspect-[4/3] w-full bg-muted overflow-hidden rounded-none">
               <img alt="Minimalist Ergoform Desk" className="w-full h-full object-cover grayscale-[20%] hover:scale-105 transition-transform duration-1000" src="https://tdwhzskyljlypfffrghe.supabase.co/storage/v1/object/public/products/horizental-1781379103725.jpg" />
             </div>
           </div>
@@ -207,8 +193,11 @@ export default function Home() {
           )}
         </section>
 
+        {/* Desk Anatomy Features Explorer */}
+        <DeskAnatomy />
+
         {/* Value Props */}
-        <section className="py-[var(--ef-section-padding)] px-[var(--ef-container-padding-x)] max-w-[var(--ef-container-max)] mx-auto border-b border-border">
+        <section className="py-[var(--ef-section-padding)] px-[var(--ef-container-padding-x)] max-w-[var(--ef-container-max)] mx-auto border-t border-border">
           <div className="grid md:grid-cols-3 gap-12 text-center">
             <ValuePropCard
               icon="schedule"
@@ -226,73 +215,6 @@ export default function Home() {
               description="
 We deliver to your doorstep across Nepal — our team on hand to set you up, zero hassle."
             />
-          </div>
-        </section>
-
-        {/* Featured Product */}
-        <section className="py-[var(--ef-section-padding)] bg-accent">
-          <div className="max-w-[var(--ef-container-max)] mx-auto px-[var(--ef-container-padding-x)]">
-            <Card className="bg-transparent border-0 shadow-none">
-              <CardContent className="p-0 grid md:grid-cols-2 gap-24 items-center">
-                <div className="relative max-w-[420px] mx-auto w-full">
-                  <div className="aspect-[4/5] bg-background rounded-[6px] overflow-hidden border border-border">
-                    <img
-                      alt={editorsPick?.custom_title || editorsPickProduct?.name || "The Double Motor Adjustable Desk"}
-                      className="w-full h-full object-cover"
-                      src={
-                        (editorsPickProduct?.images && editorsPickProduct.images.find(img => img.is_primary)?.image_url) ||
-                        (editorsPickProduct?.images && editorsPickProduct.images.length > 0 ? editorsPickProduct.images[0].image_url : null) ||
-                        "https://lh3.googleusercontent.com/aida/ADBb0ugGYmQ5alfRqx7jAu0wb6YHgd-_osxbSMaI_mB2gWaOOh9yKwz9xOdDKCDUPd2qfQTiTnCLWCLUrvFRCxbXSLw64wIqu4wAgDzq7wK_-jmHk3Yra23Q7pGakE_DuIqp0hKRULU9_lhSPz0g80IXTMTvNez4lUvbzlIEdJSSQQnrssB3rliWgK1qCs3qg7GqvJ90QKlyngHF2t1frSjeeul16z6XtE8iGPVZr6Dby8fbPW5ru6PU3_XAn3SK"
-                      }
-                    />
-                  </div>
-                </div>
-                <div className="flex flex-col gap-[var(--ef-stack-md)]">
-                  <Badge variant="outline" className="w-fit font-label-caps text-muted-foreground tracking-[2px] border-border rounded-full">
-                    {editorsPick?.badge_text || "EDITOR'S PICK"}
-                  </Badge>
-                  <CardTitle className="font-headline-section text-headline-section">
-                    {editorsPick?.custom_title || editorsPickProduct?.name || "The Double Motor Adjustable Desk"}
-                  </CardTitle>
-                  <span className="text-xl font-body-main text-primary">
-                    {editorsPickProduct ? `Rs ${editorsPickProduct.base_price.toLocaleString()}` : "Rs 30,800"}
-                  </span>
-
-                  {editorsPick?.description_1 ? (
-                    <p className="font-body-main text-body-main text-muted-foreground mt-2">{editorsPick.description_1}</p>
-                  ) : (
-                    <p className="font-body-main text-body-main text-muted-foreground mt-2">Constructed with a robust 18mm plywood top, the Double Motor Adjustable Desk is engineered for durability and everyday resilience. The surface is smooth, stable, and built to handle the demands of a full working day — whether that's dual monitors, a laptop, or everything in between.</p>
-                  )}
-
-                  {editorsPick?.description_2 ? (
-                    <p className="font-body-main text-body-main text-muted-foreground mt-2">{editorsPick.description_2}</p>
-                  ) : (
-                    <p className="font-body-main text-body-main text-muted-foreground mt-2">Driven by a dual motor system, the Double Motor Adjustable Desk lifts and adjusts with effortless precision, handling heavier loads without strain while keeping every transition whisper-quiet and shake-free.</p>
-                  )}
-
-                  <ul className="mt-4 border-t border-border pt-6 flex flex-col gap-3">
-                    <li className="flex justify-between items-center border-b border-border pb-2">
-                      <span className="font-label-caps text-label-caps">FRAME</span>
-                      <span className="font-body-main text-body-main">{editorsPick?.frame_spec || "Forest Green Steel"}</span>
-                    </li>
-                    <li className="flex justify-between items-center border-b border-border pb-2">
-                      <span className="font-label-caps text-label-caps">SURFACE</span>
-                      <span className="font-body-main text-body-main">{editorsPick?.surface_spec || "Solid European Oak"}</span>
-                    </li>
-                    <li className="flex justify-between items-center border-b border-border pb-2">
-                      <span className="font-label-caps text-label-caps">WARRANTY</span>
-                      <span className="font-body-main text-body-main">{editorsPick?.warranty_spec || "10 Years"}</span>
-                    </li>
-                  </ul>
-
-                  <Link href={editorsPickProduct ? `/products/${editorsPickProduct.slug}` : "/shop"} className="w-full">
-                    <Button className="mt-8 w-full" size="ef">
-                      {editorsPickProduct ? "View Details" : "Add to Cart"}
-                    </Button>
-                  </Link>
-                </div>
-              </CardContent>
-            </Card>
           </div>
         </section>
 

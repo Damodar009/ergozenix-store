@@ -70,8 +70,7 @@ export function Header() {
               alt="ErgoZenix logo"
               width={32}
               height={32}
-              className="w-10 h-10 object-contain"
-              style={{ mixBlendMode: "multiply" }}
+              className="w-10 h-10 object-contain mix-blend-multiply dark:mix-blend-normal"
             />
             <div
               className="font-semibold"

@@ -15,8 +15,7 @@ export function LogoIcon({ className }: LogoIconProps) {
       alt="ErgoZenix Store"
       width={24}
       height={24}
-      className={cn("object-contain", className)}
-      style={{ mixBlendMode: "multiply" }}
+      className={cn("object-contain mix-blend-multiply dark:mix-blend-normal", className)}
     />
   )
 }
