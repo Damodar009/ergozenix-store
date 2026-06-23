@@ -87,7 +87,7 @@ export function ProductCard({ product }: { product: ProductItem }) {
 
   return (
     <div
-      className="ef-product-card group overflow-hidden transition-all duration-300 bg-card border border-border rounded-[6px] max-w-[320px] hover:border-primary relative"
+      className="ef-product-card group overflow-hidden transition-all duration-300 bg-card border border-border rounded-lg max-w-[320px] hover:border-primary hover:shadow-md relative"
     >
       {/* Image */}
       <div className="relative aspect-square overflow-hidden bg-accent">
@@ -98,7 +98,7 @@ export function ProductCard({ product }: { product: ProductItem }) {
             src={product.imageUrl}
           />
         </Link>
-
+ 
         {/* Heart Icon Button */}
         <button
           onClick={(e) => {
@@ -115,17 +115,18 @@ export function ProductCard({ product }: { product: ProductItem }) {
             favorite
           </span>
         </button>
-
+ 
         {/* Hover Add-to-Cart Overlay */}
-        <div className="ef-add-to-cart absolute inset-x-0 bottom-0 py-2.5 text-center backdrop-blur-md bg-white/80">
+        <div className="ef-add-to-cart absolute inset-x-0 bottom-0 z-10">
           <button
             onClick={(e) => {
               e.preventDefault()
               e.stopPropagation()
               addToCart(product.id, 1, [])
             }}
-            className="cursor-pointer hover:underline font-label-caps text-[10px] tracking-[2px] uppercase text-primary bg-transparent border-none"
+            className="w-full py-3.5 bg-primary hover:bg-primary/95 text-primary-foreground font-label-caps text-[10.5px] font-bold tracking-[2px] uppercase transition-all duration-200 cursor-pointer flex items-center justify-center gap-2 border-none"
           >
+            <span className="material-symbols-outlined text-[16px] leading-none">shopping_bag</span>
             Add to Cart — {formatPrice(displayPrice)}
           </button>
         </div>
