@@ -65,13 +65,13 @@ export default function Home() {
         {/* Header Section */}
         <header className="bg-card min-h-[921px] flex flex-col items-center justify-center pt-16">
           <div className="text-center px-[var(--ef-container-padding-x)] max-w-4xl mx-auto flex flex-col items-center gap-[var(--ef-stack-md)]">
-            {/* <span className="font-label-caps text-label-caps text-primary tracking-[3px]">NEW ARRIVALS — SPRING 2025</span> */}
+            <span className="font-label-caps text-label-caps text-primary tracking-[3px]">PREMIUM ERGONOMIC DESKS IN NEPAL</span>
             <h1 className="font-display-hero text-display-hero text-foreground md:text-display-hero sm:text-display-hero-mobile">
               The desk you'll <br />
               <span className="italic font-normal">never want to leave.</span>
             </h1>
-            <p className="font-body-main text-body-main text-muted-foreground max-w-[400px] mt-4">
-              Redefining the relationship between human physiology and physical space through quiet, purposeful design.
+            <p className="font-body-main text-body-main text-muted-foreground max-w-[500px] mt-4">
+              Redefining your workspace with premium height-adjustable standing desks, ergonomic chairs, and workspace accessories in Nepal. Quiet, purposeful design engineered for health and productivity.
             </p>
             <div className="flex gap-[var(--ef-stack-md)] mt-[var(--ef-stack-lg)]">
               <Link href="/shop"><Button size="ef">Shop Now</Button></Link>
