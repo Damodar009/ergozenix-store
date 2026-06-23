@@ -108,9 +108,9 @@ export function DeskAnatomy() {
 
               {/* Faded Editorial Overlay: Responsive Gradient */}
               <div
-                className={`absolute inset-0 bg-gradient-to-t from-black/95 via-black/85 to-black/40 z-10 transition-opacity duration-300 group-hover:via-black/90 ${isEven
-                  ? "md:bg-gradient-to-r md:from-black/95 md:via-black/80 md:to-black/30"
-                  : "md:bg-gradient-to-l md:from-black/95 md:via-black/80 md:to-black/30"
+                className={`absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent z-10 transition-opacity duration-300 ${isEven
+                  ? "md:bg-gradient-to-r md:from-black/90 md:via-black/40 md:to-transparent"
+                  : "md:bg-gradient-to-l md:from-black/90 md:via-black/40 md:to-transparent"
                   }`}
               />
 
