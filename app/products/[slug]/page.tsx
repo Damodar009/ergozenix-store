@@ -159,12 +159,8 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
     }, matched[0])
   }, [product, selectedOptions])
 
-  // Update main image when a variant with a custom tabletop image is selected
-  useEffect(() => {
-    if (activeVariant && activeVariant.variant_url) {
-      setMainImage(activeVariant.variant_url)
-    }
-  }, [activeVariant])
+  // NOTE: Main image is intentionally NOT changed when selecting a variant/frame color.
+  // The frame color selector is for order configuration only — the product gallery images stay static.
 
   const isOutOfStock = activeVariant ? (activeVariant.variant_stock ?? 0) <= 0 : (product?.stock_quantity ?? 0) <= 0
   const { isWishlisted, toggleWishlist } = useWishlist()
@@ -559,20 +555,47 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
                 )}
               </div>
 
-              <p className="font-headline-section text-[22px] leading-[1.4] font-medium text-foreground">
-                {activeVariant ? (
-                  <span>Rs. {(activeVariant.variant_price ?? product.base_price).toLocaleString()}</span>
-                ) : product.sale_price && product.sale_price < product.base_price ? (
-                  <span className="flex items-center gap-3">
-                    <span className="text-destructive font-bold">Rs. {product.sale_price.toLocaleString()}</span>
-                    <span className="line-through text-muted-foreground text-[16px]">
-                      Rs. {product.base_price.toLocaleString()}
+              {/* Price display */}
+              {(() => {
+                const hasSale = product.sale_price != null && product.sale_price < product.base_price
+
+                // Variant offset = extra cost added by selected size/color (e.g. +3000 for 160x80cm)
+                const variantOffset = activeVariant
+                  ? (activeVariant.variant_price ?? product.base_price) - product.base_price
+                  : 0
+
+                // Display price: sale_price + offset (if on sale), else base_price + offset
+                const displayPrice = hasSale
+                  ? product.sale_price! + variantOffset
+                  : product.base_price + variantOffset
+
+                // Strike-through price: base_price + offset (only shown when on sale)
+                const strikePrice = hasSale
+                  ? product.base_price + variantOffset
+                  : null
+
+                const discountPct = hasSale
+                  ? Math.round(((product.base_price - product.sale_price!) / product.base_price) * 100)
+                  : null
+
+                return (
+                  <div className="flex items-baseline gap-3 flex-wrap">
+                    <span className="font-headline-section text-[26px] leading-[1.2] font-medium text-foreground">
+                      Rs. {displayPrice.toLocaleString()}
                     </span>
-                  </span>
-                ) : (
-                  <span>Rs. {product.base_price.toLocaleString()}</span>
-                )}
-              </p>
+                    {strikePrice && (
+                      <span className="font-body-main text-[17px] line-through text-muted-foreground">
+                        Rs. {strikePrice.toLocaleString()}
+                      </span>
+                    )}
+                    {discountPct && (
+                      <span className="text-[11px] font-bold uppercase tracking-wider px-2 py-0.5 bg-primary text-primary-foreground rounded-sm">
+                        -{discountPct}%
+                      </span>
+                    )}
+                  </div>
+                )
+              })()}
               {activeVariant && (
                 <span className="font-body-main text-[13px] text-muted-foreground">
                   SKU: {activeVariant.variant_sku}
@@ -581,24 +604,63 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
             </div>
 
             {/* Dynamic Variant Selectors */}
-            {product.options?.map((option) => (
-              <div key={option.id} className="flex flex-col gap-[var(--ef-stack-sm)]">
-                <span className="font-label-caps text-label-caps text-muted-foreground">
-                  Selected {option.name}: {selectedOptions[option.name]}
-                </span>
-                <div className="flex gap-[var(--ef-stack-sm)] flex-wrap">
-                  {option.values?.map((val) => (
-                    <button
-                      key={val.id}
-                      className={`px-4 py-2 border rounded transition-all font-label-caps text-[12px] font-semibold tracking-[1px] uppercase ${selectedOptions[option.name] === val.value ? "bg-primary text-primary-foreground border-primary" : "bg-transparent text-foreground border-border cursor-pointer hover:border-foreground"}`}
-                      onClick={() => setSelectedOptions(prev => ({ ...prev, [option.name]: val.value }))}
-                    >
-                      {val.value}
-                    </button>
-                  ))}
+            {product.options?.map((option) => {
+              const isTabletopColor = option.name.toLowerCase().includes("tabletop color")
+              return (
+                <div key={option.id} className="flex flex-col gap-[var(--ef-stack-sm)]">
+                  <span className="font-label-caps text-label-caps text-muted-foreground">
+                    Selected {option.name}: <span className="text-foreground">{selectedOptions[option.name]}</span>
+                  </span>
+
+                  {isTabletopColor ? (
+                    /* Tabletop Color: image + name cards */
+                    <div className="flex gap-3 flex-wrap">
+                      {option.values?.map((val) => {
+                        const isSelected = selectedOptions[option.name] === val.value
+                        return (
+                          <button
+                            key={val.id}
+                            onClick={() => setSelectedOptions(prev => ({ ...prev, [option.name]: val.value }))}
+                            className={`flex flex-col items-center gap-1.5 p-1.5 border-2 rounded transition-all cursor-pointer ${isSelected ? "border-primary" : "border-border hover:border-foreground/40"}`}
+                            style={{ minWidth: "72px" }}
+                          >
+                            {val.image_url ? (
+                              // eslint-disable-next-line @next/next/no-img-element
+                              <img
+                                src={val.image_url}
+                                alt={val.value}
+                                className="w-14 h-14 object-cover rounded-sm"
+                              />
+                            ) : (
+                              <div className="w-14 h-14 rounded-sm bg-muted flex items-center justify-center">
+                                <span className="text-[10px] text-muted-foreground uppercase font-semibold text-center leading-tight px-1">{val.value}</span>
+                              </div>
+                            )}
+                            <span className={`font-label-caps text-[10px] tracking-[0.5px] uppercase text-center leading-tight ${isSelected ? "text-primary font-bold" : "text-foreground"}`}>
+                              {val.value}
+                            </span>
+                          </button>
+                        )
+                      })}
+                    </div>
+                  ) : (
+                    /* All other options: plain text pill buttons */
+                    <div className="flex gap-[var(--ef-stack-sm)] flex-wrap">
+                      {option.values?.map((val) => (
+                        <button
+                          key={val.id}
+                          className={`px-4 py-2 border rounded transition-all font-label-caps text-[12px] font-semibold tracking-[1px] uppercase ${selectedOptions[option.name] === val.value ? "bg-primary text-primary-foreground border-primary" : "bg-transparent text-foreground border-border cursor-pointer hover:border-foreground"}`}
+                          onClick={() => setSelectedOptions(prev => ({ ...prev, [option.name]: val.value }))}
+                        >
+                          {val.value}
+                        </button>
+                      ))}
+                    </div>
+                  )}
                 </div>
-              </div>
-            ))}
+              )
+            })}
+
 
             {/* Quantity and Actions */}
             <div className="flex flex-col pt-4 gap-[var(--ef-stack-md)]">
@@ -692,9 +754,14 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
                     Product Description
                   </AccordionTrigger>
                   <AccordionContent>
-                    <div className="leading-relaxed text-muted-foreground font-body-main text-[15px] font-light">
-                      {product.description || "No description available."}
-                    </div>
+                    {product.description ? (
+                      <div
+                        className="product-description text-muted-foreground font-body-main text-[15px] font-light leading-relaxed"
+                        dangerouslySetInnerHTML={{ __html: product.description }}
+                      />
+                    ) : (
+                      <p className="text-muted-foreground font-body-main text-[15px] font-light">No description available.</p>
+                    )}
                   </AccordionContent>
                 </AccordionItem>
 

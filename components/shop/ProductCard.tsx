@@ -160,11 +160,6 @@ export function ProductCard({ product }: { product: ProductItem }) {
 
         {/* Star Rating */}
         <StarRating rating={product.averageRating} count={product.reviewCount} />
-
-        {/* Description */}
-        <p className="line-clamp-1 font-body-main text-[13px] font-light text-muted-foreground">
-          {product.description}
-        </p>
       </div>
     </div>
   )

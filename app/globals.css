@@ -286,6 +286,78 @@
   display: block;
 }
 
+/* ─── Product Description HTML Prose Styles ─── */
+.product-description h1 {
+  font-family: var(--font-playfair-display), 'Playfair Display', serif;
+  font-size: 22px;
+  font-weight: 500;
+  color: var(--foreground);
+  line-height: 1.3;
+  margin-bottom: 10px;
+}
+
+.product-description h2 {
+  font-family: var(--font-playfair-display), 'Playfair Display', serif;
+  font-size: 17px;
+  font-weight: 500;
+  color: var(--foreground);
+  line-height: 1.3;
+  margin-top: 20px;
+  margin-bottom: 8px;
+}
+
+.product-description h3 {
+  font-family: var(--font-hanken-grotesk), 'Hanken Grotesk', sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--foreground);
+  margin-top: 16px;
+  margin-bottom: 6px;
+}
+
+.product-description p {
+  margin-bottom: 12px;
+  line-height: 1.7;
+}
+
+.product-description p:last-child {
+  margin-bottom: 0;
+}
+
+.product-description strong {
+  font-weight: 600;
+  color: var(--foreground);
+}
+
+.product-description em {
+  font-style: italic;
+}
+
+.product-description ul,
+.product-description ol {
+  padding-left: 20px;
+  margin-bottom: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.product-description ul {
+  list-style-type: disc;
+}
+
+.product-description ol {
+  list-style-type: decimal;
+}
+
+.product-description li {
+  line-height: 1.65;
+}
+
+.product-description li strong {
+  color: var(--foreground);
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;

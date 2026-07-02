@@ -1151,15 +1151,15 @@ export default function AddProductPage() {
                               <Input
                                 type="text"
                                 placeholder="Add value (e.g. Black, Mesh, 120x60 cm)"
-                                id={`new-val-${group.id}`}
+                                value={customValueInput[group.id] ?? ""}
+                                onChange={(e) => setCustomValueInput(prev => ({ ...prev, [group.id]: e.target.value }))}
                                 onKeyDown={(e) => {
                                   if (e.key === "Enter") {
                                     e.preventDefault();
-                                    const inputEl = document.getElementById(`new-val-${group.id}`) as HTMLInputElement;
-                                    const val = inputEl?.value?.trim();
+                                    const val = (customValueInput[group.id] ?? "").trim();
                                     if (val) {
                                       handleAddOptionValue(group.id, val);
-                                      inputEl.value = "";
+                                      setCustomValueInput(prev => ({ ...prev, [group.id]: "" }));
                                     }
                                   }
                                 }}
@@ -1168,11 +1168,10 @@ export default function AddProductPage() {
                               <Button
                                 type="button"
                                 onClick={() => {
-                                  const inputEl = document.getElementById(`new-val-${group.id}`) as HTMLInputElement;
-                                  const val = inputEl?.value?.trim();
+                                  const val = (customValueInput[group.id] ?? "").trim();
                                   if (val) {
                                     handleAddOptionValue(group.id, val);
-                                    inputEl.value = "";
+                                    setCustomValueInput(prev => ({ ...prev, [group.id]: "" }));
                                   }
                                 }}
                                 className="h-8 rounded-none px-3 text-[10px] font-bold uppercase"
@@ -1182,116 +1181,133 @@ export default function AddProductPage() {
                             </div>
                           </div>
 
+                          {/* Tabletop Color photo-upload hint */}
+                          {group.name.toLowerCase().includes("tabletop color") && (
+                            <div className="flex items-center gap-2 px-3 py-2 bg-primary/5 border border-primary/20 text-[10px] text-primary font-semibold uppercase tracking-wide">
+                              <ImageIcon className="h-3 w-3 shrink-0" />
+                              Upload a photo for each tabletop color — customers will see the image when selecting.
+                            </div>
+                          )}
+
                           {group.values.length === 0 ? (
                             <div className="text-center py-6 border border-dashed border-border/60 text-xs text-muted-foreground uppercase font-semibold">
                               No values added yet. Type a value name above and click &quot;Add Option Value&quot;.
                             </div>
-                          ) : (
-                            <div className="border border-border overflow-x-auto">
-                              <table className="w-full text-left border-collapse text-xs">
-                                <thead>
-                                  <tr className="bg-muted border-b border-border uppercase font-bold text-foreground">
-                                    <th className="p-3 w-1/3">Option Value / Name *</th>
-                                    <th className="p-3 w-1/5">Price Offset (NPR)</th>
-                                    <th className="p-3 w-1/5">Stock Override</th>
-                                    <th className="p-3 w-1/4">Swatch / Image Preview</th>
-                                    <th className="p-3 w-12 text-center">Delete</th>
-                                  </tr>
-                                </thead>
-                                <tbody>
-                                  {group.values.map((val) => (
-                                    <tr key={val.id} className="border-b border-border last:border-b-0 hover:bg-muted/5">
-                                      {/* Value Name */}
-                                      <td className="p-2">
-                                        <Input
-                                          type="text"
-                                          value={val.name}
-                                          onChange={(e) => handleUpdateOptionValue(group.id, val.id, "name", e.target.value)}
-                                          className="h-8 rounded-none border border-input bg-background/50 text-xs shadow-none"
-                                        />
-                                      </td>
-
-                                      {/* Price Offset */}
-                                      <td className="p-2">
-                                        <Input
-                                          type="number"
-                                          placeholder="e.g. +3000 or -500"
-                                          value={val.price_offset}
-                                          onChange={(e) => handleUpdateOptionValue(group.id, val.id, "price_offset", e.target.value === "" ? "" : Number(e.target.value))}
-                                          className="h-8 rounded-none border border-input bg-background/50 text-xs shadow-none"
-                                        />
-                                      </td>
-
-                                      {/* Stock Override */}
-                                      <td className="p-2">
-                                        <Input
-                                          type="number"
-                                          placeholder="Base stock used if empty"
-                                          value={val.stock}
-                                          onChange={(e) => handleUpdateOptionValue(group.id, val.id, "stock", e.target.value === "" ? "" : Number(e.target.value))}
-                                          className="h-8 rounded-none border border-input bg-background/50 text-xs shadow-none"
-                                        />
-                                      </td>
-
-                                      {/* Image swatch */}
-                                      <td className="p-2">
-                                        <div className="flex items-center gap-2">
-                                          {val.image_url ? (
-                                            <div className="relative w-10 h-10 border border-border group shrink-0">
-                                              {/* eslint-disable-next-line @next/next/no-img-element */}
-                                              <img
-                                                src={val.image_url}
-                                                alt={val.name}
-                                                className="w-full h-full object-cover"
-                                              />
-                                              <button
-                                                type="button"
-                                                onClick={() => handleUpdateOptionValue(group.id, val.id, "image_url", "")}
-                                                className="absolute -top-1 -right-1 bg-destructive text-destructive-foreground rounded-full w-4 h-4 flex items-center justify-center text-[10px] hover:bg-destructive font-bold"
-                                              >
-                                                &times;
-                                              </button>
-                                            </div>
-                                          ) : (
-                                            <Button
-                                              type="button"
-                                              variant="outline"
-                                              onClick={() => {
-                                                setUploadingGroupId(group.id);
-                                                setUploadingValueId(val.id);
-                                                variantFileInputRef.current?.click();
-                                              }}
-                                              className="h-8 rounded-none border border-primary text-primary hover:bg-primary/5 bg-transparent text-[10px] font-bold uppercase py-1 px-2"
-                                              disabled={uploading}
-                                            >
-                                              {uploading && uploadingGroupId === group.id && uploadingValueId === val.id ? (
-                                                <Loader2 className="h-3 w-3 animate-spin mr-1" />
-                                              ) : (
-                                                <Upload className="h-3 w-3 mr-1" />
-                                              )}
-                                              Upload Swatch
-                                            </Button>
-                                          )}
-                                        </div>
-                                      </td>
-
-                                      {/* Remove row */}
-                                      <td className="p-2 text-center">
-                                        <button
-                                          type="button"
-                                          onClick={() => handleRemoveOptionValue(group.id, val.id)}
-                                          className="h-8 w-8 bg-destructive/10 text-destructive hover:bg-destructive hover:text-destructive-foreground flex items-center justify-center rounded-none transition-colors mx-auto"
-                                        >
-                                          <Trash2 className="h-3.5 w-3.5" />
-                                        </button>
-                                      </td>
+                          ) : (() => {
+                            const isTabletopColor = group.name.toLowerCase().includes("tabletop color")
+                            return (
+                              <div className="border border-border overflow-x-auto">
+                                <table className="w-full text-left border-collapse text-xs">
+                                  <thead>
+                                    <tr className="bg-muted border-b border-border uppercase font-bold text-foreground">
+                                      <th className="p-3 w-1/3">Option Value / Name *</th>
+                                      <th className="p-3 w-1/5">Price Offset (NPR)</th>
+                                      <th className="p-3 w-1/5">Stock Override</th>
+                                      {isTabletopColor && (
+                                        <th className="p-3 w-1/4">Color Photo <span className="text-primary normal-case font-normal">(shown to customers)</span></th>
+                                      )}
+                                      <th className="p-3 w-12 text-center">Delete</th>
                                     </tr>
-                                  ))}
-                                </tbody>
-                              </table>
-                            </div>
-                          )}
+                                  </thead>
+                                  <tbody>
+                                    {group.values.map((val) => (
+                                      <tr key={val.id} className="border-b border-border last:border-b-0 hover:bg-muted/5">
+                                        {/* Value Name */}
+                                        <td className="p-2">
+                                          <Input
+                                            type="text"
+                                            value={val.name}
+                                            onChange={(e) => handleUpdateOptionValue(group.id, val.id, "name", e.target.value)}
+                                            className="h-8 rounded-none border border-input bg-background/50 text-xs shadow-none"
+                                          />
+                                        </td>
+
+                                        {/* Price Offset */}
+                                        <td className="p-2">
+                                          <Input
+                                            type="number"
+                                            placeholder="e.g. +3000 or -500"
+                                            value={val.price_offset}
+                                            onChange={(e) => handleUpdateOptionValue(group.id, val.id, "price_offset", e.target.value === "" ? "" : Number(e.target.value))}
+                                            className="h-8 rounded-none border border-input bg-background/50 text-xs shadow-none"
+                                          />
+                                        </td>
+
+                                        {/* Stock Override */}
+                                        <td className="p-2">
+                                          <Input
+                                            type="number"
+                                            placeholder="Base stock used if empty"
+                                            value={val.stock}
+                                            onChange={(e) => handleUpdateOptionValue(group.id, val.id, "stock", e.target.value === "" ? "" : Number(e.target.value))}
+                                            className="h-8 rounded-none border border-input bg-background/50 text-xs shadow-none"
+                                          />
+                                        </td>
+
+                                        {/* Tabletop Color Photo — only for Tabletop Color groups */}
+                                        {isTabletopColor && (
+                                          <td className="p-2">
+                                            <div className="flex items-center gap-2">
+                                              {val.image_url ? (
+                                                <div className="relative w-14 h-14 border border-border group shrink-0">
+                                                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                                                  <img
+                                                    src={val.image_url}
+                                                    alt={val.name}
+                                                    className="w-full h-full object-cover"
+                                                  />
+                                                  <button
+                                                    type="button"
+                                                    onClick={() => handleUpdateOptionValue(group.id, val.id, "image_url", "")}
+                                                    className="absolute -top-1 -right-1 bg-destructive text-destructive-foreground rounded-full w-4 h-4 flex items-center justify-center text-[10px] hover:bg-destructive font-bold"
+                                                  >
+                                                    &times;
+                                                  </button>
+                                                </div>
+                                              ) : (
+                                                <Button
+                                                  type="button"
+                                                  variant="outline"
+                                                  onClick={() => {
+                                                    setUploadingGroupId(group.id);
+                                                    setUploadingValueId(val.id);
+                                                    variantFileInputRef.current?.click();
+                                                  }}
+                                                  className="h-8 rounded-none border border-primary text-primary hover:bg-primary/5 bg-transparent text-[10px] font-bold uppercase py-1 px-2"
+                                                  disabled={uploading}
+                                                >
+                                                  {uploading && uploadingGroupId === group.id && uploadingValueId === val.id ? (
+                                                    <Loader2 className="h-3 w-3 animate-spin mr-1" />
+                                                  ) : (
+                                                    <Upload className="h-3 w-3 mr-1" />
+                                                  )}
+                                                  Upload Photo
+                                                </Button>
+                                              )}
+                                            </div>
+                                          </td>
+                                        )}
+
+                                        {/* Remove row */}
+                                        <td className="p-2 text-center">
+                                          <button
+                                            type="button"
+                                            onClick={() => handleRemoveOptionValue(group.id, val.id)}
+                                            className="h-8 w-8 bg-destructive/10 text-destructive hover:bg-destructive hover:text-destructive-foreground flex items-center justify-center rounded-none transition-colors mx-auto"
+                                          >
+                                            <Trash2 className="h-3.5 w-3.5" />
+                                          </button>
+                                        </td>
+                                      </tr>
+                                    ))}
+                                  </tbody>
+                                </table>
+                              </div>
+                            )
+                          })()}
                         </div>
+
+
 
                       </div>
                     ))}
