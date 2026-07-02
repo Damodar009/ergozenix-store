@@ -74,21 +74,6 @@ export default function Home() {
             />
             <div className="absolute inset-0" style={{ background: 'linear-gradient(to right, rgba(20,20,16,0.95) 0%, rgba(20,20,16,0.65) 50%, rgba(20,20,16,0.15) 100%)' }} />
           </div>
-
-          {/* Right half: full-bleed photo */}
-          <div className="absolute inset-y-0 right-0 w-[55%] z-0 hidden md:block">
-            <img
-              src="https://tdwhzskyljlypfffrghe.supabase.co/storage/v1/object/public/products/hero-standing-man.png"
-              alt=""
-              className="w-full h-full object-cover object-center"
-            />
-            {/* Left blend gradient */}
-            <div
-              className="absolute inset-y-0 left-0 w-2/3 pointer-events-none"
-              style={{ background: 'linear-gradient(to right, rgba(20,20,16,1) 0%, rgba(20,20,16,0.5) 50%, rgba(20,20,16,0) 100%)' }}
-            />
-          </div>
-
           {/* Main content */}
           <div className="relative z-10 flex-1 flex items-center px-[var(--ef-container-padding-x)] max-w-[var(--ef-container-max)] mx-auto w-full py-24">
             <div className="max-w-[520px] flex flex-col gap-6">
