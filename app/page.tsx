@@ -62,25 +62,87 @@ export default function Home() {
   return (
     <div className="flex flex-col min-h-screen">
       <main className="flex-1 w-full pb-[var(--ef-section-padding)]">
-        {/* Header Section */}
-        <header className="bg-card min-h-[921px] flex flex-col items-center justify-center pt-16">
-          <div className="text-center px-[var(--ef-container-padding-x)] max-w-4xl mx-auto flex flex-col items-center gap-[var(--ef-stack-md)]">
-            <span className="font-label-caps text-label-caps text-primary tracking-[3px]">PREMIUM ERGONOMIC DESKS IN NEPAL</span>
-            <h1 className="font-display-hero text-display-hero text-foreground md:text-display-hero sm:text-display-hero-mobile">
-              The desk you'll <br />
-              <span className="italic font-normal">never want to leave.</span>
-            </h1>
-            <p className="font-body-main text-body-main text-muted-foreground max-w-[500px] mt-4">
-              Redefining your workspace with premium height-adjustable standing desks, ergonomic chairs, and workspace accessories in Nepal. Quiet, purposeful design engineered for health and productivity.
-            </p>
-            <div className="flex gap-[var(--ef-stack-md)] mt-[var(--ef-stack-lg)]">
-              <Link href="/shop"><Button size="ef">Shop Now</Button></Link>
-              <Button variant="outline" size="ef">Learn More</Button>
+        {/* ─── Hero ─── */}
+        <header className="relative min-h-[90vh] flex flex-col overflow-hidden" style={{ backgroundColor: '#1a1a17' }}>
+          {/* Background image with dark overlay */}
+          <div className="absolute inset-0 z-0">
+            <img
+              src="https://tdwhzskyljlypfffrghe.supabase.co/storage/v1/object/public/products/horizental-1781379103725.jpg"
+              alt=""
+              className="w-full h-full object-cover"
+              style={{ opacity: 0.28 }}
+            />
+            <div className="absolute inset-0" style={{ background: 'linear-gradient(to right, rgba(20,20,16,0.95) 0%, rgba(20,20,16,0.65) 50%, rgba(20,20,16,0.15) 100%)' }} />
+          </div>
+
+          {/* Right half: full-bleed photo */}
+          <div className="absolute inset-y-0 right-0 w-[55%] z-0 hidden md:block">
+            <img
+              src="https://tdwhzskyljlypfffrghe.supabase.co/storage/v1/object/public/products/hero-standing-man.png"
+              alt=""
+              className="w-full h-full object-cover object-center"
+            />
+            {/* Left blend gradient */}
+            <div
+              className="absolute inset-y-0 left-0 w-2/3 pointer-events-none"
+              style={{ background: 'linear-gradient(to right, rgba(20,20,16,1) 0%, rgba(20,20,16,0.5) 50%, rgba(20,20,16,0) 100%)' }}
+            />
+          </div>
+
+          {/* Main content */}
+          <div className="relative z-10 flex-1 flex items-center px-[var(--ef-container-padding-x)] max-w-[var(--ef-container-max)] mx-auto w-full py-24">
+            <div className="max-w-[520px] flex flex-col gap-6">
+              <span className="font-label-caps text-[11px] tracking-[3px] uppercase" style={{ color: 'rgba(255,255,255,0.5)' }}>
+                Engineered for Wellbeing
+              </span>
+              <h1 className="font-display-hero text-display-hero leading-[1.05]" style={{ color: '#ffffff' }}>
+                Stand Up.<br />Work Better.
+              </h1>
+              <p className="font-body-main text-[16px] max-w-[400px] leading-relaxed" style={{ color: 'rgba(255,255,255,0.62)' }}>
+                Transform your workspace with precision-engineered standing desks. Reduce pain, boost productivity, and revolutionize how you work.
+              </p>
+              <div className="flex gap-4 flex-wrap mt-2">
+                <Link href="/shop">
+                  <button
+                    className="font-label-caps tracking-[2px] text-[11px] flex items-center gap-2 px-7 py-4 transition-opacity hover:opacity-90"
+                    style={{ backgroundColor: '#ffffff', color: '#1c1c19', border: 'none', cursor: 'pointer' }}
+                  >
+                    Explore Desks
+                    <span className="material-symbols-outlined" style={{ fontSize: '16px', lineHeight: 1 }}>arrow_forward</span>
+                  </button>
+                </Link>
+                <button
+                  className="font-label-caps tracking-[2px] text-[11px] px-7 py-4 bg-transparent transition-colors hover:bg-white/10"
+                  style={{ border: '1px solid rgba(255,255,255,0.32)', color: '#ffffff', cursor: 'pointer' }}
+                  onClick={() => document.getElementById('health-benefits')?.scrollIntoView({ behavior: 'smooth' })}
+                >
+                  See Benefits
+                </button>
+              </div>
             </div>
           </div>
-          <div className="w-full mt-24">
-            <div className="md:aspect-[21/9] aspect-[4/3] w-full bg-muted overflow-hidden rounded-none">
-              <img alt="Minimalist Ergoform Desk" className="w-full h-full object-cover grayscale-[20%] hover:scale-105 transition-transform duration-1000" src="https://tdwhzskyljlypfffrghe.supabase.co/storage/v1/object/public/products/horizental-1781379103725.jpg" />
+
+          {/* Stats bar */}
+          <div className="relative z-10 border-t backdrop-blur-sm" style={{ borderColor: 'rgba(255,255,255,0.08)', backgroundColor: 'rgba(0,0,0,0.4)' }}>
+            <div className="max-w-[var(--ef-container-max)] mx-auto px-[var(--ef-container-padding-x)] py-5 grid grid-cols-3">
+              {[
+                { value: "46%", label: "Productivity Boost" },
+                { value: "120kg", label: "Max Capacity" },
+                { value: "1yr", label: "Warranty" },
+              ].map((stat, i) => (
+                <div
+                  key={stat.label}
+                  className="flex flex-col items-center gap-0.5 px-4"
+                  style={{ borderLeft: i > 0 ? '1px solid rgba(255,255,255,0.1)' : 'none' }}
+                >
+                  <span className="font-display-hero text-[28px] md:text-[36px] leading-none" style={{ color: '#ffffff' }}>
+                    {stat.value}
+                  </span>
+                  <span className="font-label-caps text-[10px] tracking-[2px] uppercase" style={{ color: 'rgba(255,255,255,0.42)' }}>
+                    {stat.label}
+                  </span>
+                </div>
+              ))}
             </div>
           </div>
         </header>
@@ -191,6 +253,67 @@ export default function Home() {
               ))}
             </div>
           )}
+        </section>
+
+        {/* ─── Health Benefits ─── */}
+        <section id="health-benefits" className="py-[var(--ef-section-padding)] px-[var(--ef-container-padding-x)] max-w-[var(--ef-container-max)] mx-auto border-t border-border">
+          <div className="grid md:grid-cols-2 gap-12 lg:gap-20 items-center">
+            {/* Left: Text */}
+            <div className="flex flex-col gap-8">
+              <div>
+                <span className="font-label-caps text-[11px] tracking-[3px] text-primary uppercase block mb-3">
+                  Health Benefits
+                </span>
+                <h2 className="font-headline-section text-headline-section text-foreground">
+                  Why Standing Desks Matter
+                </h2>
+              </div>
+
+              <div className="flex flex-col gap-6">
+                {[
+                  {
+                    title: "Reduce Back Pain",
+                    body: "Studies show that standing desks can reduce chronic back and neck pain by up to 54%.",
+                  },
+                  {
+                    title: "Boost Energy & Mood",
+                    body: "Standing promotes better circulation and reduces fatigue throughout the day.",
+                  },
+                  {
+                    title: "Increase Productivity",
+                    body: "Users report 46% higher productivity when alternating between sitting and standing.",
+                  },
+                ].map((item) => (
+                  <div key={item.title} className="flex gap-4">
+                    <div className="w-1 shrink-0 rounded-full bg-primary mt-1" />
+                    <div>
+                      <p className="font-label-caps text-[13px] tracking-[1px] text-foreground font-semibold mb-1">
+                        {item.title}
+                      </p>
+                      <p className="font-body-main text-[14px] text-muted-foreground leading-relaxed">
+                        {item.body}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <Link href="/shop">
+                <Button size="ef" variant="outline">
+                  Explore Our Desks
+                </Button>
+              </Link>
+            </div>
+
+            {/* Right: Photo */}
+            <div className="rounded-lg overflow-hidden border border-border aspect-[4/3] bg-muted">
+              <img
+                src="https://tdwhzskyljlypfffrghe.supabase.co/storage/v1/object/public/products/health-benefits-standing-desk.png"
+                alt="Professional working comfortably at a standing desk"
+                className="w-full h-full object-cover"
+              />
+            </div>
+          </div>
         </section>
 
         {/* Desk Anatomy Features Explorer */}
